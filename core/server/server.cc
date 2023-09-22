@@ -1,17 +1,15 @@
 
 #include "server.h"
 
-#include <intrin.h>
 #include <stdio.h>
-
-#pragma intrinsic(__rdtsc)
 
 int main(int argc, char* argv[]) {
   auto times = 10000000;
+  auto start = rdtsc_s();
   // start
   for (auto i = 0; i < times; i++) {
   }
   // end
-  auto t = rtdsc();
-  printf("test %ld\n", t);
+  auto end = rdtsc_e();
+  printf("test %ld\n", end - start);
 }
