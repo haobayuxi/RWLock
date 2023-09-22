@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <cstring>
 
 static __inline__ int64_t rdtsc_s(void) {
