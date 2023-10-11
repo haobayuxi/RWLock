@@ -1,0 +1,14 @@
+#pragma once
+
+#include "meta_manager.h"
+
+using namespace rdmaio;
+
+class QPManager {
+ public:
+  QPManager(t_id_t golbal_tid) : global_tid(global_tid) {}
+
+ private:
+  RCQP* data_qps[MAX_REMOTE_NODE_NUM]{nullptr};
+  t_id_t global_tid;
+}
