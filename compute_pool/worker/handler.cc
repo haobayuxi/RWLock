@@ -37,7 +37,7 @@ void Handler::test() {
   auto coro_id = 0;
   auto remote_offset = 0;
   auto qp = qp_man->data_qps[0];
-  // char*;
+  char* rd_data = (char*)malloc(sizeof(int));
   for (int i = 0; i < 10; i++) {
     // write
     auto rc = qp->post_send(IBV_WR_RDMA_WRITE, &i, sizeof(int), remote_offset,
@@ -59,7 +59,6 @@ void Handler::test() {
       RDMA_LOG(ERROR) << "client: post read fail. rc=" << rc;
       return;
     }
-    ibv_wc wc{};
     rc = qp->poll_till_completion(wc, no_timeout);
     if (rc != SUCC) {
       RDMA_LOG(ERROR) << "client: poll read fail. rc=" << rc;
