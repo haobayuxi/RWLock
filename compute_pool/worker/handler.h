@@ -22,7 +22,7 @@ class Handler {
   void test();
   // void OutputResult(std::string bench_name, std::string system_name);
 
-  // For micro-benchmark
+  // For micro-benchmarks
   // void ConfigureComputeNodeForMICRO(int argc, char* argv[]);
   // void GenThreadsForMICRO();
 };
