@@ -27,20 +27,20 @@ MetaManager::MetaManager() {
       "remote_meta_ports");  // Array Used for transferring datastore metas
 
   // // Get remote machine's memory store meta via TCP
-  // for (size_t index = 0; index < remote_ips.size(); index++) {
-  //   std::string remote_ip = remote_ips.get(index).get_str();
-  //   int remote_meta_port = (int)remote_meta_ports.get(index).get_int64();
-  //   // RDMA_LOG(INFO) << "get hash meta from " << remote_ip;
-  //   node_id_t remote_machine_id = GetMemStoreMeta(remote_ip,
-  //   remote_meta_port); if (remote_machine_id == -1) {
-  //     std::cerr << "Thread " << std::this_thread::get_id()
-  //               << " GetMemStoreMeta() failed!, remote_machine_id = -1"
-  //               << std::endl;
-  //   }
-  //   int remote_port = (int)remote_ports.get(index).get_int64();
-  //   remote_nodes.push_back(RemoteNode{
-  //       .node_id = remote_machine_id, .ip = remote_ip, .port = remote_port});
-  // }
+  for (size_t index = 0; index < remote_ips.size(); index++) {
+    std::string remote_ip = remote_ips.get(index).get_str();
+    // int remote_meta_port = (int)remote_meta_ports.get(index).get_int64();
+    // // RDMA_LOG(INFO) << "get hash meta from " << remote_ip;
+    // node_id_t remote_machine_id = GetMemStoreMeta(remote_ip,
+    // remote_meta_port); if (remote_machine_id == -1) {
+    //   std::cerr << "Thread " << std::this_thread::get_id()
+    //             << " GetMemStoreMeta() failed!, remote_machine_id = -1"
+    //             << std::endl;
+    // }
+    int remote_port = (int)remote_ports.get(index).get_int64();
+    remote_nodes.push_back(
+        RemoteNode{.node_id = index, .ip = remote_ip, .port = remote_port});
+  }
   // RDMA_LOG(INFO) << "All hash meta received";
 
   // RDMA setup
