@@ -95,20 +95,15 @@ void Server::LoadData(node_id_t machine_id,
 }
 
 void Server::CleanTable() {
-  if (tatp_server) {
-    delete tatp_server;
-    RDMA_LOG(INFO) << "delete tatp tables";
-  }
+  // if (tatp_server) {
+  //   delete tatp_server;
+  //   RDMA_LOG(INFO) << "delete tatp tables";
+  // }
 
-  if (smallbank_server) {
-    delete smallbank_server;
-    RDMA_LOG(INFO) << "delete smallbank tables";
-  }
-
-  if (tpcc_server) {
-    delete tpcc_server;
-    RDMA_LOG(INFO) << "delete tpcc tables";
-  }
+  // if (tpcc_server) {
+  //   delete tpcc_server;
+  //   RDMA_LOG(INFO) << "delete tpcc tables";
+  // }
 }
 
 void Server::CleanQP() { rdma_ctrl->destroy_rc_qp(); }
@@ -305,7 +300,7 @@ int main(int argc, char* argv[]) {
   assert(machine_id >= 0 && machine_id < machine_num);
   int local_port = (int)local_node.get("local_port").get_int64();
   int local_meta_port = (int)local_node.get("local_meta_port").get_int64();
-  int use_pm = (int)local_node.get("use_pm").get_int64();
+  int use_pm = 0;
   std::string pm_root = local_node.get("pm_root").get_str();
   std::string workload = local_node.get("workload").get_str();
   auto mem_size_GB = local_node.get("mem_size_GB").get_uint64();
