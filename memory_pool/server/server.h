@@ -11,6 +11,7 @@
 
 // #include "memstore/data_item.h"
 // #include "memstore/hash_store.h"
+#include "base/common.h"
 #include "rlib/rdma_ctrl.hpp"
 
 // Load DB
@@ -24,49 +25,41 @@ using namespace rdmaio;
 class Server {
  public:
   Server(int nid, int local_port, int local_meta_port, size_t hash_buf_size,
-         size_t log_buf_size, int use_pm, std::string& pm_file, size_t pm_size)
+         size_t log_buf_size, size_t pm_size)
       : server_node_id(nid),
         local_port(local_port),
         local_meta_port(local_meta_port),
         hash_buf_size(hash_buf_size),
         log_buf_size(log_buf_size),
-        use_pm(use_pm),
-        pm_file(pm_file),
         pm_size(pm_size),
         hash_buffer(nullptr),
         log_buffer(nullptr) {}
 
   ~Server() {
     RDMA_LOG(INFO) << "Do server cleaning...";
-    if (tatp_server) {
-      delete tatp_server;
-      RDMA_LOG(INFO) << "delete tatp tables";
-    }
+    // if (tatp_server) {
+    //   delete tatp_server;
+    //   RDMA_LOG(INFO) << "delete tatp tables";
+    // }
 
-    if (smallbank_server) {
-      delete smallbank_server;
-      RDMA_LOG(INFO) << "delete smallbank tables";
-    }
+    // if (smallbank_server) {
+    //   delete smallbank_server;
+    //   RDMA_LOG(INFO) << "delete smallbank tables";
+    // }
 
-    if (tpcc_server) {
-      delete tpcc_server;
-      RDMA_LOG(INFO) << "delete tpcc tables";
-    }
+    // if (tpcc_server) {
+    //   delete tpcc_server;
+    //   RDMA_LOG(INFO) << "delete tpcc tables";
+    // }
 
-    if (micro_server) {
-      delete micro_server;
-      RDMA_LOG(INFO) << "delete micro tables";
-    }
+    // if (micro_server) {
+    //   delete micro_server;
+    //   RDMA_LOG(INFO) << "delete micro tables";
+    // }
 
-    if (use_pm) {
-      munmap(hash_buffer, pm_size);
-      close(pm_file_fd);
-      RDMA_LOG(INFO) << "munmap hash buffer";
-    } else {
-      if (hash_buffer) {
-        free(hash_buffer);
-        RDMA_LOG(INFO) << "Free hash buffer";
-      }
+    if (hash_buffer) {
+      free(hash_buffer);
+      RDMA_LOG(INFO) << "Free hash buffer";
     }
 
     if (log_buffer) {
@@ -109,13 +102,13 @@ class Server {
 
   const size_t log_buf_size;
 
-  const int use_pm;
+  // const int use_pm;
 
-  const std::string pm_file;
+  // const std::string pm_file;
 
   const size_t pm_size;
 
-  int pm_file_fd;
+  // int pm_file_fd;
 
   RdmaCtrlPtr rdma_ctrl;
 
