@@ -35,7 +35,7 @@ void QPManager::BuildQPConnection(MetaManager* meta_man) {
         data_qps[remote_node.node_id] = data_qp;
         RDMA_LOG(INFO) << ": Data QP connected! with remote node : "
                        << remote_node.node_id << " ip : " << remote_node.ip
-                       << meta_man->remote_hash_mrs[0];
+                       << meta_man->remote_hash_mrs[0].key;
       }
       usleep(2000);
     } while (rc != SUCC);
