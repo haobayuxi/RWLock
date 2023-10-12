@@ -11,6 +11,8 @@
 #include "base/common.h"
 #include "rlib/rdma_ctrl.hpp"
 
+using namespace rdmaio;
+
 struct RemoteNode {
   node_id_t node_id;
   std::string ip;

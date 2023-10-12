@@ -2,8 +2,6 @@
 
 #include "meta_manager.h"
 
-using namespace rdmaio;
-
 class QPManager {
  public:
   QPManager(t_id_t golbal_tid) : global_tid(global_tid) {}
