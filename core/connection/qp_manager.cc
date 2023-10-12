@@ -30,11 +30,8 @@ void QPManager::BuildQPConnection(MetaManager* meta_man) {
             remote_hash_mr);  // Bind the hash mr as the default remote mr for
                               // convenient parameter passing
         data_qps[remote_node.node_id] = data_qp;
-        RDMA_LOG(INFO) << "Thread " << global_tid
-                       << ": Data QP connected!
-                          with remote node : " << remote_node.node_id << " ip
-            : " <<
-              remote_node.ip;
+        RDMA_LOG(INFO) << ": Data QP connected! with remote node : "
+                       << remote_node.node_id << " ip : " << remote_node.ip;
       }
       usleep(2000);
     } while (rc != SUCC);
