@@ -40,6 +40,7 @@ void Handler::test() {
       RDMA_LOG(ERROR) << "client: poll read fail. rc=" << rc;
       return;
     }
+    RDMA_LOG(INFO) << "rdma write success";
     // read
     rc = qp->post_send(IBV_WR_RDMA_READ, rd_data, sizeof(int), remote_offset,
                        IBV_SEND_SIGNALED, coro_id);
@@ -53,7 +54,7 @@ void Handler::test() {
       return;
     }
     // print
-    RDMA_LOG(INFO) << "read" << i;
+    RDMA_LOG(INFO) << "read" << rd_data;
   }
 }
 
