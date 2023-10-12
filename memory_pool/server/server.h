@@ -12,6 +12,7 @@
 // #include "memstore/data_item.h"
 // #include "memstore/hash_store.h"
 #include "base/common.h"
+#include "connection/qp_manager.h"
 #include "rlib/rdma_ctrl.hpp"
 
 // Load DB

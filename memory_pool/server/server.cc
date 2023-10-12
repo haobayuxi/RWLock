@@ -331,8 +331,8 @@ int main(int argc, char* argv[]) {
     server->InitMem();
     server->CleanTable();
     server->CleanQP();
-    server->LoadData(machine_id, machine_num, workload);
-    server->SendMeta(machine_id, workload, compute_node_num);
+    // server->LoadData(machine_id, machine_num, workload);
+    // server->SendMeta(machine_id, workload, compute_node_num);
     run_next_round = server->Run();
   }
 
