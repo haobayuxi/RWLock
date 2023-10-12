@@ -95,8 +95,6 @@ class MetaManager {
 
   // std::vector<node_id_t> backup_table_nodes[MAX_DB_TABLE_NUM];
 
-  std::unordered_map<node_id_t, MemoryAttr> remote_hash_mrs;
-
   std::unordered_map<node_id_t, MemoryAttr> remote_log_mrs;
 
   node_id_t local_machine_id;
@@ -108,6 +106,8 @@ class MetaManager {
   std::vector<RemoteNode> remote_nodes;
 
   RNicHandler* opened_rnic;
+
+  std::unordered_map<node_id_t, MemoryAttr> remote_hash_mrs;
 
   // Below are some parameteres from json file
   int64_t txn_system;
