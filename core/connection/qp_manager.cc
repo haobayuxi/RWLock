@@ -6,7 +6,8 @@
 void QPManager::BuildQPConnection(MetaManager* meta_man) {
   for (const auto& remote_node : meta_man->remote_nodes) {
     // Note that each remote machine has one MemStore mr and one Log mr
-    MemoryAttr remote_hash_mr = meta_man->GetRemoteHashMR(remote_node.node_id);
+    // MemoryAttr remote_hash_mr =
+    // meta_man->GetRemoteHashMR(remote_node.node_id);
     //  MemoryAttr remote_log_mr
     // = meta_man->GetRemoteLogMR(remote_node.node_id);
 
@@ -33,7 +34,8 @@ void QPManager::BuildQPConnection(MetaManager* meta_man) {
                                             // parameter passing
         data_qps[remote_node.node_id] = data_qp;
         RDMA_LOG(INFO) << ": Data QP connected! with remote node : "
-                       << remote_node.node_id << " ip : " << remote_node.ip;
+                       << remote_node.node_id << " ip : " << remote_node.ip
+                       << meta_man->remote_hash_mrs[0];
       }
       usleep(2000);
     } while (rc != SUCC);
