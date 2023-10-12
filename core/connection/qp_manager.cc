@@ -7,7 +7,8 @@ void QPManager::BuildQPConnection(MetaManager* meta_man) {
   for (const auto& remote_node : meta_man->remote_nodes) {
     // Note that each remote machine has one MemStore mr and one Log mr
     MemoryAttr remote_hash_mr = meta_man->GetRemoteHashMR(remote_node.node_id);
-    // MemoryAttr remote_log_mr = meta_man->GetRemoteLogMR(remote_node.node_id);
+    //  MemoryAttr remote_log_mr
+    // = meta_man->GetRemoteLogMR(remote_node.node_id);
 
     // Build QPs with one remote machine (this machine can be a primary or a
     // backup) Create the thread local queue pair
@@ -27,8 +28,9 @@ void QPManager::BuildQPConnection(MetaManager* meta_man) {
       rc = data_qp->connect(remote_node.ip, remote_node.port);
       if (rc == SUCC) {
         data_qp->bind_remote_mr(
-            remote_hash_mr);  // Bind the hash mr as the default remote mr for
-                              // convenient parameter passing
+            meta_man->remote_hash_mrs[0]);  // Bind the hash mr as the default
+                                            // remote mr for convenient
+                                            // parameter passing
         data_qps[remote_node.node_id] = data_qp;
         RDMA_LOG(INFO) << ": Data QP connected! with remote node : "
                        << remote_node.node_id << " ip : " << remote_node.ip;

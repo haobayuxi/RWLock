@@ -30,13 +30,13 @@ void Handler::test() {
     auto rc = qp->post_send(IBV_WR_RDMA_WRITE, (char*)&i, sizeof(int),
                             remote_offset, IBV_SEND_SIGNALED, coro_id);
     if (rc != SUCC) {
-      RDMA_LOG(ERROR) << "client: post read fail. rc=" << rc;
+      RDMA_LOG(ERROR) << "client: post write fail. rc=" << rc;
       return;
     }
     ibv_wc wc{};
     rc = qp->poll_till_completion(wc, no_timeout);
     if (rc != SUCC) {
-      RDMA_LOG(ERROR) << "client: poll read fail. rc=" << rc;
+      RDMA_LOG(ERROR) << "client: poll write fail. rc=" << rc;
       return;
     }
     RDMA_LOG(INFO) << "rdma write success";
