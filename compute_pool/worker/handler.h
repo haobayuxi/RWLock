@@ -19,6 +19,7 @@ class Handler {
   // For macro-benchmark
   void ConfigureComputeNode(int argc, char* argv[]);
   void GenThreads(std::string bench_name);
+  void test();
   void OutputResult(std::string bench_name, std::string system_name);
 
   // For micro-benchmark

@@ -26,6 +26,8 @@ std::vector<double> lock_durations;
 std::vector<uint64_t> total_try_times;
 std::vector<uint64_t> total_commit_times;
 
+void Handler::test() {}
+
 void Handler::ConfigureComputeNode(int argc, char* argv[]) {
   std::string config_file = "compute_node_config.json";
   std::string system_name = std::string(argv[2]);
