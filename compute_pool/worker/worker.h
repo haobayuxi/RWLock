@@ -3,11 +3,13 @@
 
 // #pragma once
 
+#include "util/debug.h"
+
 // #include "allocator/region_allocator.h"
-// #include "base/common.h"
+#include "base/common.h"
 // #include "cache/lock_status.h"
 // #include "cache/version_status.h"
-// #include "connection/meta_manager.h"
+#include "connection/meta_manager.h"
 // struct thread_params {
 //   t_id_t thread_local_id;
 //   t_id_t thread_global_id;

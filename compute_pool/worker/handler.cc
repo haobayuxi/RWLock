@@ -11,6 +11,7 @@
 #include <mutex>
 #include <thread>
 
+#include "rlib/rdma_ctrl.hpp"
 #include "util/json_config.h"
 #include "worker/worker.h"
 
@@ -26,7 +27,47 @@ std::vector<double> lock_durations;
 std::vector<uint64_t> total_try_times;
 std::vector<uint64_t> total_commit_times;
 
-void Handler::test() {}
+void Handler::test() {
+  RDMA_LOG(INFO) << "Error calling pthread_setaffinity_np: ";
+  // connect rdma
+  auto* global_meta_man = new MetaManager();
+  auto qp_man = new QPManager(0);
+  qp_man->BuildQPConnection(global_meta_man);
+  RDMA_LOG(INFO) << "rdma connected";
+  auto coro_id = 0;
+  auto remote_offset = 0;
+  auto qp = qp_man->data_qps[0];
+  char* for (int i = 0; i < 10; i++) {
+    // write
+    auto rc = qp->post_send(IBV_WR_RDMA_WRITE, &i, sizeof(int), remote_offset,
+                            IBV_SEND_SIGNALED, coro_id);
+    if (rc != SUCC) {
+      RDMA_LOG(ERROR) << "client: post read fail. rc=" << rc;
+      return false;
+    }
+    ibv_wc wc{};
+    rc = qp->poll_till_completion(wc, no_timeout);
+    if (rc != SUCC) {
+      RDMA_LOG(ERROR) << "client: poll read fail. rc=" << rc;
+      return false;
+    }
+    // read
+    auto rc = qp->post_send(IBV_WR_RDMA_READ, rd_data, sizeof(int),
+                            remote_offset, IBV_SEND_SIGNALED, coro_id);
+    if (rc != SUCC) {
+      RDMA_LOG(ERROR) << "client: post read fail. rc=" << rc;
+      return false;
+    }
+    ibv_wc wc{};
+    rc = qp->poll_till_completion(wc, no_timeout);
+    if (rc != SUCC) {
+      RDMA_LOG(ERROR) << "client: poll read fail. rc=" << rc;
+      return false;
+    }
+    // print
+    RDMA_LOG(INFO) << "read" << i;
+  }
+}
 
 // void Handler::ConfigureComputeNode(int argc, char* argv[]) {
 //   std::string config_file = "compute_node_config.json";
