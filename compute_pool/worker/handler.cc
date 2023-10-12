@@ -16,7 +16,6 @@ std::vector<uint64_t> total_try_times;
 std::vector<uint64_t> total_commit_times;
 
 void Handler::test() {
-  RDMA_LOG(INFO) << "Error calling pthread_setaffinity_np: ";
   // connect rdma
   auto* global_meta_man = new MetaManager();
   QPManager* qp_man = new QPManager(0);
