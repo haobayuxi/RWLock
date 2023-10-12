@@ -27,13 +27,13 @@ class MetaManager {
   void GetMRMeta(const RemoteNode& node);
 
   /*** Memory Store Metadata ***/
-  ALWAYS_INLINE
-  const HashMeta& GetPrimaryHashMetaWithTableID(
-      const table_id_t table_id) const {
-    auto search = primary_hash_metas.find(table_id);
-    assert(search != primary_hash_metas.end());
-    return search->second;
-  }
+  // ALWAYS_INLINE
+  // const HashMeta& GetPrimaryHashMetaWithTableID(
+  //     const table_id_t table_id) const {
+  //   auto search = primary_hash_metas.find(table_id);
+  //   assert(search != primary_hash_metas.end());
+  //   return search->second;
+  // }
 
   // ALWAYS_INLINE
   // const std::vector<HashMeta>* GetBackupHashMetasWithTableID(
@@ -82,7 +82,7 @@ class MetaManager {
   }
 
  private:
-  std::unordered_map<table_id_t, HashMeta> primary_hash_metas;
+  // std::unordered_map<table_id_t, HashMeta> primary_hash_metas;
 
   // std::unordered_map<table_id_t, std::vector<HashMeta>> backup_hash_metas;
 
