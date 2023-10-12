@@ -53,8 +53,8 @@ void Handler::test() {
       return;
     }
     // read
-    auto rc = qp->post_send(IBV_WR_RDMA_READ, rd_data, sizeof(int),
-                            remote_offset, IBV_SEND_SIGNALED, coro_id);
+    rc = qp->post_send(IBV_WR_RDMA_READ, rd_data, sizeof(int), remote_offset,
+                       IBV_SEND_SIGNALED, coro_id);
     if (rc != SUCC) {
       RDMA_LOG(ERROR) << "client: post read fail. rc=" << rc;
       return;
