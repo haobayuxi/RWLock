@@ -9,10 +9,7 @@
 #include <unordered_map>
 
 #include "base/common.h"
-// #include "memstore/hash_store.h"
 #include "rlib/rdma_ctrl.hpp"
-
-using namespace rdmaio;
 
 struct RemoteNode {
   node_id_t node_id;
