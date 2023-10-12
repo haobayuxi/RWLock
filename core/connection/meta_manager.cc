@@ -90,75 +90,77 @@ MetaManager::MetaManager() {
 //   }
 
 /* --------------- Receiving hash metadata ----------------- */
-size_t hash_meta_size = (size_t)1024 * 1024 * 1024;
-char* recv_buf = (char*)malloc(hash_meta_size);
-auto retlen = recv(client_socket, recv_buf, hash_meta_size, 0);
-if (retlen < 0) {
-  RDMA_LOG(ERROR) << "MetaManager receives hash meta error: "
-                  << strerror(errno);
-  free(recv_buf);
-  close(client_socket);
-  return -1;
-}
-char ack[] = "[ACK]hash_meta_received_from_client";
-send(client_socket, ack, strlen(ack) + 1, 0);
-close(client_socket);
-char* snooper = recv_buf;
-// Get number of meta
-size_t primary_meta_num = *((size_t*)snooper);
-snooper += sizeof(primary_meta_num);
-size_t backup_meta_num = *((size_t*)snooper);
-snooper += sizeof(backup_meta_num);
-node_id_t remote_machine_id = *((node_id_t*)snooper);
-if (remote_machine_id >= MAX_REMOTE_NODE_NUM) {
-  RDMA_LOG(FATAL) << "remote machine id " << remote_machine_id
-                  << " exceeds the max machine number";
-}
-snooper += sizeof(remote_machine_id);
-// Get the `end of file' indicator: finish transmitting
-char* eof = snooper + sizeof(HashMeta) * (primary_meta_num + backup_meta_num);
-if ((*((uint64_t*)eof)) == MEM_STORE_META_END) {
-  for (size_t i = 0; i < primary_meta_num; i++) {
-    HashMeta meta;
-    memcpy(&meta, (HashMeta*)(snooper + i * sizeof(HashMeta)),
-           sizeof(HashMeta));
-    primary_hash_metas[meta.table_id] = meta;
-    primary_table_nodes[meta.table_id] = remote_machine_id;
-    // RDMA_LOG(INFO) << "primary_node_ip: " << remote_ip << " table id: " <<
-    // meta.table_id << " data_ptr: 0x" << std::hex << meta.data_ptr << "
-    // base_off: 0x" << meta.base_off << " bucket_num: " << std::dec <<
-    // meta.bucket_num << " node_size: " << meta.node_size << " B";
-  }
-  snooper += sizeof(HashMeta) * primary_meta_num;
-  for (size_t i = 0; i < backup_meta_num; i++) {
-    HashMeta meta;
-    memcpy(&meta, (HashMeta*)(snooper + i * sizeof(HashMeta)),
-           sizeof(HashMeta));
+// size_t hash_meta_size = (size_t)1024 * 1024 * 1024;
+// char* recv_buf = (char*)malloc(hash_meta_size);
+// auto retlen = recv(client_socket, recv_buf, hash_meta_size, 0);
+// if (retlen < 0) {
+//   RDMA_LOG(ERROR) << "MetaManager receives hash meta error: "
+//                   << strerror(errno);
+//   free(recv_buf);
+//   close(client_socket);
+//   return -1;
+// }
+// char ack[] = "[ACK]hash_meta_received_from_client";
+// send(client_socket, ack, strlen(ack) + 1, 0);
+// close(client_socket);
+// char* snooper = recv_buf;
+// // Get number of meta
+// size_t primary_meta_num = *((size_t*)snooper);
+// snooper += sizeof(primary_meta_num);
+// size_t backup_meta_num = *((size_t*)snooper);
+// snooper += sizeof(backup_meta_num);
+// node_id_t remote_machine_id = *((node_id_t*)snooper);
+// if (remote_machine_id >= MAX_REMOTE_NODE_NUM) {
+//   RDMA_LOG(FATAL) << "remote machine id " << remote_machine_id
+//                   << " exceeds the max machine number";
+// }
+// snooper += sizeof(remote_machine_id);
+// // Get the `end of file' indicator: finish transmitting
+// char* eof = snooper + sizeof(HashMeta) * (primary_meta_num +
+// backup_meta_num); if ((*((uint64_t*)eof)) == MEM_STORE_META_END) {
+//   for (size_t i = 0; i < primary_meta_num; i++) {
+//     HashMeta meta;
+//     memcpy(&meta, (HashMeta*)(snooper + i * sizeof(HashMeta)),
+//            sizeof(HashMeta));
+//     primary_hash_metas[meta.table_id] = meta;
+//     primary_table_nodes[meta.table_id] = remote_machine_id;
+//     // RDMA_LOG(INFO) << "primary_node_ip: " << remote_ip << " table id: " <<
+//     // meta.table_id << " data_ptr: 0x" << std::hex << meta.data_ptr << "
+//     // base_off: 0x" << meta.base_off << " bucket_num: " << std::dec <<
+//     // meta.bucket_num << " node_size: " << meta.node_size << " B";
+//   }
+//   snooper += sizeof(HashMeta) * primary_meta_num;
+//   for (size_t i = 0; i < backup_meta_num; i++) {
+//     HashMeta meta;
+//     memcpy(&meta, (HashMeta*)(snooper + i * sizeof(HashMeta)),
+//            sizeof(HashMeta));
 
-    // if (backup_hash_metas.find(meta.table_id) == backup_hash_metas.end()) {
-    //   backup_hash_metas[meta.table_id] = std::vector<HashMeta>();
-    // }
-    // if (backup_table_nodes.find(meta.table_id) == backup_table_nodes.end())
-    // {
-    //   backup_table_nodes[meta.table_id] = std::vector<node_id_t>();
-    // }
-    // backup_hash_metas[meta.table_id].push_back(meta);
-    // backup_table_nodes[meta.table_id].push_back(remote_machine_id);
-    // RDMA_LOG(INFO) << "backup_node_ip: " << remote_ip << " table id: " <<
-    // meta.table_id << " data_ptr: " << std::hex << meta.data_ptr << "
-    // base_off: " << meta.base_off << " bucket_num: " << std::dec <<
-    // meta.bucket_num << " node_size: " << meta.node_size;
+//     // if (backup_hash_metas.find(meta.table_id) == backup_hash_metas.end())
+//     {
+//     //   backup_hash_metas[meta.table_id] = std::vector<HashMeta>();
+//     // }
+//     // if (backup_table_nodes.find(meta.table_id) ==
+//     backup_table_nodes.end())
+//     // {
+//     //   backup_table_nodes[meta.table_id] = std::vector<node_id_t>();
+//     // }
+//     // backup_hash_metas[meta.table_id].push_back(meta);
+//     // backup_table_nodes[meta.table_id].push_back(remote_machine_id);
+//     // RDMA_LOG(INFO) << "backup_node_ip: " << remote_ip << " table id: " <<
+//     // meta.table_id << " data_ptr: " << std::hex << meta.data_ptr << "
+//     // base_off: " << meta.base_off << " bucket_num: " << std::dec <<
+//     // meta.bucket_num << " node_size: " << meta.node_size;
 
-    backup_hash_metas[meta.table_id].push_back(meta);
-    backup_table_nodes[meta.table_id].push_back(remote_machine_id);
-  }
-} else {
-  free(recv_buf);
-  return -1;
-}
-free(recv_buf);
-return remote_machine_id;
-}
+//     backup_hash_metas[meta.table_id].push_back(meta);
+//     backup_table_nodes[meta.table_id].push_back(remote_machine_id);
+//   }
+// } else {
+//   free(recv_buf);
+//   return -1;
+// }
+// free(recv_buf);
+// return remote_machine_id;
+// }
 
 void MetaManager::GetMRMeta(const RemoteNode& node) {
   // Get remote node's memory region information via TCP
