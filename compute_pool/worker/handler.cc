@@ -31,13 +31,14 @@ void Handler::test() {
   RDMA_LOG(INFO) << "Error calling pthread_setaffinity_np: ";
   // connect rdma
   auto* global_meta_man = new MetaManager();
-  auto qp_man = new QPManager(0);
+  QPManager* qp_man = new QPManager(0);
   qp_man->BuildQPConnection(global_meta_man);
   RDMA_LOG(INFO) << "rdma connected";
   auto coro_id = 0;
   auto remote_offset = 0;
   auto qp = qp_man->data_qps[0];
-  char* for (int i = 0; i < 10; i++) {
+  // char*;
+  for (int i = 0; i < 10; i++) {
     // write
     auto rc = qp->post_send(IBV_WR_RDMA_WRITE, &i, sizeof(int), remote_offset,
                             IBV_SEND_SIGNALED, coro_id);
