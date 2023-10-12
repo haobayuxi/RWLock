@@ -44,26 +44,26 @@ void Handler::test() {
                             IBV_SEND_SIGNALED, coro_id);
     if (rc != SUCC) {
       RDMA_LOG(ERROR) << "client: post read fail. rc=" << rc;
-      return false;
+      return;
     }
     ibv_wc wc{};
     rc = qp->poll_till_completion(wc, no_timeout);
     if (rc != SUCC) {
       RDMA_LOG(ERROR) << "client: poll read fail. rc=" << rc;
-      return false;
+      return;
     }
     // read
     auto rc = qp->post_send(IBV_WR_RDMA_READ, rd_data, sizeof(int),
                             remote_offset, IBV_SEND_SIGNALED, coro_id);
     if (rc != SUCC) {
       RDMA_LOG(ERROR) << "client: post read fail. rc=" << rc;
-      return false;
+      return;
     }
     ibv_wc wc{};
     rc = qp->poll_till_completion(wc, no_timeout);
     if (rc != SUCC) {
       RDMA_LOG(ERROR) << "client: poll read fail. rc=" << rc;
-      return false;
+      return;
     }
     // print
     RDMA_LOG(INFO) << "read" << i;
