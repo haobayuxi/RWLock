@@ -1,19 +1,7 @@
 // Author: Ming Zhang
 // Copyright (c) 2022
 
-#include "worker/handler.h"
-
-#include <algorithm>
-#include <atomic>
-#include <cstdlib>
-#include <fstream>
-#include <iostream>
-#include <mutex>
-#include <thread>
-
-#include "rlib/rdma_ctrl.hpp"
-#include "util/json_config.h"
-#include "worker/worker.h"
+#include "handler.h"
 
 std::atomic<uint64_t> tx_id_generator;
 std::atomic<uint64_t> connected_t_num;

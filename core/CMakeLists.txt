@@ -24,12 +24,10 @@ set(CONNECTION_SRC
 #         scheduler/corotine_scheduler.cc
 #         )
 
-# add_library(ford STATIC
-#         ${CONNECTION_SRC}
-#         ${DTX_SRC}
-#         ${SCHEDULER_SRC}
-#         )
+add_library(rwlock STATIC
+        ${CONNECTION_SRC}
+        )
 
-# set_target_properties(ford PROPERTIES LINKER_LANGUAGE CXX)
+set_target_properties(rwlock PROPERTIES LINKER_LANGUAGE CXX)
 
-# target_link_libraries(ford rlib pthread boost_coroutine boost_context boost_system)
+target_link_libraries(rwlock rlib pthread boost_coroutine boost_context boost_system)

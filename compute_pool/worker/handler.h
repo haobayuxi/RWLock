@@ -13,6 +13,12 @@
 #include <string>
 #include <vector>
 
+#include "connection/meta_manager.h"
+#include "rlib/rdma_ctrl.hpp"
+#include "util/json_config.h"
+#include "worker/handler.h"
+#include "worker/worker.h"
+
 class Handler {
  public:
   Handler() {}
