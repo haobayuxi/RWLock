@@ -14,6 +14,7 @@
 #include "connection/qp_manager.h"
 #include "scheduler/corotine_scheduler.h"
 #include "util/debug.h"
+#include "util/json_config.h"
 // #include "dtx/dtx.h"
 // #include "micro/micro_txn.h"
 // #include "tatp/tatp_txn.h"

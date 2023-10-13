@@ -779,7 +779,7 @@ void run_thread(thread_params* params) {
 
   auto json_config = JsonConfig::load_file(config_filepath);
   auto conf = json_config.get(bench_name);
-  ATTEMPTED_NUM = conf.get("attempted_num").get_uint64();
+  // ATTEMPTED_NUM = conf.get("attempted_num").get_uint64();
 
   // if (bench_name == "tatp") {
   //   tatp_client = tatp_cli;
