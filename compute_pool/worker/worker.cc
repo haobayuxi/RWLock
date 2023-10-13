@@ -604,7 +604,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   }
   x = 0;
   memcpy((char*)&x, receive_buf, sizeof(int));
-  RDMA_LOG(INFO) << "receive " << x;
+  RDMA_LOG(INFO) << coro_id << " receive " << x;
   coro_sched->Yield(yield, coro_id);
 }
 //   double total_msr_us = 0;
