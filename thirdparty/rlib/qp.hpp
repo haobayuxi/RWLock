@@ -64,7 +64,7 @@ class QP {
   }
 
   void bind_local_mr(MemoryAttr attr) {
-    RDMA_LOG(WARING) << "local attr key" << attr.key;
+    RDMA_LOG(WARNING) << "local attr key" << attr.key;
     local_mr_ = attr;
   }
 
