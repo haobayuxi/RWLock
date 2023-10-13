@@ -30,7 +30,7 @@ void Handler::test() {
   char* rd_data = (char*)malloc(sizeof(int));
   for (int i = 0; i < 10; i++) {
     // write
-    auto rc = qp->post_send(IBV_WR_RDMA_WRITE, (char*)&i, sizeof(int),
+    auto rc = qp->post_send(IBV_WR_RDMA_WRITE, local_mem, sizeof(int),
                             remote_offset, IBV_SEND_SIGNALED, coro_id);
     if (rc != SUCC) {
       RDMA_LOG(ERROR) << "client: post write fail. rc=" << rc;
