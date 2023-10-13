@@ -11,4 +11,4 @@ add_library(worker STATIC
 
 set_target_properties(worker PROPERTIES LINKER_LANGUAGE CXX)
 
-target_link_libraries(worker rlib)
+target_link_libraries(worker rwlock)

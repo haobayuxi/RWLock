@@ -20,12 +20,13 @@ set(CONNECTION_SRC
 #         dtx/dtx_compare_check.cc
 #         )
 
-# set(SCHEDULER_SRC
-#         scheduler/corotine_scheduler.cc
-#         )
+set(SCHEDULER_SRC
+        scheduler/corotine_scheduler.cc
+        )
 
 add_library(rwlock STATIC
         ${CONNECTION_SRC}
+        ${SCHEDULER_SRC}
         )
 
 set_target_properties(rwlock PROPERTIES LINKER_LANGUAGE CXX)

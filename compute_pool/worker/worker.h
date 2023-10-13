@@ -4,8 +4,21 @@
 // #pragma once
 
 #include "util/debug.h"
+// #include <atomic>
+// #include <cstdio>
+// #include <fstream>
+// #include <functional>
+// #include <memory>
 
-// #include "allocator/region_allocator.h"
+#include "allocator/buffer_allocator.h"
+#include "allocator/log_allocator.h"
+#include "connection/qp_manager.h"
+// #include "dtx/dtx.h"
+// #include "micro/micro_txn.h"
+// #include "tatp/tatp_txn.h"
+// #include "tpcc/tpcc_txn.h"
+// #include "util/latency.h"
+// #include "util/zipf.h"
 #include "base/common.h"
 // #include "cache/lock_status.h"
 // #include "cache/version_status.h"

@@ -3,53 +3,37 @@
 
 #include "worker.h"
 
-// #include <atomic>
-// #include <cstdio>
-// #include <fstream>
-// #include <functional>
-// #include <memory>
+using namespace std::placeholders;
 
-// #include "allocator/buffer_allocator.h"
-// #include "allocator/log_allocator.h"
-// #include "connection/qp_manager.h"
-// #include "dtx/dtx.h"
-// #include "micro/micro_txn.h"
-// #include "tatp/tatp_txn.h"
-// #include "tpcc/tpcc_txn.h"
-// #include "util/latency.h"
-// #include "util/zipf.h"
+// All the functions are executed in each thread
+std::mutex mux;
 
-// using namespace std::placeholders;
+extern std::atomic<uint64_t> tx_id_generator;
+extern std::atomic<uint64_t> connected_t_num;
+extern std::vector<double> lock_durations;
+extern std::vector<t_id_t> tid_vec;
+extern std::vector<double> attemp_tp_vec;
+extern std::vector<double> tp_vec;
+extern std::vector<double> medianlat_vec;
+extern std::vector<double> taillat_vec;
 
-// // All the functions are executed in each thread
-// std::mutex mux;
-
-// extern std::atomic<uint64_t> tx_id_generator;
-// extern std::atomic<uint64_t> connected_t_num;
-// extern std::vector<double> lock_durations;
-// extern std::vector<t_id_t> tid_vec;
-// extern std::vector<double> attemp_tp_vec;
-// extern std::vector<double> tp_vec;
-// extern std::vector<double> medianlat_vec;
-// extern std::vector<double> taillat_vec;
-
-// extern std::vector<uint64_t> total_try_times;
-// extern std::vector<uint64_t> total_commit_times;
+extern std::vector<uint64_t> total_try_times;
+extern std::vector<uint64_t> total_commit_times;
 
 // __thread size_t ATTEMPTED_NUM;
 // __thread uint64_t seed;                        // Thread-global random seed
 // __thread FastRandom* random_generator = NULL;  // Per coroutine random
 // generator
-// __thread t_id_t thread_gid;
-// __thread t_id_t thread_local_id;
-// __thread t_id_t thread_num;
+__thread t_id_t thread_gid;
+__thread t_id_t thread_local_id;
+__thread t_id_t thread_num;
 
 // __thread TATP* tatp_client = nullptr;
 // __thread SmallBank* smallbank_client = nullptr;
 // __thread TPCC* tpcc_client = nullptr;
 
-// __thread MetaManager* meta_man;
-// __thread QPManager* qp_man;
+__thread MetaManager* meta_man;
+__thread QPManager* qp_man;
 
 // __thread VersionCache* status;
 // __thread LockCache* lock_table;
@@ -65,15 +49,15 @@
 // __thread coro_id_t coro_num;
 // __thread CoroutineScheduler*
 //     coro_sched;  // Each transaction thread has a coroutine scheduler
-// __thread bool stop_run;
+__thread bool stop_run;
 
 // // Performance measurement (thread granularity)
 // __thread struct timespec msr_start, msr_end;
 // __thread double* timer;
 // __thread uint64_t stat_attempted_tx_total = 0;  // Issued transaction number
 // __thread uint64_t stat_committed_tx_total = 0;  // Committed transaction
-// number const coro_id_t POLL_ROUTINE_ID = 0;            // The poll coroutine
-// ID
+// number
+const coro_id_t POLL_ROUTINE_ID = 0;  // The poll coroutine ID
 
 // // For MICRO benchmark
 // __thread ZipfGen* zipf_gen = nullptr;
@@ -86,18 +70,18 @@
 // __thread uint64_t* thread_local_try_times;
 // __thread uint64_t* thread_local_commit_times;
 
-// // Coroutine 0 in each thread does polling
-// void PollCompletion(coro_yield_t& yield) {
-//   while (true) {
-//     coro_sched->PollCompletion();
-//     Coroutine* next = coro_sched->coro_head->next_coro;
-//     if (next->coro_id != POLL_ROUTINE_ID) {
-//       // RDMA_LOG(DBG) << "Coro 0 yields to coro " << next->coro_id;
-//       coro_sched->RunCoroutine(yield, next);
-//     }
-//     if (stop_run) break;
-//   }
-// }
+// Coroutine 0 in each thread does polling
+void PollCompletion(coro_yield_t& yield) {
+  while (true) {
+    coro_sched->PollCompletion();
+    Coroutine* next = coro_sched->coro_head->next_coro;
+    if (next->coro_id != POLL_ROUTINE_ID) {
+      // RDMA_LOG(DBG) << "Coro 0 yields to coro " << next->coro_id;
+      coro_sched->RunCoroutine(yield, next);
+    }
+    if (stop_run) break;
+  }
+}
 
 // void RecordTpLat(double msr_sec) {
 //   double attemp_tput = (double)stat_attempted_tx_total / msr_sec;
@@ -790,12 +774,12 @@
 
 // void run_thread(thread_params* params, TATP* tatp_cli, TPCC* tpcc_cli) {
 void run_thread(thread_params* params) {
-  // auto bench_name = params->bench_name;
-  // std::string config_filepath = bench_name + "_config.json";
+  auto bench_name = params->bench_name;
+  std::string config_filepath = bench_name + "_config.json";
 
-  // auto json_config = JsonConfig::load_file(config_filepath);
-  // auto conf = json_config.get(bench_name);
-  // ATTEMPTED_NUM = conf.get("attempted_num").get_uint64();
+  auto json_config = JsonConfig::load_file(config_filepath);
+  auto conf = json_config.get(bench_name);
+  ATTEMPTED_NUM = conf.get("attempted_num").get_uint64();
 
   // if (bench_name == "tatp") {
   //   tatp_client = tatp_cli;
@@ -822,24 +806,24 @@ void run_thread(thread_params* params) {
   //       new ZipfGen(num_keys_global, zipf_theta, zipf_seed & zipf_seed_mask);
   // }
 
-  // stop_run = false;
-  // thread_gid = params->thread_global_id;
-  // thread_local_id = params->thread_local_id;
-  // thread_num = params->thread_num_per_machine;
-  // meta_man = params->global_meta_man;
+  stop_run = false;
+  thread_gid = params->thread_global_id;
+  thread_local_id = params->thread_local_id;
+  thread_num = params->thread_num_per_machine;
+  meta_man = params->global_meta_man;
   // status = params->global_status;
   // lock_table = params->global_lcache;
-  // coro_num = (coro_id_t)params->coro_num;
-  // coro_sched = new CoroutineScheduler(thread_gid, coro_num);
+  coro_num = (coro_id_t)params->coro_num;
+  coro_sched = new CoroutineScheduler(thread_gid, coro_num);
 
-  // auto alloc_rdma_region_range =
-  //     params->global_rdma_region->GetThreadLocalRegion(thread_local_id);
-  // addr_cache = new AddrCache();
-  // rdma_buffer_allocator = new RDMABufferAllocator(
-  //     alloc_rdma_region_range.first, alloc_rdma_region_range.second);
-  // log_offset_allocator =
-  //     new LogOffsetAllocator(thread_gid, params->total_thread_num);
-  // timer = new double[ATTEMPTED_NUM]();
+  auto alloc_rdma_region_range =
+      params->global_rdma_region->GetThreadLocalRegion(thread_local_id);
+  addr_cache = new AddrCache();
+  rdma_buffer_allocator = new RDMABufferAllocator(
+      alloc_rdma_region_range.first, alloc_rdma_region_range.second);
+  log_offset_allocator =
+      new LogOffsetAllocator(thread_gid, params->total_thread_num);
+  timer = new double[ATTEMPTED_NUM]();
 
   // // Init coroutine random gens specialized for TPCC benchmark
   // random_generator = new FastRandom[coro_num];
@@ -847,52 +831,52 @@ void run_thread(thread_params* params) {
   // // Guarantee that each thread has a global different initial seed
   // seed = 0xdeadbeef + thread_gid;
 
-  // // Init coroutines
-  // for (coro_id_t coro_i = 0; coro_i < coro_num; coro_i++) {
-  //   uint64_t coro_seed =
-  //       static_cast<uint64_t>((static_cast<uint64_t>(thread_gid) << 32) |
-  //                             static_cast<uint64_t>(coro_i));
-  //   random_generator[coro_i].SetSeed(coro_seed);
-  //   coro_sched->coro_array[coro_i].coro_id = coro_i;
-  //   // Bind workload to coroutine
-  //   if (coro_i == POLL_ROUTINE_ID) {
-  //     coro_sched->coro_array[coro_i].func =
-  //         coro_call_t(bind(PollCompletion, _1));
-  //   } else {
-  //     if (bench_name == "tatp") {
-  //       coro_sched->coro_array[coro_i].func =
-  //           coro_call_t(bind(RunTATP, _1, coro_i));
-  //     } else if (bench_name == "smallbank") {
-  //       coro_sched->coro_array[coro_i].func =
-  //           coro_call_t(bind(RunSmallBank, _1, coro_i));
-  //     } else if (bench_name == "tpcc") {
-  //       coro_sched->coro_array[coro_i].func =
-  //           coro_call_t(bind(RunTPCC, _1, coro_i));
-  //     } else if (bench_name == "micro") {
-  //       coro_sched->coro_array[coro_i].func =
-  //           coro_call_t(bind(RunMICRO, _1, coro_i));
-  //     }
-  //   }
-  // }
+  // Init coroutines
+  for (coro_id_t coro_i = 0; coro_i < coro_num; coro_i++) {
+    uint64_t coro_seed =
+        static_cast<uint64_t>((static_cast<uint64_t>(thread_gid) << 32) |
+                              static_cast<uint64_t>(coro_i));
+    random_generator[coro_i].SetSeed(coro_seed);
+    coro_sched->coro_array[coro_i].coro_id = coro_i;
+    // Bind workload to coroutine
+    if (coro_i == POLL_ROUTINE_ID) {
+      coro_sched->coro_array[coro_i].func =
+          coro_call_t(bind(PollCompletion, _1));
+    } else {
+      if (bench_name == "tatp") {
+        coro_sched->coro_array[coro_i].func =
+            coro_call_t(bind(RunTATP, _1, coro_i));
+      } else if (bench_name == "smallbank") {
+        coro_sched->coro_array[coro_i].func =
+            coro_call_t(bind(RunSmallBank, _1, coro_i));
+      } else if (bench_name == "tpcc") {
+        coro_sched->coro_array[coro_i].func =
+            coro_call_t(bind(RunTPCC, _1, coro_i));
+      } else if (bench_name == "micro") {
+        coro_sched->coro_array[coro_i].func =
+            coro_call_t(bind(RunMICRO, _1, coro_i));
+      }
+    }
+  }
 
-  // // Link all coroutines via pointers in a loop manner
-  // coro_sched->LoopLinkCoroutine(coro_num);
+  // Link all coroutines via pointers in a loop manner
+  coro_sched->LoopLinkCoroutine(coro_num);
 
-  // // Build qp connection in thread granularity
-  // qp_man = new QPManager(thread_gid);
-  // qp_man->BuildQPConnection(meta_man);
+  // Build qp connection in thread granularity
+  qp_man = new QPManager(thread_gid);
+  qp_man->BuildQPConnection(meta_man);
 
-  // // Sync qp connections in one compute node before running transactions
-  // connected_t_num += 1;
-  // while (connected_t_num != thread_num) {
-  //   usleep(2000);  // wait for all threads connections
-  // }
+  // Sync qp connections in one compute node before running transactions
+  connected_t_num += 1;
+  while (connected_t_num != thread_num) {
+    usleep(2000);  // wait for all threads connections
+  }
 
-  // // Start the first coroutine
-  // coro_sched->coro_array[0].func();
+  // Start the first coroutine
+  coro_sched->coro_array[0].func();
 
-  // // Stop running
-  // stop_run = true;
+  // Stop running
+  stop_run = true;
 
   // // RDMA_LOG(DBG) << "Thread: " << thread_gid << ". Loop RDMA alloc times: "
   // <<
