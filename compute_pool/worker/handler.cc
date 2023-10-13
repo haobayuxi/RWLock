@@ -19,8 +19,8 @@ void Handler::test() {
   char* local_mem = (char*)malloc(8192);
   // connect rdma
   auto* global_meta_man = new MetaManager();
-  global_meta_man->global_rdma_ctrl->register_memory(
-      CLIENT_MR_ID, local_mem, 8192, global_meta_man->opened_rnic);
+  RDMA_ASSERT(global_meta_man->global_rdma_ctrl->register_memory(
+      CLIENT_MR_ID, local_mem, 8192, global_meta_man->opened_rnic));
   QPManager* qp_man = new QPManager(0);
   qp_man->BuildQPConnection(global_meta_man);
   RDMA_LOG(INFO) << "rdma connected";
