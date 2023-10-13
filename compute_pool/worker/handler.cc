@@ -51,7 +51,8 @@ void Handler::test() {
       RDMA_LOG(ERROR) << "client: post read fail. rc=" << rc;
       return;
     }
-    rc = qp->poll_till_completion(wc, no_timeout);
+    ibv_wc wc1{};
+    rc = qp->poll_till_completion(wc1, no_timeout);
     if (rc != SUCC) {
       RDMA_LOG(ERROR) << "client: poll read fail. rc=" << rc;
       return;
