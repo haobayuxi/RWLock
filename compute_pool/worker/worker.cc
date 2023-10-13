@@ -606,6 +606,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   x = 0;
   memcpy((char*)&x, receive_buf, sizeof(int));
   RDMA_LOG(INFO) << coro_id << " receive " << x;
+  return;
 }
 //   double total_msr_us = 0;
 //   // Each coroutine has a dtx: Each coroutine is a coordinator
