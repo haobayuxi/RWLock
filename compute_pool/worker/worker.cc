@@ -589,7 +589,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   int x = 100;
   char* data_buf = rdma_buffer_allocator->Alloc(sizeof(int));
   memcpy(data_buf, (char*)&x, sizeof(int));
-  if (!coro_sched->RDMAWriteSync(coro_id, qp, data_buf, offset, sizeof(int))) {
+  if (!coro_sched->RDMAWrite(coro_id, qp, data_buf, offset, sizeof(int))) {
     RDMA_LOG(INFO) << "rdma write fail";
   }
 
@@ -598,14 +598,14 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   // pending_direct_ro.emplace_back(DirectRead{
   //     .qp = qp, .item = &item, .buf = data_buf, .remote_node =
   //     remote_node_id});
-  if (!coro_sched->RDMAReadSync(coro_id, qp, receive_buf, offset,
-                                sizeof(int))) {
+  if (!coro_sched->RDMARead(coro_id, qp, receive_buf, offset, sizeof(int))) {
     RDMA_LOG(INFO) << "rdma read fail";
   }
+
+  coro_sched->Yield(yield, coro_id);
   x = 0;
   memcpy((char*)&x, receive_buf, sizeof(int));
   RDMA_LOG(INFO) << coro_id << " receive " << x;
-  coro_sched->Yield(yield, coro_id);
 }
 //   double total_msr_us = 0;
 //   // Each coroutine has a dtx: Each coroutine is a coordinator

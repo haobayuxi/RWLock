@@ -334,9 +334,9 @@ void CoroutineScheduler::LoopLinkCoroutine(coro_id_t coro_num) {
 // For coroutine yield, used by transactions
 ALWAYS_INLINE
 void CoroutineScheduler::Yield(coro_yield_t& yield, coro_id_t cid) {
-  // if (unlikely(pending_counts[cid] == 0)) {
-  //   return;
-  // }
+  if (unlikely(pending_counts[cid] == 0)) {
+    return;
+  }
   // 1. Remove this coroutine from the yield-able coroutine list
   Coroutine* coro = &coro_array[cid];
   assert(coro->is_wait_poll == false);
@@ -346,7 +346,7 @@ void CoroutineScheduler::Yield(coro_yield_t& yield, coro_id_t cid) {
   if (coro_tail == coro) coro_tail = coro->prev_coro;
   coro->is_wait_poll = true;
   // 2. Yield to the next coroutine
-  RDMA_LOG(INFO) << "coro: " << cid << " yields to coro " << next->coro_id;
+  // RDMA_LOG(INFO) << "coro: " << cid << " yields to coro " << next->coro_id;
   RunCoroutine(yield, next);
 }
 
