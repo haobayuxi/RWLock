@@ -217,10 +217,10 @@ bool CoroutineScheduler::RDMAWrite(coro_id_t coro_id, RCQP* qp, char* wt_data,
 }
 
 ALWAYS_INLINE
-bool CoroutineScheduler::RDMAWrite(coro_id_t coro_id, RCQP* qp, char* wt_data,
-                                   uint64_t remote_offset, size_t size,
-                                   MemoryAttr& local_mr,
-                                   MemoryAttr& remote_mr) {
+bool CoroutineScheduler::RDMAWriteSync(coro_id_t coro_id, RCQP* qp,
+                                       char* wt_data, uint64_t remote_offset,
+                                       size_t size, MemoryAttr& local_mr,
+                                       MemoryAttr& remote_mr) {
   auto rc =
       qp->post_send_to_mr(local_mr, remote_mr, IBV_WR_RDMA_WRITE, wt_data, size,
                           remote_offset, IBV_SEND_SIGNALED, coro_id);
