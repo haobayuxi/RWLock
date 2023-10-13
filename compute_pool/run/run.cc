@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
 
   Handler* handler = new Handler();
   // handler->ConfigureComputeNode(argc, argv);
-  string str("micro");
+  std::string str("micro");
   handler->GenThreads(str);
   // handler->test();
   // handler->OutputResult(std::string(argv[1]), std::string(argv[2]));
