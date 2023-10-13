@@ -38,7 +38,7 @@ __thread QPManager* qp_man;
 // __thread VersionCache* status;
 // __thread LockCache* lock_table;
 
-// __thread RDMABufferAllocator* rdma_buffer_allocator;
+__thread RDMABufferAllocator* rdma_buffer_allocator;
 // __thread LogOffsetAllocator* log_offset_allocator;
 // __thread AddrCache* addr_cache;
 
@@ -46,9 +46,9 @@ __thread QPManager* qp_man;
 // __thread SmallBankTxType* smallbank_workgen_arr;
 // __thread TPCCTxType* tpcc_workgen_arr;
 
-// __thread coro_id_t coro_num;
-// __thread CoroutineScheduler*
-//     coro_sched;  // Each transaction thread has a coroutine scheduler
+__thread coro_id_t coro_num;
+__thread CoroutineScheduler*
+    coro_sched;  // Each transaction thread has a coroutine scheduler
 __thread bool stop_run;
 
 // // Performance measurement (thread granularity)
@@ -582,7 +582,7 @@ void PollCompletion(coro_yield_t& yield) {
 //   delete dtx;
 // }
 
-// void RunMICRO(coro_yield_t& yield, coro_id_t coro_id) {
+void RunMICRO(coro_yield_t& yield, coro_id_t coro_id) {}
 //   double total_msr_us = 0;
 //   // Each coroutine has a dtx: Each coroutine is a coordinator
 //   DTX* dtx = new DTX(meta_man, qp_man, status, lock_table, thread_gid,
@@ -818,12 +818,12 @@ void run_thread(thread_params* params) {
 
   auto alloc_rdma_region_range =
       params->global_rdma_region->GetThreadLocalRegion(thread_local_id);
-  addr_cache = new AddrCache();
+  // addr_cache = new AddrCache();
   rdma_buffer_allocator = new RDMABufferAllocator(
       alloc_rdma_region_range.first, alloc_rdma_region_range.second);
-  log_offset_allocator =
-      new LogOffsetAllocator(thread_gid, params->total_thread_num);
-  timer = new double[ATTEMPTED_NUM]();
+  // log_offset_allocator =
+  //     new LogOffsetAllocator(thread_gid, params->total_thread_num);
+  // timer = new double[ATTEMPTED_NUM]();
 
   // // Init coroutine random gens specialized for TPCC benchmark
   // random_generator = new FastRandom[coro_num];
@@ -836,26 +836,23 @@ void run_thread(thread_params* params) {
     uint64_t coro_seed =
         static_cast<uint64_t>((static_cast<uint64_t>(thread_gid) << 32) |
                               static_cast<uint64_t>(coro_i));
-    random_generator[coro_i].SetSeed(coro_seed);
+    // random_generator[coro_i].SetSeed(coro_seed);
     coro_sched->coro_array[coro_i].coro_id = coro_i;
     // Bind workload to coroutine
     if (coro_i == POLL_ROUTINE_ID) {
       coro_sched->coro_array[coro_i].func =
           coro_call_t(bind(PollCompletion, _1));
     } else {
-      if (bench_name == "tatp") {
-        coro_sched->coro_array[coro_i].func =
-            coro_call_t(bind(RunTATP, _1, coro_i));
-      } else if (bench_name == "smallbank") {
-        coro_sched->coro_array[coro_i].func =
-            coro_call_t(bind(RunSmallBank, _1, coro_i));
-      } else if (bench_name == "tpcc") {
-        coro_sched->coro_array[coro_i].func =
-            coro_call_t(bind(RunTPCC, _1, coro_i));
-      } else if (bench_name == "micro") {
-        coro_sched->coro_array[coro_i].func =
-            coro_call_t(bind(RunMICRO, _1, coro_i));
-      }
+      // if (bench_name == "tatp") {
+      //   coro_sched->coro_array[coro_i].func =
+      //       coro_call_t(bind(RunTATP, _1, coro_i));
+      // }else if (bench_name == "tpcc") {
+      //   coro_sched->coro_array[coro_i].func =
+      //       coro_call_t(bind(RunTPCC, _1, coro_i));
+      // } else if (bench_name == "micro") {
+      coro_sched->coro_array[coro_i].func =
+          coro_call_t(bind(RunMICRO, _1, coro_i));
+      // }
     }
   }
 
