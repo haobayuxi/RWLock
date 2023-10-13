@@ -75,9 +75,9 @@ void PollCompletion(coro_yield_t& yield) {
   while (true) {
     coro_sched->PollCompletion();
     Coroutine* next = coro_sched->coro_head->next_coro;
+    RDMA_LOG(INFO) << "Coro 0 yields to coro " << next->coro_id;
     if (next->coro_id != POLL_ROUTINE_ID) {
-      // RDMA_LOG(DBG) << "Coro 0 yields to coro " << next->coro_id;
-      coro_sched->RunCoroutine(yield, next);
+            coro_sched->RunCoroutine(yield, next);
     }
     if (stop_run) break;
   }
