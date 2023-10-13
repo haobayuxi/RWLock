@@ -1,7 +1,7 @@
 // // Author: Ming Zhang
 // // Copyright (c) 2022
 
-// #include "worker/worker.h"
+#include "worker.h"
 
 // #include <atomic>
 // #include <cstdio>
@@ -14,7 +14,6 @@
 // #include "connection/qp_manager.h"
 // #include "dtx/dtx.h"
 // #include "micro/micro_txn.h"
-// #include "smallbank/smallbank_txn.h"
 // #include "tatp/tatp_txn.h"
 // #include "tpcc/tpcc_txn.h"
 // #include "util/latency.h"
@@ -789,134 +788,124 @@
 //   delete dtx;
 // }
 
-// void run_thread(thread_params* params, TATP* tatp_cli, SmallBank*
-// smallbank_cli,
-//                 TPCC* tpcc_cli) {
-//   auto bench_name = params->bench_name;
-//   std::string config_filepath = bench_name + "_config.json";
+// void run_thread(thread_params* params, TATP* tatp_cli, TPCC* tpcc_cli) {
+void run_thread(thread_params* params) {
+  // auto bench_name = params->bench_name;
+  // std::string config_filepath = bench_name + "_config.json";
 
-//   auto json_config = JsonConfig::load_file(config_filepath);
-//   auto conf = json_config.get(bench_name);
-//   ATTEMPTED_NUM = conf.get("attempted_num").get_uint64();
+  // auto json_config = JsonConfig::load_file(config_filepath);
+  // auto conf = json_config.get(bench_name);
+  // ATTEMPTED_NUM = conf.get("attempted_num").get_uint64();
 
-//   if (bench_name == "tatp") {
-//     tatp_client = tatp_cli;
-//     tatp_workgen_arr = tatp_client->CreateWorkgenArray();
-//     thread_local_try_times = new uint64_t[TATP_TX_TYPES]();
-//     thread_local_commit_times = new uint64_t[TATP_TX_TYPES]();
-//   } else if (bench_name == "smallbank") {
-//     smallbank_client = smallbank_cli;
-//     smallbank_workgen_arr = smallbank_client->CreateWorkgenArray();
-//     thread_local_try_times = new uint64_t[SmallBank_TX_TYPES]();
-//     thread_local_commit_times = new uint64_t[SmallBank_TX_TYPES]();
-//   } else if (bench_name == "tpcc") {
-//     tpcc_client = tpcc_cli;
-//     tpcc_workgen_arr = tpcc_client->CreateWorkgenArray();
-//     thread_local_try_times = new uint64_t[TPCC_TX_TYPES]();
-//     thread_local_commit_times = new uint64_t[TPCC_TX_TYPES]();
-//   }
+  // if (bench_name == "tatp") {
+  //   tatp_client = tatp_cli;
+  //   tatp_workgen_arr = tatp_client->CreateWorkgenArray();
+  //   thread_local_try_times = new uint64_t[TATP_TX_TYPES]();
+  //   thread_local_commit_times = new uint64_t[TATP_TX_TYPES]();
+  // } else if (bench_name == "tpcc") {
+  //   tpcc_client = tpcc_cli;
+  //   tpcc_workgen_arr = tpcc_client->CreateWorkgenArray();
+  //   thread_local_try_times = new uint64_t[TPCC_TX_TYPES]();
+  //   thread_local_commit_times = new uint64_t[TPCC_TX_TYPES]();
+  // } else if (bench_name == "micro") {
+  //   uint64_t zipf_seed = 2 * thread_gid * GetCPUCycle();
+  //   uint64_t zipf_seed_mask = (uint64_t(1) << 48) - 1;
+  //   std::string micro_config_filepath = "micro_config.json";
+  //   auto json_config = JsonConfig::load_file(micro_config_filepath);
+  //   auto micro_conf = json_config.get("micro");
+  //   num_keys_global = align_pow2(micro_conf.get("num_keys").get_int64());
+  //   auto zipf_theta = micro_conf.get("zipf_theta").get_double();
+  //   is_skewed = micro_conf.get("is_skewed").get_bool();
+  //   write_ratio = micro_conf.get("write_ratio").get_uint64();
+  //   data_set_size = micro_conf.get("data_set_size").get_uint64();
+  //   zipf_gen =
+  //       new ZipfGen(num_keys_global, zipf_theta, zipf_seed & zipf_seed_mask);
+  // }
 
-//   stop_run = false;
-//   thread_gid = params->thread_global_id;
-//   thread_local_id = params->thread_local_id;
-//   thread_num = params->thread_num_per_machine;
-//   meta_man = params->global_meta_man;
-//   status = params->global_status;
-//   lock_table = params->global_lcache;
-//   coro_num = (coro_id_t)params->coro_num;
-//   coro_sched = new CoroutineScheduler(thread_gid, coro_num);
+  // stop_run = false;
+  // thread_gid = params->thread_global_id;
+  // thread_local_id = params->thread_local_id;
+  // thread_num = params->thread_num_per_machine;
+  // meta_man = params->global_meta_man;
+  // status = params->global_status;
+  // lock_table = params->global_lcache;
+  // coro_num = (coro_id_t)params->coro_num;
+  // coro_sched = new CoroutineScheduler(thread_gid, coro_num);
 
-//   auto alloc_rdma_region_range =
-//       params->global_rdma_region->GetThreadLocalRegion(thread_local_id);
-//   addr_cache = new AddrCache();
-//   rdma_buffer_allocator = new RDMABufferAllocator(
-//       alloc_rdma_region_range.first, alloc_rdma_region_range.second);
-//   log_offset_allocator =
-//       new LogOffsetAllocator(thread_gid, params->total_thread_num);
-//   timer = new double[ATTEMPTED_NUM]();
+  // auto alloc_rdma_region_range =
+  //     params->global_rdma_region->GetThreadLocalRegion(thread_local_id);
+  // addr_cache = new AddrCache();
+  // rdma_buffer_allocator = new RDMABufferAllocator(
+  //     alloc_rdma_region_range.first, alloc_rdma_region_range.second);
+  // log_offset_allocator =
+  //     new LogOffsetAllocator(thread_gid, params->total_thread_num);
+  // timer = new double[ATTEMPTED_NUM]();
 
-//   // Initialize Zipf generator for MICRO benchmark
-//   if (bench_name == "micro") {
-//     uint64_t zipf_seed = 2 * thread_gid * GetCPUCycle();
-//     uint64_t zipf_seed_mask = (uint64_t(1) << 48) - 1;
-//     std::string micro_config_filepath = "micro_config.json";
-//     auto json_config = JsonConfig::load_file(micro_config_filepath);
-//     auto micro_conf = json_config.get("micro");
-//     num_keys_global = align_pow2(micro_conf.get("num_keys").get_int64());
-//     auto zipf_theta = micro_conf.get("zipf_theta").get_double();
-//     is_skewed = micro_conf.get("is_skewed").get_bool();
-//     write_ratio = micro_conf.get("write_ratio").get_uint64();
-//     data_set_size = micro_conf.get("data_set_size").get_uint64();
-//     zipf_gen =
-//         new ZipfGen(num_keys_global, zipf_theta, zipf_seed & zipf_seed_mask);
-//   }
+  // // Init coroutine random gens specialized for TPCC benchmark
+  // random_generator = new FastRandom[coro_num];
 
-//   // Init coroutine random gens specialized for TPCC benchmark
-//   random_generator = new FastRandom[coro_num];
+  // // Guarantee that each thread has a global different initial seed
+  // seed = 0xdeadbeef + thread_gid;
 
-//   // Guarantee that each thread has a global different initial seed
-//   seed = 0xdeadbeef + thread_gid;
+  // // Init coroutines
+  // for (coro_id_t coro_i = 0; coro_i < coro_num; coro_i++) {
+  //   uint64_t coro_seed =
+  //       static_cast<uint64_t>((static_cast<uint64_t>(thread_gid) << 32) |
+  //                             static_cast<uint64_t>(coro_i));
+  //   random_generator[coro_i].SetSeed(coro_seed);
+  //   coro_sched->coro_array[coro_i].coro_id = coro_i;
+  //   // Bind workload to coroutine
+  //   if (coro_i == POLL_ROUTINE_ID) {
+  //     coro_sched->coro_array[coro_i].func =
+  //         coro_call_t(bind(PollCompletion, _1));
+  //   } else {
+  //     if (bench_name == "tatp") {
+  //       coro_sched->coro_array[coro_i].func =
+  //           coro_call_t(bind(RunTATP, _1, coro_i));
+  //     } else if (bench_name == "smallbank") {
+  //       coro_sched->coro_array[coro_i].func =
+  //           coro_call_t(bind(RunSmallBank, _1, coro_i));
+  //     } else if (bench_name == "tpcc") {
+  //       coro_sched->coro_array[coro_i].func =
+  //           coro_call_t(bind(RunTPCC, _1, coro_i));
+  //     } else if (bench_name == "micro") {
+  //       coro_sched->coro_array[coro_i].func =
+  //           coro_call_t(bind(RunMICRO, _1, coro_i));
+  //     }
+  //   }
+  // }
 
-//   // Init coroutines
-//   for (coro_id_t coro_i = 0; coro_i < coro_num; coro_i++) {
-//     uint64_t coro_seed =
-//         static_cast<uint64_t>((static_cast<uint64_t>(thread_gid) << 32) |
-//                               static_cast<uint64_t>(coro_i));
-//     random_generator[coro_i].SetSeed(coro_seed);
-//     coro_sched->coro_array[coro_i].coro_id = coro_i;
-//     // Bind workload to coroutine
-//     if (coro_i == POLL_ROUTINE_ID) {
-//       coro_sched->coro_array[coro_i].func =
-//           coro_call_t(bind(PollCompletion, _1));
-//     } else {
-//       if (bench_name == "tatp") {
-//         coro_sched->coro_array[coro_i].func =
-//             coro_call_t(bind(RunTATP, _1, coro_i));
-//       } else if (bench_name == "smallbank") {
-//         coro_sched->coro_array[coro_i].func =
-//             coro_call_t(bind(RunSmallBank, _1, coro_i));
-//       } else if (bench_name == "tpcc") {
-//         coro_sched->coro_array[coro_i].func =
-//             coro_call_t(bind(RunTPCC, _1, coro_i));
-//       } else if (bench_name == "micro") {
-//         coro_sched->coro_array[coro_i].func =
-//             coro_call_t(bind(RunMICRO, _1, coro_i));
-//       }
-//     }
-//   }
+  // // Link all coroutines via pointers in a loop manner
+  // coro_sched->LoopLinkCoroutine(coro_num);
 
-//   // Link all coroutines via pointers in a loop manner
-//   coro_sched->LoopLinkCoroutine(coro_num);
+  // // Build qp connection in thread granularity
+  // qp_man = new QPManager(thread_gid);
+  // qp_man->BuildQPConnection(meta_man);
 
-//   // Build qp connection in thread granularity
-//   qp_man = new QPManager(thread_gid);
-//   qp_man->BuildQPConnection(meta_man);
+  // // Sync qp connections in one compute node before running transactions
+  // connected_t_num += 1;
+  // while (connected_t_num != thread_num) {
+  //   usleep(2000);  // wait for all threads connections
+  // }
 
-//   // Sync qp connections in one compute node before running transactions
-//   connected_t_num += 1;
-//   while (connected_t_num != thread_num) {
-//     usleep(2000);  // wait for all threads connections
-//   }
+  // // Start the first coroutine
+  // coro_sched->coro_array[0].func();
 
-//   // Start the first coroutine
-//   coro_sched->coro_array[0].func();
+  // // Stop running
+  // stop_run = true;
 
-//   // Stop running
-//   stop_run = true;
+  // // RDMA_LOG(DBG) << "Thread: " << thread_gid << ". Loop RDMA alloc times: "
+  // <<
+  //     // rdma_buffer_allocator->loop_times;
 
-//   // RDMA_LOG(DBG) << "Thread: " << thread_gid << ". Loop RDMA alloc times: "
-//   <<
-//   // rdma_buffer_allocator->loop_times;
-
-//   // Clean
-//   delete[] timer;
-//   delete addr_cache;
-//   if (tatp_workgen_arr) delete[] tatp_workgen_arr;
-//   if (smallbank_workgen_arr) delete[] smallbank_workgen_arr;
-//   if (tpcc_workgen_arr) delete[] tpcc_workgen_arr;
-//   if (random_generator) delete[] random_generator;
-//   if (zipf_gen) delete zipf_gen;
-//   delete coro_sched;
-//   delete thread_local_try_times;
-//   delete thread_local_commit_times;
-// }
+  //     // Clean
+  //     delete[] timer;
+  // delete addr_cache;
+  // if (tatp_workgen_arr) delete[] tatp_workgen_arr;
+  // if (tpcc_workgen_arr) delete[] tpcc_workgen_arr;
+  // if (random_generator) delete[] random_generator;
+  // if (zipf_gen) delete zipf_gen;
+  // delete coro_sched;
+  // delete thread_local_try_times;
+  // delete thread_local_commit_times;
+}

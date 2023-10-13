@@ -12,12 +12,13 @@ MetaManager::MetaManager() {
   auto local_node = json_config.get("local_compute_node");
   local_machine_id = (node_id_t)local_node.get("machine_id").get_int64();
   txn_system = local_node.get("txn_system").get_int64();
-  RDMA_LOG(INFO) << "Run "
-                 << (txn_system == 0
-                         ? "FaRM"
-                         : (txn_system == 1
-                                ? "DrTM+H"
-                                : (txn_system == 2 ? "FORD" : "FORD-LOCAL")));
+  // RDMA_LOG(INFO) << "Run "
+  //                << (txn_system == 0
+  //                        ? "FaRM"
+  //                        : (txn_system == 1
+  //                               ? "DrTM+H"
+  //                               : (txn_system == 2 ? "FORD" :
+  //                               "FORD-LOCAL")));
 
   auto pm_nodes = json_config.get("remote_pm_nodes");
   auto remote_ips = pm_nodes.get("remote_ips");  // Array
@@ -178,6 +179,4 @@ void MetaManager::GetMRMeta(const RemoteNode& node) {
   }
   remote_log_mrs[node.node_id] = remote_log_mr;
   remote_hash_mrs[node.node_id] = remote_hash_mr;
-  RDMA_LOG(INFO) << "get mr meta " << node.node_id << " key "
-                 << remote_hash_mr.key;
 }

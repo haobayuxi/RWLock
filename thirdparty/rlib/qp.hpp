@@ -63,10 +63,7 @@ class QP {
     return QPImpl::poll_till_completion(cq_, wc, timeout);
   }
 
-  void bind_local_mr(MemoryAttr attr) {
-    RDMA_LOG(WARNING) << "local attr key" << attr.key;
-    local_mr_ = attr;
-  }
+  void bind_local_mr(MemoryAttr attr) { local_mr_ = attr; }
 
   QPAttr get_attr() const {
     QPAttr res = {.addr = rnic_->query_addr(),
