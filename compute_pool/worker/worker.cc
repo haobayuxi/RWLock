@@ -594,6 +594,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   }
 
   coro_sched->Yield(yield, coro_id);
+  RDMA_LOG(INFO) << coro_id << " pre read ";
   char* receive_buf = rdma_buffer_allocator->Alloc(sizeof(int));
   // pending_direct_ro.emplace_back(DirectRead{
   //     .qp = qp, .item = &item, .buf = data_buf, .remote_node =
@@ -606,11 +607,11 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   x = 0;
   memcpy((char*)&x, receive_buf, sizeof(int));
   RDMA_LOG(INFO) << coro_id << " receive " << x;
-  if (!coro_sched->RDMARead(coro_id, qp, receive_buf, offset, sizeof(int))) {
-    RDMA_LOG(INFO) << "rdma read fail";
-  }
+  // if (!coro_sched->RDMARead(coro_id, qp, receive_buf, offset, sizeof(int))) {
+  //   RDMA_LOG(INFO) << "rdma read fail";
+  // }
 
-  coro_sched->Yield(yield, coro_id);
+  // coro_sched->Yield(yield, coro_id);
   return;
 }
 //   double total_msr_us = 0;
