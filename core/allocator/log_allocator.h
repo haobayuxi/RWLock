@@ -6,7 +6,7 @@
 #include "base/common.h"
 
 const offset_t LOG_BUFFER_SIZE = 1024 * 1024 * 1024;
-const node_id_t NUM_MEMORY_NODES = BACKUP_DEGREE + 1;
+const node_id_t NUM_MEMORY_NODES = 1;
 
 // Remote offset to write log
 class LogOffsetAllocator {
@@ -21,7 +21,9 @@ class LogOffsetAllocator {
   }
 
   offset_t GetNextLogOffset(node_id_t node_id, size_t log_entry_size) {
-    if (unlikely(start_log_offsets[node_id] + current_log_offsets[node_id] + log_entry_size > end_log_offsets[node_id])) {
+    if (unlikely(start_log_offsets[node_id] + current_log_offsets[node_id] +
+                     log_entry_size >
+                 end_log_offsets[node_id])) {
       current_log_offsets[node_id] = 0;
     }
     offset_t offset = start_log_offsets[node_id] + current_log_offsets[node_id];
