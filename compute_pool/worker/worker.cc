@@ -592,7 +592,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   }
 
   coro_sched->Yield(yield, coro_id);
-  char* data_buf = thread_rdma_buffer_alloc->Alloc(sizeof(int));
+  char* data_buf = rdma_buffer_allocator->Alloc(sizeof(int));
   // pending_direct_ro.emplace_back(DirectRead{
   //     .qp = qp, .item = &item, .buf = data_buf, .remote_node =
   //     remote_node_id});
