@@ -178,4 +178,6 @@ void MetaManager::GetMRMeta(const RemoteNode& node) {
   }
   remote_log_mrs[node.node_id] = remote_log_mr;
   remote_hash_mrs[node.node_id] = remote_hash_mr;
+  RDMA_LOG(INFO) << "get mr meta " << node.node_id << " key "
+                 << remote_hash_mr.key;
 }
