@@ -582,9 +582,9 @@ void PollCompletion(coro_yield_t& yield) {
 //   delete dtx;
 // }
 
-void RunMICRO(coro_yield_t& yield, coro_id_t coro_id) {
+void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   // test rdma
-  RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
+  RCQP* qp = qp_man->data_qps[0];
   auto offset = 0;
   int x = coro_id;
   if (!coro_sched->RDMAWriteSync(coro_id, qp, (char*)&x, offset, sizeof(int))) {
@@ -849,6 +849,8 @@ void run_thread(thread_params* params) {
   // // Guarantee that each thread has a global different initial seed
   // seed = 0xdeadbeef + thread_gid;
 
+  qp_man = new QPManager(thread_gid);
+
   // Init coroutines
   for (coro_id_t coro_i = 0; coro_i < coro_num; coro_i++) {
     uint64_t coro_seed =
@@ -869,7 +871,7 @@ void run_thread(thread_params* params) {
       //       coro_call_t(bind(RunTPCC, _1, coro_i));
       // } else if (bench_name == "micro") {
       coro_sched->coro_array[coro_i].func =
-          coro_call_t(bind(RunMICRO, _1, coro_i));
+          coro_call_t(bind(RunMICRO, _1, coro_i, qp_man));
       // }
     }
   }
@@ -878,7 +880,6 @@ void run_thread(thread_params* params) {
   coro_sched->LoopLinkCoroutine(coro_num);
 
   // Build qp connection in thread granularity
-  qp_man = new QPManager(thread_gid);
   qp_man->BuildQPConnection(meta_man);
 
   // Sync qp connections in one compute node before running transactions
