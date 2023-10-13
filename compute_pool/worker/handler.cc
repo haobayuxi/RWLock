@@ -27,8 +27,8 @@ void Handler::test() {
   auto coro_id = 0;
   auto remote_offset = 0;
   auto qp = qp_man->data_qps[0];
-  char* rd_data = (char*)malloc(sizeof(int));
   for (int i = 0; i < 10; i++) {
+    memcpy(local_mem, (char*)&i, sizeof(int));
     // write
     auto rc = qp->post_send(IBV_WR_RDMA_WRITE, local_mem, sizeof(int),
                             remote_offset, IBV_SEND_SIGNALED, coro_id);
@@ -43,8 +43,9 @@ void Handler::test() {
       return;
     }
     RDMA_LOG(INFO) << "rdma write success";
+    memset(local_mem, 0, sizeof(int));
     // read
-    rc = qp->post_send(IBV_WR_RDMA_READ, rd_data, sizeof(int), remote_offset,
+    rc = qp->post_send(IBV_WR_RDMA_READ, local_mem, sizeof(int), remote_offset,
                        IBV_SEND_SIGNALED, coro_id);
     if (rc != SUCC) {
       RDMA_LOG(ERROR) << "client: post read fail. rc=" << rc;
@@ -55,8 +56,10 @@ void Handler::test() {
       RDMA_LOG(ERROR) << "client: poll read fail. rc=" << rc;
       return;
     }
+    int result = 0;
+    memcpy(&result, local_mem, sizeof(int));
     // print
-    RDMA_LOG(INFO) << "read" << rd_data;
+    RDMA_LOG(INFO) << "read" << result;
   }
 }
 
