@@ -582,7 +582,25 @@ void PollCompletion(coro_yield_t& yield) {
 //   delete dtx;
 // }
 
-void RunMICRO(coro_yield_t& yield, coro_id_t coro_id) {}
+void RunMICRO(coro_yield_t& yield, coro_id_t coro_id) {
+  // test rdma
+  RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
+  auto offset = 0;
+  int x = coro_id;
+  if (!coro_sched->RDMAWriteSync(coro_id, qp, (char*)&x, offset, sizeof(int))) {
+    RDMA_LOG(INFO) << "rdma write fail";
+  }
+
+  coro_sched->Yield(yield, coro_id);
+  char* data_buf = thread_rdma_buffer_alloc->Alloc(sizeof(int));
+  // pending_direct_ro.emplace_back(DirectRead{
+  //     .qp = qp, .item = &item, .buf = data_buf, .remote_node =
+  //     remote_node_id});
+  if (!coro_sched->RDMAReadSync(coro_id, qp, data_buf, offset, sizeof(int))) {
+    RDMA_LOG(INFO) << "rdma read fail";
+  }
+  coro_sched->Yield(yield, coro_id);
+}
 //   double total_msr_us = 0;
 //   // Each coroutine has a dtx: Each coroutine is a coordinator
 //   DTX* dtx = new DTX(meta_man, qp_man, status, lock_table, thread_gid,
