@@ -107,7 +107,7 @@ void Handler::GenThreads(std::string bench_name) {
   t_id_t thread_num_per_machine =
       (t_id_t)client_conf.get("thread_num_per_machine").get_int64();
   thread_num_per_machine = 1;
-  const int coro_num = 2;
+  const int coro_num = 3;
   // const int coro_num = (int)client_conf.get("coroutine_num").get_int64();
   assert(machine_id >= 0 && machine_id < machine_num);
 
