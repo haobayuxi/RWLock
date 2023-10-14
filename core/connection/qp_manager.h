@@ -4,7 +4,7 @@
 
 class QPManager {
  public:
-  QPManager(t_id_t gid) { RDMA_LOG(INFO) << "init g tid = " << gid; }
+  QPManager(t_id_t gid) { global_tid = gid; }
   void BuildQPConnection(MetaManager* meta_man);
 
   ALWAYS_INLINE
