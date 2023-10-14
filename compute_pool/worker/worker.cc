@@ -435,8 +435,7 @@ void PollCompletion(coro_yield_t& yield) {
 //   delete dtx;
 // }
 
-void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
-              t_id_t tid) {
+void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   // test rdma read and atomic
   RCQP* qp = qp_man->data_qps[0];
   auto offset = 0;
@@ -453,7 +452,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
 
     coro_sched->Yield(yield, coro_id);
     // success
-    micro_commit[tid] += 1;
+    micro_commit[thread_local_id] += 1;
   }
 
   // if (!coro_sched->RDMARead(coro_id, qp, receive_buf, offset, sizeof(int))) {
@@ -735,7 +734,7 @@ void run_thread(thread_params* params) {
       //       coro_call_t(bind(RunTPCC, _1, coro_i));
       // } else if (bench_name == "micro") {
       coro_sched->coro_array[coro_i].func =
-          coro_call_t(bind(RunMICRO, _1, coro_i, qp_man, thread_local_id));
+          coro_call_t(bind(RunMICRO, _1, coro_i, qp_man));
       // }
     }
   }
