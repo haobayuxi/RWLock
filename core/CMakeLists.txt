@@ -6,19 +6,11 @@ set(CONNECTION_SRC
         connection/qp_manager.cc
         )
 
-# set(DTX_SRC
-#         dtx/doorbell.cc
-#         dtx/dtx_check.cc
-#         dtx/dtx_check_ro.cc
-#         dtx/dtx_check_rw.cc
-#         dtx/dtx_issue.cc
-#         dtx/dtx.cc
-#         dtx/dtx_exe_commit.cc
-#         dtx/dtx_local_meta.cc
-#         dtx/dtx_compare.cc
-#         dtx/dtx_compare_issue.cc
-#         dtx/dtx_compare_check.cc
-#         )
+set(DTX_SRC
+        dtx/doorbell.cc
+        dtx/dtx.cc
+        dtx/dtx_exe_commit.cc
+        )
 
 set(SCHEDULER_SRC
         scheduler/corotine_scheduler.cc
@@ -27,6 +19,7 @@ set(SCHEDULER_SRC
 add_library(rwlock STATIC
         ${CONNECTION_SRC}
         ${SCHEDULER_SRC}
+        ${DTX_SRC}
         )
 
 set_target_properties(rwlock PROPERTIES LINKER_LANGUAGE CXX)

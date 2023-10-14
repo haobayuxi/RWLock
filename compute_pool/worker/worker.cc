@@ -75,9 +75,9 @@ void PollCompletion(coro_yield_t& yield) {
   while (true) {
     coro_sched->PollCompletion();
     Coroutine* next = coro_sched->coro_head->next_coro;
-    RDMA_LOG(INFO) << "Coro 0 yields to coro " << next->coro_id;
+    // RDMA_LOG(INFO) << "Coro 0 yields to coro " << next->coro_id;
     if (next->coro_id != POLL_ROUTINE_ID) {
-            coro_sched->RunCoroutine(yield, next);
+      coro_sched->RunCoroutine(yield, next);
     }
     if (stop_run) break;
   }
@@ -251,155 +251,6 @@ void PollCompletion(coro_yield_t& yield) {
 //         static_cast<int>(tx_type)); abort();
 //     }
 // #endif
-//     /********************************** Stat begin
-//      * *****************************************/
-//     // Stat after one transaction finishes
-//     if (tx_committed) {
-//       clock_gettime(CLOCK_REALTIME, &tx_end_time);
-//       double tx_usec =
-//           (tx_end_time.tv_sec - tx_start_time.tv_sec) * 1000000 +
-//           (double)(tx_end_time.tv_nsec - tx_start_time.tv_nsec) / 1000;
-//       timer[stat_committed_tx_total++] = tx_usec;
-//     }
-//     if (stat_attempted_tx_total >= ATTEMPTED_NUM) {
-//       // A coroutine calculate the total execution time and exits
-//       clock_gettime(CLOCK_REALTIME, &msr_end);
-//       // double msr_usec = (msr_end.tv_sec - msr_start.tv_sec) * 1000000 +
-//       // (double) (msr_end.tv_nsec - msr_start.tv_nsec) / 1000;
-//       double msr_sec =
-//           (msr_end.tv_sec - msr_start.tv_sec) +
-//           (double)(msr_end.tv_nsec - msr_start.tv_nsec) / 1000000000;
-//       RecordTpLat(msr_sec);
-//       break;
-//     }
-//     /********************************** Stat end
-//      * *****************************************/
-//   }
-
-//   delete dtx;
-// }
-
-// void RunSmallBank(coro_yield_t& yield, coro_id_t coro_id) {
-//   // Each coroutine has a dtx: Each coroutine is a coordinator
-//   DTX* dtx = new DTX(meta_man, qp_man, status, lock_table, thread_gid,
-//   coro_id,
-//                      coro_sched, rdma_buffer_allocator, log_offset_allocator,
-//                      addr_cache);
-//   struct timespec tx_start_time, tx_end_time;
-//   bool tx_committed = false;
-
-//   // Running transactions
-//   clock_gettime(CLOCK_REALTIME, &msr_start);
-//   while (true) {
-//     SmallBankTxType tx_type = smallbank_workgen_arr[FastRand(&seed) % 100];
-//     uint64_t iter = ++tx_id_generator;  // Global atomic transaction id
-//     stat_attempted_tx_total++;
-//     // TLOG(INFO, thread_gid) << "tx: " << iter << " coroutine: " << coro_id
-//     <<
-//     // " tx_type: " << (int)tx_type;
-
-// #if 1
-//     clock_gettime(CLOCK_REALTIME, &tx_start_time);
-//     switch (tx_type) {
-//       case SmallBankTxType::kAmalgamate: {
-//         thread_local_try_times[uint64_t(tx_type)]++;
-//         tx_committed = TxAmalgamate(smallbank_client, &seed, yield, iter,
-//         dtx); if (tx_committed)
-//         thread_local_commit_times[uint64_t(tx_type)]++; break;
-//       }
-//       case SmallBankTxType::kBalance: {
-//         thread_local_try_times[uint64_t(tx_type)]++;
-//         tx_committed = TxBalance(smallbank_client, &seed, yield, iter, dtx);
-//         if (tx_committed) thread_local_commit_times[uint64_t(tx_type)]++;
-//         break;
-//       }
-//       case SmallBankTxType::kDepositChecking: {
-//         thread_local_try_times[uint64_t(tx_type)]++;
-//         tx_committed =
-//             TxDepositChecking(smallbank_client, &seed, yield, iter, dtx);
-//         if (tx_committed) thread_local_commit_times[uint64_t(tx_type)]++;
-//         break;
-//       }
-//       case SmallBankTxType::kSendPayment: {
-//         thread_local_try_times[uint64_t(tx_type)]++;
-//         tx_committed = TxSendPayment(smallbank_client, &seed, yield, iter,
-//         dtx); if (tx_committed)
-//         thread_local_commit_times[uint64_t(tx_type)]++; break;
-//       }
-//       case SmallBankTxType::kTransactSaving: {
-//         thread_local_try_times[uint64_t(tx_type)]++;
-//         tx_committed =
-//             TxTransactSaving(smallbank_client, &seed, yield, iter, dtx);
-//         if (tx_committed) thread_local_commit_times[uint64_t(tx_type)]++;
-//         break;
-//       }
-//       case SmallBankTxType::kWriteCheck: {
-//         thread_local_try_times[uint64_t(tx_type)]++;
-//         tx_committed = TxWriteCheck(smallbank_client, &seed, yield, iter,
-//         dtx); if (tx_committed)
-//         thread_local_commit_times[uint64_t(tx_type)]++; break;
-//       }
-//       default:
-//         printf("Unexpected transaction type %d\n",
-//         static_cast<int>(tx_type)); abort();
-//     }
-// #else
-//     switch (tx_type) {
-//       case SmallBankTxType::kAmalgamate: {
-//         do {
-//           clock_gettime(CLOCK_REALTIME, &tx_start_time);
-//           tx_committed =
-//               TxAmalgamate(smallbank_client, &seed, yield, iter, dtx);
-//         } while (tx_committed != true);
-//         break;
-//       }
-//       case SmallBankTxType::kBalance: {
-//         do {
-//           clock_gettime(CLOCK_REALTIME, &tx_start_time);
-//           tx_committed = TxBalance(smallbank_client, &seed, yield, iter,
-//           dtx);
-//         } while (tx_committed != true);
-//         break;
-//       }
-//       case SmallBankTxType::kDepositChecking: {
-//         do {
-//           clock_gettime(CLOCK_REALTIME, &tx_start_time);
-//           tx_committed =
-//               TxDepositChecking(smallbank_client, &seed, yield, iter, dtx);
-//         } while (tx_committed != true);
-//         break;
-//       }
-//       case SmallBankTxType::kSendPayment: {
-//         do {
-//           clock_gettime(CLOCK_REALTIME, &tx_start_time);
-//           tx_committed =
-//               TxSendPayment(smallbank_client, &seed, yield, iter, dtx);
-//         } while (tx_committed != true);
-//         break;
-//       }
-//       case SmallBankTxType::kTransactSaving: {
-//         do {
-//           clock_gettime(CLOCK_REALTIME, &tx_start_time);
-//           tx_committed =
-//               TxTransactSaving(smallbank_client, &seed, yield, iter, dtx);
-//         } while (tx_committed != true);
-//         break;
-//       }
-//       case SmallBankTxType::kWriteCheck: {
-//         do {
-//           clock_gettime(CLOCK_REALTIME, &tx_start_time);
-//           tx_committed =
-//               TxWriteCheck(smallbank_client, &seed, yield, iter, dtx);
-//         } while (tx_committed != true);
-//         break;
-//       }
-//       default:
-//         printf("Unexpected transaction type %d\n",
-//         static_cast<int>(tx_type)); abort();
-//     }
-
-// #endif
-
 //     /********************************** Stat begin
 //      * *****************************************/
 //     // Stat after one transaction finishes
