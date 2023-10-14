@@ -206,13 +206,13 @@ void DTX::ParallelUndoLog() {
   }
 
   // Write undo logs to all memory nodes
-  for (int i = 0; i < global_meta_man->remote_nodes.size(); i++) {
-    offset_t log_offset =
-        thread_remote_log_offset_alloc->GetNextLogOffset(i, log_size);
-    RCQP* qp = thread_qp_man->GetRemoteLogQPWithNodeID(i);
-    coro_sched->RDMALog(coro_id, tx_id, qp, written_log_buf, log_offset,
-                        log_size);
-  }
+  // for (int i = 0; i < global_meta_man->remote_nodes.size(); i++) {
+  //   offset_t log_offset =
+  //       thread_remote_log_offset_alloc->GetNextLogOffset(i, log_size);
+  //   RCQP* qp = thread_qp_man->GetRemoteLogQPWithNodeID(i);
+  //   coro_sched->RDMALog(coro_id, tx_id, qp, written_log_buf, log_offset,
+  //                       log_size);
+  // }
 }
 
 void DTX::Abort() {
