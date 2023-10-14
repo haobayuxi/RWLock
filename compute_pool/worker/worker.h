@@ -41,3 +41,5 @@ struct thread_params {
 // void run_thread(thread_params* params, TATP* tatp_client, TPCC* tpcc_client);
 
 void run_thread(thread_params* params);
+
+uint64_t micro_commit[100];
