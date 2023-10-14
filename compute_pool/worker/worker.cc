@@ -710,10 +710,11 @@ void run_thread(thread_params* params) {
 
   // // Guarantee that each thread has a global different initial seed
   // seed = 0xdeadbeef + thread_gid;
-  RDMA_LOG(INFO) << "gid = " << thread_gid << " local id = " << thread_local_id;
   qp_man = new QPManager(thread_gid);
-  RDMA_LOG(INFO) << "gid = " << thread_gid
-                 << " qp gid = " << qp_man->global_tid;
+
+  // Build qp connection in thread granularity
+  RDMA_LOG(INFO) << "qpman gid = " << qp_man->global_tid;
+  qp_man->BuildQPConnection(meta_man);
   // Init coroutines
   for (coro_id_t coro_i = 0; coro_i < coro_num; coro_i++) {
     uint64_t coro_seed =
@@ -741,10 +742,6 @@ void run_thread(thread_params* params) {
 
   // Link all coroutines via pointers in a loop manner
   coro_sched->LoopLinkCoroutine(coro_num);
-
-  // Build qp connection in thread granularity
-  RDMA_LOG(INFO) << "qpman gid = " << qp_man->global_tid;
-  qp_man->BuildQPConnection(meta_man);
 
   // Sync qp connections in one compute node before running transactions
   connected_t_num += 1;
