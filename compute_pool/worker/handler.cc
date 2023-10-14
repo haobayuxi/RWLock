@@ -188,7 +188,8 @@ void Handler::GenThreads(std::string bench_name) {
   for (int i = 0; i < thread_num_per_machine; i++) {
     total += micro_commit[i];
   }
-  RDMA_LOG(INFO) << total / msr_sec;
+  RDMA_LOG(INFO) << "committed " << total << "time " << msr_sec
+                 << " persecond=" << total / msr_sec;
 
   delete[] param_arr;
   delete global_rdma_region;

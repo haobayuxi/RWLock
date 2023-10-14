@@ -439,7 +439,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   // test rdma read and atomic
   RCQP* qp = qp_man->data_qps[0];
   auto offset = 0;
-  int count = 100000;
+  int count = 10000000;
 
   char* data_buf = rdma_buffer_allocator->Alloc(sizeof(int));
   for (int i = 0; i < count; i++) {
