@@ -433,32 +433,25 @@ void PollCompletion(coro_yield_t& yield) {
 //   delete dtx;
 // }
 
-void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
-  // test rdma
+void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
+              t_id_t tid) {
+  // test rdma read and atomic
   RCQP* qp = qp_man->data_qps[0];
   auto offset = 0;
-  int x = 100;
-  while (true) {
-    char* data_buf = rdma_buffer_allocator->Alloc(sizeof(int));
-    memcpy(data_buf, (char*)&x, sizeof(int));
-    if (!coro_sched->RDMAWrite(coro_id, qp, data_buf, offset, sizeof(int))) {
-      RDMA_LOG(INFO) << "rdma write fail";
-    }
+  int count = 100000;
 
-    coro_sched->Yield(yield, coro_id);
-    RDMA_LOG(INFO) << coro_id << " pre read ";
-    char* receive_buf = rdma_buffer_allocator->Alloc(sizeof(int));
-    // pending_direct_ro.emplace_back(DirectRead{
-    //     .qp = qp, .item = &item, .buf = data_buf, .remote_node =
-    //     remote_node_id});
-    if (!coro_sched->RDMARead(coro_id, qp, receive_buf, offset, sizeof(int))) {
+  char* data_buf = rdma_buffer_allocator->Alloc(sizeof(int));
+  for (int i = 0; i < count; i++) {
+    if (!coro_sched->RDMARead(coro_id, qp, data_buf, offset, sizeof(int))) {
       RDMA_LOG(INFO) << "rdma read fail";
     }
+    // if (!coro_sched->RDMARead(coro_id, qp, data_buf, offset, sizeof(int))) {
+    //   RDMA_LOG(INFO) << "rdma read fail";
+    // }
 
     coro_sched->Yield(yield, coro_id);
-    x = 0;
-    memcpy((char*)&x, receive_buf, sizeof(int));
-    RDMA_LOG(INFO) << coro_id << " receive " << x;
+    // success
+    micro_commit[tid] += 1;
   }
 
   // if (!coro_sched->RDMARead(coro_id, qp, receive_buf, offset, sizeof(int))) {
@@ -738,7 +731,7 @@ void run_thread(thread_params* params) {
       //       coro_call_t(bind(RunTPCC, _1, coro_i));
       // } else if (bench_name == "micro") {
       coro_sched->coro_array[coro_i].func =
-          coro_call_t(bind(RunMICRO, _1, coro_i, qp_man));
+          coro_call_t(bind(RunMICRO, _1, coro_i, qp_man, thread_local_id));
       // }
     }
   }

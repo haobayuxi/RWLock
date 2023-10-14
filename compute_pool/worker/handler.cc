@@ -14,6 +14,7 @@ std::vector<double> taillat_vec;
 std::vector<double> lock_durations;
 std::vector<uint64_t> total_try_times;
 std::vector<uint64_t> total_commit_times;
+uint64_t micro_commit[100];
 
 void Handler::test() {
   char* local_mem = (char*)malloc(8192);
@@ -106,11 +107,12 @@ void Handler::GenThreads(std::string bench_name) {
   node_id_t machine_id = (node_id_t)client_conf.get("machine_id").get_int64();
   t_id_t thread_num_per_machine =
       (t_id_t)client_conf.get("thread_num_per_machine").get_int64();
-  thread_num_per_machine = 1;
-  const int coro_num = 3;
-  // const int coro_num = (int)client_conf.get("coroutine_num").get_int64();
+  // thread_num_per_machine = 1;
+  // const int coro_num = 3;
+  const int coro_num = (int)client_conf.get("coroutine_num").get_int64();
   assert(machine_id >= 0 && machine_id < machine_num);
-
+  RDMA_LOG(INFO) << "thread num=" << thread_num_per_machine
+                 << "coro_num num = " << coro_num;
   /* Start working */
   tx_id_generator = 0;  // Initial transaction id == 0
   connected_t_num = 0;  // Sync all threads' RDMA QP connections
@@ -125,7 +127,7 @@ void Handler::GenThreads(std::string bench_name) {
       new RDMARegionAllocator(global_meta_man, thread_num_per_machine);
 
   auto* param_arr = new struct thread_params[thread_num_per_machine];
-
+  memset(micro_commit, 0, 100);
   // TATP* tatp_client = nullptr;
   // TPCC* tpcc_client = nullptr;
 
@@ -140,7 +142,8 @@ void Handler::GenThreads(std::string bench_name) {
   // }
 
   RDMA_LOG(INFO) << "Spawn threads to execute...";
-
+  struct timespec msr_start, msr_end;
+  clock_gettime(CLOCK_REALTIME, &msr_end);
   for (t_id_t i = 0; i < thread_num_per_machine; i++) {
     param_arr[i].thread_local_id = i;
     param_arr[i].thread_global_id = (machine_id * thread_num_per_machine) + i;
@@ -172,7 +175,20 @@ void Handler::GenThreads(std::string bench_name) {
     }
   }
 
+  clock_gettime(CLOCK_REALTIME, &msr_end);
+  // double msr_usec = (msr_end.tv_sec - msr_start.tv_sec) * 1000000 +
+  // (double) (msr_end.tv_nsec - msr_start.tv_nsec) / 1000;
+  double msr_sec = (msr_end.tv_sec - msr_start.tv_sec) +
+                   (double)(msr_end.tv_nsec - msr_start.tv_nsec) / 1000000000;
+
+  // auto total_msr_us = msr_sec * 1000000;
+
   RDMA_LOG(INFO) << "DONE";
+  auto total = 0;
+  for (int i = 0; i < thread_num_per_machine; i++) {
+    total += micro_commit[i];
+  }
+  RDMA_LOG(INFO) << total / msr_sec;
 
   delete[] param_arr;
   delete global_rdma_region;
