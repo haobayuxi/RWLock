@@ -443,7 +443,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
 
   char* data_buf = rdma_buffer_allocator->Alloc(sizeof(int));
   for (int i = 0; i < count; i++) {
-    if (!coro_sched->RDMARead(coro_id, qp, data_buf, offset, sizeof(int))) {
+    if (!coro_sched->RDMACAS(coro_id, qp, data_buf, offset, 0, 1)) {
       RDMA_LOG(INFO) << "rdma read fail";
     }
     // if (!coro_sched->RDMARead(coro_id, qp, data_buf, offset, sizeof(int))) {
