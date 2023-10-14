@@ -54,10 +54,9 @@ class DTX {
   void RemoveLastROItem();
 
  public:
-  DTX(MetaManager* meta_man, QPManager* qp_man, VersionCache* status,
-      LockCache* lock_table, t_id_t tid, coro_id_t coroid,
+  DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
       CoroutineScheduler* sched, RDMABufferAllocator* rdma_buffer_allocator,
-      LogOffsetAllocator* log_offset_allocator, AddrCache* addr_buf);
+      LogOffsetAllocator* log_offset_allocator);
   ~DTX() { Clean(); }
 
  public:
@@ -427,8 +426,8 @@ ALWAYS_INLINE
 void DTX::Clean() {
   read_only_set.clear();
   read_write_set.clear();
-  not_eager_locked_rw_set.clear();
+  // not_eager_locked_rw_set.clear();
   locked_rw_set.clear();
-  old_version_for_insert.clear();
+  // old_version_for_insert.clear();
   inserted_pos.clear();
 }

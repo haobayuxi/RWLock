@@ -3,10 +3,9 @@
 
 #include "dtx/dtx.h"
 
-DTX::DTX(MetaManager* meta_man, QPManager* qp_man, VersionCache* status,
-         LockCache* lock_table, t_id_t tid, coro_id_t coroid,
+DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
          CoroutineScheduler* sched, RDMABufferAllocator* rdma_buffer_allocator,
-         LogOffsetAllocator* remote_log_offset_allocator, AddrCache* addr_buf) {
+         LogOffsetAllocator* remote_log_offset_allocator) {
   // Transaction setup
   tx_id = 0;
   t_id = tid;
@@ -14,14 +13,13 @@ DTX::DTX(MetaManager* meta_man, QPManager* qp_man, VersionCache* status,
   coro_sched = sched;
   global_meta_man = meta_man;
   thread_qp_man = qp_man;
-  global_vcache = status;
-  global_lcache = lock_table;
+  // global_vcache = status;
+  // global_lcache = lock_table;
   thread_rdma_buffer_alloc = rdma_buffer_allocator;
   tx_status = TXStatus::TX_INIT;
 
-  select_backup = 0;
   thread_remote_log_offset_alloc = remote_log_offset_allocator;
-  addr_cache = addr_buf;
+  // addr_cache = addr_buf;
 
   hit_local_cache_times = 0;
   miss_local_cache_times = 0;
