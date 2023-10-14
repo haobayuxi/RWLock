@@ -710,7 +710,7 @@ void run_thread(thread_params* params) {
 
   // // Guarantee that each thread has a global different initial seed
   // seed = 0xdeadbeef + thread_gid;
-
+  RDMA_LOG(INFO) << "gid = " << thread_gid << " local id = " << thread_local_id;
   qp_man = new QPManager(thread_gid);
   // Init coroutines
   for (coro_id_t coro_i = 0; coro_i < coro_num; coro_i++) {
