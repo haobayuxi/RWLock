@@ -3,6 +3,8 @@
 #include <cstddef>  // For size_t
 #include <cstdint>  // For uintxx_t
 
+#include "flags.h"
+
 // Global specification
 using tx_id_t = uint64_t;     // Transaction id type
 using t_id_t = uint32_t;      // Thread id type
