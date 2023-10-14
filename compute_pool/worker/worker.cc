@@ -20,6 +20,8 @@ extern std::vector<double> taillat_vec;
 extern std::vector<uint64_t> total_try_times;
 extern std::vector<uint64_t> total_commit_times;
 
+extern uint64_t micro_commit[100];
+
 // __thread size_t ATTEMPTED_NUM;
 // __thread uint64_t seed;                        // Thread-global random seed
 // __thread FastRandom* random_generator = NULL;  // Per coroutine random

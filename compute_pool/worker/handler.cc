@@ -14,7 +14,7 @@ std::vector<double> taillat_vec;
 std::vector<double> lock_durations;
 std::vector<uint64_t> total_try_times;
 std::vector<uint64_t> total_commit_times;
-extern uint64_t micro_commit[100];
+uint64_t micro_commit[100];
 
 void Handler::test() {
   char* local_mem = (char*)malloc(8192);
