@@ -190,7 +190,7 @@ void Handler::GenThreads(std::string bench_name) {
   }
 
   RDMA_LOG(INFO) << "committed " << total << "time " << msr_sec
-                 << " persecond=" << ((double)total) / msr_sec;
+                 << " persecond=" << (total * 1.0) / msr_sec;
 
   delete[] param_arr;
   delete global_rdma_region;
