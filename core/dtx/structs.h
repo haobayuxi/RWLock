@@ -3,7 +3,7 @@
 
 #pragma once
 
-// #include "memstore/hash_store.h"
+#include "memstore/hash_store.h"
 #include "rlib/rdma_ctrl.hpp"
 
 enum DTX_SYS : int {
