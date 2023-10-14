@@ -30,7 +30,8 @@ class QPManager {
 
   RCQP* data_qps[MAX_REMOTE_NODE_NUM]{nullptr};
 
+  t_id_t global_tid;
+
  private:
   RCQP* log_qps[MAX_REMOTE_NODE_NUM]{nullptr};
-  t_id_t global_tid;
 };

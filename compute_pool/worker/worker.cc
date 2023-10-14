@@ -741,6 +741,7 @@ void run_thread(thread_params* params) {
   coro_sched->LoopLinkCoroutine(coro_num);
 
   // Build qp connection in thread granularity
+  RDMA_LOG(INFO) << "qpman gid = " << qp_man->global_tid;
   qp_man->BuildQPConnection(meta_man);
 
   // Sync qp connections in one compute node before running transactions
