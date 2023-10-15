@@ -16,12 +16,15 @@ endif()
 include_directories(
     core
     thirdparty
+    workload
     compute_pool
 )
 
 add_subdirectory(thirdparty/rlib)
 
 add_subdirectory(core)
+
+add_subdirectory(workload)
 
 add_subdirectory(compute_pool)
 
