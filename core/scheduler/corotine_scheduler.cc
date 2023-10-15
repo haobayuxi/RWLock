@@ -17,7 +17,9 @@ void CoroutineScheduler::PollRegularCompletion() {
       continue;
     }
     if (unlikely(wc.status != IBV_WC_SUCCESS)) {
-      RDMA_LOG(EMPH) << "Bad completion status: " << wc.status << " with error " << ibv_wc_status_str(wc.status) << ";@ node " << qp->idx_.node_id;
+      RDMA_LOG(EMPH) << "Bad completion status: " << wc.status << " with error "
+                     << ibv_wc_status_str(wc.status) << ";@ node "
+                     << qp->idx_.node_id;
       if (wc.status != IBV_WC_RETRY_EXC_ERR) {
         RDMA_LOG(EMPH) << "completion status != IBV_WC_RETRY_EXC_ERR. abort()";
         abort();
@@ -47,7 +49,9 @@ void CoroutineScheduler::PollLogCompletion() {
       continue;
     }
     if (unlikely(wc.status != IBV_WC_SUCCESS)) {
-      RDMA_LOG(EMPH) << "Bad completion status: " << wc.status << " with error " << ibv_wc_status_str(wc.status) << ";@ node " << qp->idx_.node_id;
+      RDMA_LOG(EMPH) << "Bad completion status: " << wc.status << " with error "
+                     << ibv_wc_status_str(wc.status) << ";@ node "
+                     << qp->idx_.node_id;
       if (wc.status != IBV_WC_RETRY_EXC_ERR) {
         RDMA_LOG(EMPH) << "completion status != IBV_WC_RETRY_EXC_ERR. abort()";
         abort();
