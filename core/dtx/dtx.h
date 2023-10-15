@@ -56,20 +56,13 @@ class DTX {
  public:
   DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
       CoroutineScheduler* sched, RDMABufferAllocator* rdma_buffer_allocator,
-      LogOffsetAllocator* log_offset_allocator);
+      LogOffsetAllocator* log_offset_allocator, int lease);
   ~DTX() { Clean(); }
 
  public:
   // size_t GetAddrCacheSize() { return addr_cache->TotalAddrSize(); }
 
  private:
-  // Internal transaction functions
-  bool ExeRO(coro_yield_t& yield);  // Execute read-only transaction
-
-  bool ExeRW(
-      coro_yield_t& yield);  // Execute read-write transaction, use doorbell
-                             // read+cas(lock) and background undo log
-
   bool Validate(coro_yield_t& yield);  // RDMA read value versions
   bool RWLock(coro_yield_t& yield);
   bool Drtm(coro_yield_t& yield);
@@ -111,7 +104,6 @@ class DTX {
 
   coro_id_t coro_id;  // Coroutine ID
 
- public:
   // For statistics
   std::vector<uint64_t> lock_durations;  // us
   long long start_time;
@@ -127,6 +119,7 @@ class DTX {
   MetaManager* global_meta_man;  // Global metadata manager
 
  private:
+  int lease;
   CoroutineScheduler* coro_sched;  // Thread local coroutine scheduler
 
   QPManager* thread_qp_man;  // Thread local qp connection manager. Each

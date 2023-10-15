@@ -22,16 +22,15 @@ extern std::vector<uint64_t> total_commit_times;
 
 extern uint64_t micro_commit[100];
 
-// __thread size_t ATTEMPTED_NUM;
-// __thread uint64_t seed;                        // Thread-global random seed
-// __thread FastRandom* random_generator = NULL;  // Per coroutine random
+__thread size_t ATTEMPTED_NUM;
+__thread uint64_t seed;                        // Thread-global random seed
+__thread FastRandom* random_generator = NULL;  // Per coroutine random
 // generator
 __thread t_id_t thread_gid;
 __thread t_id_t thread_local_id;
 __thread t_id_t thread_num;
 
 // __thread TATP* tatp_client = nullptr;
-// __thread SmallBank* smallbank_client = nullptr;
 // __thread TPCC* tpcc_client = nullptr;
 
 __thread MetaManager* meta_man;
@@ -41,11 +40,10 @@ __thread QPManager* qp_man;
 // __thread LockCache* lock_table;
 
 __thread RDMABufferAllocator* rdma_buffer_allocator;
-// __thread LogOffsetAllocator* log_offset_allocator;
+__thread LogOffsetAllocator* log_offset_allocator;
 // __thread AddrCache* addr_cache;
 
 // __thread TATPTxType* tatp_workgen_arr;
-// __thread SmallBankTxType* smallbank_workgen_arr;
 // __thread TPCCTxType* tpcc_workgen_arr;
 
 __thread coro_id_t coro_num;
@@ -54,23 +52,23 @@ __thread CoroutineScheduler*
 __thread bool stop_run;
 
 // // Performance measurement (thread granularity)
-// __thread struct timespec msr_start, msr_end;
+__thread struct timespec msr_start, msr_end;
 // __thread double* timer;
-// __thread uint64_t stat_attempted_tx_total = 0;  // Issued transaction number
-// __thread uint64_t stat_committed_tx_total = 0;  // Committed transaction
+__thread uint64_t stat_attempted_tx_total = 0;  // Issued transaction number
+__thread uint64_t stat_committed_tx_total = 0;  // Committed transaction
 // number
 const coro_id_t POLL_ROUTINE_ID = 0;  // The poll coroutine ID
 
 // // For MICRO benchmark
-// __thread ZipfGen* zipf_gen = nullptr;
-// __thread bool is_skewed;
-// __thread uint64_t data_set_size;
-// __thread uint64_t num_keys_global;
-// __thread uint64_t write_ratio;
+__thread ZipfGen* zipf_gen = nullptr;
+__thread bool is_skewed;
+__thread uint64_t data_set_size;
+__thread uint64_t num_keys_global;
+__thread uint64_t write_ratio;
 
 // // Stat the commit rate
-// __thread uint64_t* thread_local_try_times;
-// __thread uint64_t* thread_local_commit_times;
+__thread uint64_t* thread_local_try_times;
+__thread uint64_t* thread_local_commit_times;
 
 // Coroutine 0 in each thread does polling
 void PollCompletion(coro_yield_t& yield) {
@@ -435,7 +433,7 @@ void PollCompletion(coro_yield_t& yield) {
 //   delete dtx;
 // }
 
-void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
+void test_iops(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   // test rdma read and atomic
   RCQP* qp = qp_man->data_qps[0];
   auto offset = 0;
@@ -457,20 +455,56 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
     // success
     micro_commit[thread_local_id] += 1;
   }
+}
 
-  // if (!coro_sched->RDMARead(coro_id, qp, receive_buf, offset, sizeof(int))) {
-  //   RDMA_LOG(INFO) << "rdma read fail";
-  // }
+void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
+              int lease) {
+  // Each coroutine has a dtx: Each coroutine is a coordinator
+  DTX* dtx = new DTX(meta_man, qp_man, thread_gid, coro_id, coro_sched,
+                     rdma_buffer_allocator, log_offset_allocator, lease);
+  struct timespec tx_start_time, tx_end_time;
+  bool tx_committed = false;
+  clock_gettime(CLOCK_REALTIME, &msr_start);
+  while (true) {
+    uint64_t iter = ++tx_id_generator;  // Global atomic transaction id
+    stat_attempted_tx_total++;
+    clock_gettime(CLOCK_REALTIME, &tx_start_time);
+    tx_committed = TxReadOnly(zipf_gen, &seed, yield, iter, dtx, is_skewed,
+                              data_set_size, num_keys_global, 0);
 
-  // coro_sched->Yield(yield, coro_id);
+    /********************************** Stat begin
+     * *****************************************/
+    // Stat after one transaction finishes
+    if (tx_committed) {
+      clock_gettime(CLOCK_REALTIME, &tx_end_time);
+      double tx_usec =
+          (tx_end_time.tv_sec - tx_start_time.tv_sec) * 1000000 +
+          (double)(tx_end_time.tv_nsec - tx_start_time.tv_nsec) / 1000;
+      timer[stat_committed_tx_total++] = tx_usec;
+    }
+    if (stat_attempted_tx_total >= ATTEMPTED_NUM) {
+      // A coroutine calculate the total execution time and exits
+      clock_gettime(CLOCK_REALTIME, &msr_end);
+      // double msr_usec = (msr_end.tv_sec - msr_start.tv_sec) * 1000000 +
+      // (double) (msr_end.tv_nsec - msr_start.tv_nsec) / 1000;
+      double msr_sec =
+          (msr_end.tv_sec - msr_start.tv_sec) +
+          (double)(msr_end.tv_nsec - msr_start.tv_nsec) / 1000000000;
+
+            double attemp_tput = (double)stat_attempted_tx_total / msr_sec;
+      double tx_tput = (double)stat_committed_tx_total / msr_sec;
+
+      break;
+    }
+  }
   return;
 }
 //   double total_msr_us = 0;
 //   // Each coroutine has a dtx: Each coroutine is a coordinator
 //   DTX* dtx = new DTX(meta_man, qp_man, status, lock_table, thread_gid,
 //   coro_id,
-//                      coro_sched, rdma_buffer_allocator, log_offset_allocator,
-//                      addr_cache);
+//                      coro_sched, rdma_buffer_allocator,
+//                      log_offset_allocator, addr_cache);
 //   struct timespec tx_start_time, tx_end_time;
 //   bool tx_committed = false;
 
@@ -534,7 +568,8 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
 //       output_of << tx_tput << " " << percentile_50 << " " << percentile_99
 //                 << std::endl;
 //       output_of.close();
-//       // std::cout << tx_tput << " " << percentile_50 << " " << percentile_99
+//       // std::cout << tx_tput << " " << percentile_50 << " " <<
+//       percentile_99
 //       <<
 //       // std::endl;
 
@@ -640,7 +675,8 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
 //   auto average_execution_time =
 //       (total_execution_time / stat_committed_tx_total) * 1000000;  // us
 
-//   ofs << thread_gid << " " << average_inv_duration << " " << max_inv_duration
+//   ofs << thread_gid << " " << average_inv_duration << " " <<
+//   max_inv_duration
 //       << " " << average_execution_time << " " << avg_re_read_times << " "
 //       << double(total_duration / total_execution_time) << " "
 //       << (double)(total_duration / total_msr_us) << std::endl;
@@ -685,7 +721,8 @@ void run_thread(thread_params* params) {
   //   write_ratio = micro_conf.get("write_ratio").get_uint64();
   //   data_set_size = micro_conf.get("data_set_size").get_uint64();
   //   zipf_gen =
-  //       new ZipfGen(num_keys_global, zipf_theta, zipf_seed & zipf_seed_mask);
+  //       new ZipfGen(num_keys_global, zipf_theta, zipf_seed &
+  //       zipf_seed_mask);
   // }
 
   stop_run = false;
@@ -758,7 +795,8 @@ void run_thread(thread_params* params) {
   // Stop running
   stop_run = true;
 
-  // // RDMA_LOG(DBG) << "Thread: " << thread_gid << ". Loop RDMA alloc times: "
+  // // RDMA_LOG(DBG) << "Thread: " << thread_gid << ". Loop RDMA alloc times:
+  // "
   // <<
   //     // rdma_buffer_allocator->loop_times;
 

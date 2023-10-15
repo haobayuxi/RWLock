@@ -5,7 +5,7 @@
 
 DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
          CoroutineScheduler* sched, RDMABufferAllocator* rdma_buffer_allocator,
-         LogOffsetAllocator* remote_log_offset_allocator) {
+         LogOffsetAllocator* remote_log_offset_allocator, int lease) {
   // Transaction setup
   tx_id = 0;
   t_id = tid;
@@ -13,8 +13,7 @@ DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
   coro_sched = sched;
   global_meta_man = meta_man;
   thread_qp_man = qp_man;
-  // global_vcache = status;
-  // global_lcache = lock_table;
+  lease = lease;
   thread_rdma_buffer_alloc = rdma_buffer_allocator;
   tx_status = TXStatus::TX_INIT;
 
@@ -92,7 +91,7 @@ bool DTX::Dlmr(coro_yield_t& yield) {
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
     // auto offset = addr_cache->Search(remote_node_id, it->table_id, it->key);
     char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
-    // if (!coro_sched->RDMACAS(coro_id, qp, data_buf, offset, DataItemSize)) {
+    // if (!coro_sched->RDMAFAA(coro_id, qp, data_buf, offset, 1)) {
     //   return false;
     // }
   }
@@ -102,123 +101,36 @@ bool DTX::Dlmr(coro_yield_t& yield) {
   return true;
 }
 
-bool DTX::ExeRO(coro_yield_t& yield) {
-  // You can read from primary or backup
-  // std::vector<DirectRead> pending_direct_ro;
-  // std::vector<HashRead> pending_hash_ro;
-  // if (!IssueReadRO(pending_direct_ro, pending_hash_ro)) return false;
-
-  // // Yield to other coroutines when waiting for network replies
-  // coro_sched->Yield(yield, coro_id);
-
-  // // Receive data
-  // std::list<InvisibleRead> pending_invisible_ro;
-  // std::list<HashRead> pending_next_hash_ro;
-  // // RDMA_LOG(DBG) << "coro: " << coro_id << " tx_id: " << tx_id << " check
-  // read
-  // // ro";
-  // auto res = CheckReadRO(pending_direct_ro, pending_hash_ro,
-  //                        pending_invisible_ro, pending_next_hash_ro, yield);
-  // return res;
-  return true;
-}
-
-bool DTX::ExeRW(coro_yield_t& yield) {
-  // For read-only data from primary or backup
-  //   std::vector<DirectRead> pending_direct_ro;
-  //   std::vector<HashRead> pending_hash_ro;
-
-  //   // For read-write data from primary
-  //   std::vector<CasRead> pending_cas_rw;
-  //   std::vector<DirectRead> pending_direct_rw;
-  //   std::vector<HashRead> pending_hash_rw;
-  //   std::vector<InsertOffRead> pending_insert_off_rw;
-
-  //   std::list<InvisibleRead> pending_invisible_ro;
-
-  //   std::list<HashRead> pending_next_hash_ro;
-  //   std::list<HashRead> pending_next_hash_rw;
-  //   std::list<InsertOffRead> pending_next_off_rw;
-
-  //   if (!IssueReadRO(pending_direct_ro, pending_hash_ro))
-  //     return false;  // RW transactions may also have RO data
-  // // RDMA_LOG(DBG) << "coro: " << coro_id << " tx_id: " << tx_id << " issue
-  // read
-  // // rorw";
-  // #if READ_LOCK
-  //   if (!IssueReadLock(pending_cas_rw, pending_hash_rw,
-  //   pending_insert_off_rw))
-  //     return false;
-  // #else
-  //   if (!IssueReadRW(pending_direct_rw, pending_hash_rw,
-  //   pending_insert_off_rw))
-  //     return false;
-  // #endif
-
-  //   // Yield to other coroutines when waiting for network replies
-  //   coro_sched->Yield(yield, coro_id);
-
-  //   // RDMA_LOG(DBG) << "coro: " << coro_id << " tx_id: " << tx_id << " check
-  //   read
-  //   // rorw";
-  //   bool res = false;
-  // #if READ_LOCK
-  //   res = CheckReadRORW(pending_direct_ro, pending_hash_ro, pending_hash_rw,
-  //                       pending_insert_off_rw, pending_cas_rw,
-  //                       pending_invisible_ro, pending_next_hash_ro,
-  //                       pending_next_hash_rw, pending_next_off_rw, yield);
-  // #else
-  //   res = CompareCheckReadRORW(
-  //       pending_direct_ro, pending_direct_rw, pending_hash_ro,
-  //       pending_hash_rw, pending_next_hash_ro, pending_next_hash_rw,
-  //       pending_insert_off_rw, pending_next_off_rw, pending_invisible_ro,
-  //       yield);
-  // #endif
-
-  // #if COMMIT_TOGETHER
-  //   ParallelUndoLog();
-  // #endif
-
-  // return res;
-  return true;
-}
-
 bool DTX::Validate(coro_yield_t& yield) {
-  return true;
-  //   long long end_time = get_clock_sys_time_us();
-  //   auto lease_expired = (end_time - start_time) < 40;
-  //   // RDMA_LOG(INFO) << "lease:" << end_time - start_time << " : " <<
-  //   // lease_expired;
-  //   // The transaction is read-write, and all the written data have
-  //   // been locked before
-  //   if (not_eager_locked_rw_set.empty() && read_only_set.empty()) {
-  //     // TLOG(DBG, t_id) << "save validation";
-  //     return true;
-  //   }
-  //   // if (lease_expired) {
-  //   //   return true;
-  //   // }
+  // The transaction is read-write, and all the written data have
+  // been locked before
+  if (not_eager_locked_rw_set.empty() && read_only_set.empty()) {
+    // TLOG(DBG, t_id) << "save validation";
+    return true;
+  }
+  // if (lease_expired) {
+  //   return true;
+  // }
 
-  //   std::vector<ValidateRead> pending_validate;
+  std::vector<ValidateRead> pending_validate;
 
-  // #if LOCAL_VALIDATION
-  //   ValStatus ret = IssueLocalValidate(pending_validate);
+#if LOCAL_VALIDATION
+  ValStatus ret = IssueLocalValidate(pending_validate);
 
-  //   if (ret == ValStatus::NO_NEED_VAL) {
-  //     return true;
-  //   } else if (ret == ValStatus::RDMA_ERROR || ret == ValStatus::MUST_ABORT)
-  //   {
-  //     return false;
-  //   }
-  // #else
-  //   if (!IssueRemoteValidate(pending_validate)) return false;
-  // #endif
+  if (ret == ValStatus::NO_NEED_VAL) {
+    return true;
+  } else if (ret == ValStatus::RDMA_ERROR || ret == ValStatus::MUST_ABORT) {
+    return false;
+  }
+#else
+  if (!IssueRemoteValidate(pending_validate)) return false;
+#endif
 
-  //   // Yield to other coroutines when waiting for network replies
-  //   coro_sched->Yield(yield, coro_id);
+  // Yield to other coroutines when waiting for network replies
+  coro_sched->Yield(yield, coro_id);
 
-  //   auto res = CheckValidate(pending_validate);
-  //   return res;
+  auto res = CheckValidate(pending_validate);
+  return res;
 }
 
 // // Invisible + write primary and backups

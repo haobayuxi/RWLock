@@ -38,133 +38,66 @@ ABORT:
   return false;
 }
 
-// bool DTX::TxCommit(coro_yield_t& yield) {
-//   // Only read one item
-//   // if (read_write_set.empty() && read_only_set.size() == 1) {
-//   //   return true;
-//   // }
+bool DTX::TxCommit(coro_yield_t& yield) {
+  bool commit_stat;
 
-//   bool commit_stat;
+  /*!
+    RWLock's commit protocol
+    */
 
-//   /*!
-//     FORD's commit protocol
-//     */
+  if (global_meta_man->txn_system == DTX_SYS::RWLock) {
+    // check lease
+    auto end_time = get_clock_sys_time_us();
+    if (end_time - start_time) > lease {
+        if (!Validate(yield)) {
+          goto ABORT;
+        }
+      }
 
-//   if (global_meta_man->txn_system == DTX_SYS::FORD) {
-//     if (!Validate(yield)) {
-//       goto ABORT;
-//     }
+    // Next step. If read-write txns, we need to commit the updates to remote
+    // replicas
+    if (!read_write_set.empty()) {
+      // Write log
 
-//     // Next step. If read-write txns, we need to commit the updates to remote
-//     // replicas
-//     if (!read_write_set.empty()) {
-//       // Write back for read-write tx
-// #if COMMIT_TOGETHER
-//       commit_stat = CoalescentCommit(yield);
-//       if (commit_stat) {
-//         return true;
-//       } else {
-//         goto ABORT;
-//       }
-// #else
-//       commit_stat = CompareCommitBackup(yield);
-//       if (!commit_stat) {
-//         goto ABORT;
-//       }
-//       commit_stat = CompareCommitPrimary(yield);
-//       if (!commit_stat) {
-//         goto ABORT;
-//       }
-//       commit_stat = CompareTruncateAsync(yield);
-//       if (commit_stat) {
-//         return true;
-//       } else {
-//         goto ABORT;
-//       }
-// #endif
-//     }
-//   }
+      // write data and unlock
+    }
+  }
 
-//   if (global_meta_man->txn_system == DTX_SYS::LOCAL) {
-//     if (!read_write_set.empty()) {
-//       // For read-write txn
-//       if (!LocalLock()) return false;
-//       if (!LocalValidate()) return false;
-//       commit_stat = CoalescentCommit(yield);
-//       if (commit_stat) {
-//         return true;
-//       } else {
-//         abort();
-//       }
-//       LocalUnlock();
-//     } else {
-//       // For read-only txn
-//       if (!LocalValidate()) return false;
-//     }
-//   }
+  /*!
+    DrTM+H's commit protocol
+    */
 
-//   /*!
-//     DrTM+H's commit protocol
-//     */
+  if (global_meta_man->txn_system == DTX_SYS::DrTMH) {
+    // check lease
 
-//   if (global_meta_man->txn_system == DTX_SYS::DrTMH) {
-//     // Lock and Validation are batched
-//     if (!CompareLockingValidation(yield)) {
-//       goto ABORT;
-//     }
+    if (!Validate(yield)) {
+      goto ABORT;
+    }
 
-//     // Seperately commit backup and primary
-//     if (!read_write_set.empty()) {
-//       commit_stat = CompareCommitBackup(yield);
-//       if (!commit_stat) {
-//         goto ABORT;
-//       }
-//       commit_stat = CompareCommitPrimary(yield);
-//       if (!commit_stat) {
-//         goto ABORT;
-//       }
-//       commit_stat = CompareTruncateAsync(yield);
-//       if (commit_stat) {
-//         return true;
-//       } else {
-//         goto ABORT;
-//       }
-//     }
-//   }
+    // Next step. If read-write txns, we need to commit the updates to remote
+    // replicas
+    if (!read_write_set.empty()) {
+      // Write log
 
-//   /*!
-//     FaRM's commit protocol
-//     */
+      // write data and unlock
+    }
+  }
 
-//   if (global_meta_man->txn_system == DTX_SYS::FaRM) {
-//     if (!CompareLocking(yield)) {
-//       goto ABORT;
-//     }
-//     if (!CompareValidation(yield)) {
-//       goto ABORT;
-//     }
+  /*!
+    DLMR's commit protocol
+    */
 
-//     // Seperately commit backup and primary
-//     if (!read_write_set.empty()) {
-//       commit_stat = CompareCommitBackup(yield);
-//       if (!commit_stat) {
-//         goto ABORT;
-//       }
-//       commit_stat = CompareCommitPrimary(yield);
-//       if (!commit_stat) {
-//         goto ABORT;
-//       }
-//       commit_stat = CompareTruncateAsync(yield);
-//       if (commit_stat) {
-//         return true;
-//       } else {
-//         goto ABORT;
-//       }
-//     }
-//   }
+  if (global_meta_man->txn_system == DTX_SYS::DLMR) {
+    if (!read_write_set.empty()) {
+      // Write log
 
-//   return true;
-// ABORT:
-//   Abort();
-//   return false;
-// }
+      // write data and unlock
+    }
+    // unlock read lock and write lock
+  }
+
+  return true;
+ABORT:
+  Abort();
+  return false;
+}
