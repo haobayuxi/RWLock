@@ -12,32 +12,21 @@ bool DTX::TxExe(coro_yield_t& yield, bool fail_abort) {
 
   if (global_meta_man->txn_system == DTX_SYS::RWLock) {
     // Run our system
-    if (read_write_set.empty()) {
-      if (ExeRO(yield))
-        return true;
-      else {
-        goto ABORT;
-      }
+    if (RWLock(yield)) {
+      return true;
     } else {
-      if (ExeRW(yield))
-        return true;
-      else {
-        goto ABORT;
-      }
+      goto ABORT;
     }
   } else if (global_meta_man->txn_system == DTX_SYS::DrTMH) {
-    if (read_write_set.empty()) {
-      if (CompareExeRO(yield))
-        return true;
-      else
-        goto ABORT;
+    if (Drtm(yield)) {
+      return true;
     } else {
-      if (CompareExeRW(yield))
-        return true;
-      else
-        goto ABORT;
+      goto ABORT;
     }
   } else if (global_meta_man->txn_system == DTX_SYS::DLMR) {
+    // get read lock
+
+    // get write lock
   } else {
     RDMA_LOG(FATAL) << "NOT SUPPORT SYSTEM ID: " << global_meta_man->txn_system;
   }
