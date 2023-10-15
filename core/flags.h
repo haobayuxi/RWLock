@@ -11,6 +11,7 @@
 // 40: micro-benchmark
 
 const size_t MAX_ITEM_SIZE = 664;
+const size_t MAX_MICRO_ITEM_SIZE = 40;
 
 /*********************** For FORD **********************/
 // 0: Read rw data without lock

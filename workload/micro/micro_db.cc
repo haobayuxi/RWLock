@@ -22,24 +22,6 @@ void MICRO::LoadTable(node_id_t node_id, node_id_t num_server,
     PopulateMicroTable(mem_store_reserve_param);
     primary_table_ptrs.push_back(micro_table);
   }
-
-  // Initiate + Populate table for backup role
-  if (BACKUP_DEGREE < num_server) {
-    for (node_id_t i = 1; i <= BACKUP_DEGREE; i++) {
-      if ((node_id_t)MicroTableType::kMicroTable % num_server ==
-          (node_id - i + num_server) % num_server) {
-        printf("Backup: Initializing MICRO table\n");
-        std::string config_filepath = "workload/micro/micro_tables/micro.json";
-        auto json_config = JsonConfig::load_file(config_filepath);
-        auto table_config = json_config.get("table");
-        micro_table = new HashStore((table_id_t)MicroTableType::kMicroTable,
-                                    table_config.get("bkt_num").get_uint64(),
-                                    mem_store_alloc_param);
-        PopulateMicroTable(mem_store_reserve_param);
-        backup_table_ptrs.push_back(micro_table);
-      }
-    }
-  }
 }
 
 void MICRO::PopulateMicroTable(MemStoreReserveParam* mem_store_reserve_param) {

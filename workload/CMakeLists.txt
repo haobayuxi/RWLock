@@ -5,4 +5,4 @@
 
 add_subdirectory(tatp)
 
-# add_subdirectory(micro)
+add_subdirectory(micro)

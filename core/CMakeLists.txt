@@ -10,6 +10,7 @@ set(DTX_SRC
         dtx/doorbell.cc
         dtx/dtx.cc
         dtx/dtx_exe_commit.cc
+        dtx/dtx_issue.cc
         )
 
 set(SCHEDULER_SRC

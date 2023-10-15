@@ -63,7 +63,7 @@ class MICRO {
 
   std::vector<HashStore*> primary_table_ptrs;
 
-  std::vector<HashStore*> backup_table_ptrs;
+  // std::vector<HashStore*> backup_table_ptrs;
 
   // For server usage: Provide interfaces to servers for loading tables
   // Also for client usage: Provide interfaces to clients for generating ids
@@ -95,6 +95,6 @@ class MICRO {
   ALWAYS_INLINE
   std::vector<HashStore*> GetPrimaryHashStore() { return primary_table_ptrs; }
 
-  ALWAYS_INLINE
-  std::vector<HashStore*> GetBackupHashStore() { return backup_table_ptrs; }
+  // ALWAYS_INLINE
+  // std::vector<HashStore*> GetBackupHashStore() { return backup_table_ptrs; }
 };

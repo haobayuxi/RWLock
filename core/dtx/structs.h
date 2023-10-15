@@ -7,10 +7,9 @@
 #include "rlib/rdma_ctrl.hpp"
 
 enum DTX_SYS : int {
-  FaRM = 0,
+  RWLock = 0,
   DrTMH = 1,
-  FORD = 2,
-  LOCAL = 3  // FORD with localized metadata including locks and versions
+  DLMR = 2,
 };
 
 enum TXStatus : int {

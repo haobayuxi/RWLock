@@ -1,55 +1,53 @@
 // // Author: Ming Zhang
 // // Copyright (c) 2022
 
-// #include "dtx/dtx.h"
+#include "dtx/dtx.h"
 
-// bool DTX::TxExe(coro_yield_t& yield, bool fail_abort) {
-//   // Start executing transaction
-//   tx_status = TXStatus::TX_EXE;
-//   if (read_write_set.empty() && read_only_set.empty()) {
-//     return true;
-//   }
+bool DTX::TxExe(coro_yield_t& yield, bool fail_abort) {
+  // Start executing transaction
+  tx_status = TXStatus::TX_EXE;
+  if (read_write_set.empty() && read_only_set.empty()) {
+    return true;
+  }
 
-//   if (global_meta_man->txn_system == DTX_SYS::FORD) {
-//     // Run our system
-//     if (read_write_set.empty()) {
-//       if (ExeRO(yield))
-//         return true;
-//       else {
-//         goto ABORT;
-//       }
-//     } else {
-//       if (ExeRW(yield))
-//         return true;
-//       else {
-//         goto ABORT;
-//       }
-//     }
-//   } else if (global_meta_man->txn_system == DTX_SYS::FaRM ||
-//              global_meta_man->txn_system == DTX_SYS::DrTMH ||
-//              global_meta_man->txn_system == DTX_SYS::LOCAL) {
-//     if (read_write_set.empty()) {
-//       if (CompareExeRO(yield))
-//         return true;
-//       else
-//         goto ABORT;
-//     } else {
-//       if (CompareExeRW(yield))
-//         return true;
-//       else
-//         goto ABORT;
-//     }
-//   } else {
-//     RDMA_LOG(FATAL) << "NOT SUPPORT SYSTEM ID: " <<
-//     global_meta_man->txn_system;
-//   }
+  if (global_meta_man->txn_system == DTX_SYS::RWLock) {
+    // Run our system
+    if (read_write_set.empty()) {
+      if (ExeRO(yield))
+        return true;
+      else {
+        goto ABORT;
+      }
+    } else {
+      if (ExeRW(yield))
+        return true;
+      else {
+        goto ABORT;
+      }
+    }
+  } else if (global_meta_man->txn_system == DTX_SYS::DrTMH) {
+    if (read_write_set.empty()) {
+      if (CompareExeRO(yield))
+        return true;
+      else
+        goto ABORT;
+    } else {
+      if (CompareExeRW(yield))
+        return true;
+      else
+        goto ABORT;
+    }
+  } else if (global_meta_man->txn_system == DTX_SYS::DLMR) {
+  } else {
+    RDMA_LOG(FATAL) << "NOT SUPPORT SYSTEM ID: " << global_meta_man->txn_system;
+  }
 
-//   return true;
+  return true;
 
-// ABORT:
-//   if (fail_abort) Abort();
-//   return false;
-// }
+ABORT:
+  if (fail_abort) Abort();
+  return false;
+}
 
 // bool DTX::TxCommit(coro_yield_t& yield) {
 //   // Only read one item
