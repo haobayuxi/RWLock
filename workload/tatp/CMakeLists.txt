@@ -10,4 +10,4 @@ add_library(tatp_txn STATIC ${TXN_SOURCES})
 set_target_properties(tatp_db PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(tatp_txn PROPERTIES LINKER_LANGUAGE CXX)
 
-target_link_libraries(tatp_txn ford)
+target_link_libraries(tatp_txn rwlock)
