@@ -72,7 +72,8 @@ class DTX {
 
   bool Validate(coro_yield_t& yield);  // RDMA read value versions
   bool RWLock(coro_yield_t& yield);
-  bool DTX::Drtm(coro_yield_t& yield);
+  bool Drtm(coro_yield_t& yield);
+  bool Dlmr(coro_yield_t& yield);
 
   // bool CoalescentCommit(coro_yield_t& yield);
 

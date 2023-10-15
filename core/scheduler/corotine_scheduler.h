@@ -316,6 +316,20 @@ bool CoroutineScheduler::RDMACAS(coro_id_t coro_id, RCQP* qp, char* local_buf,
   return true;
 }
 
+ALWAYS_INLINE
+bool CoroutineScheduler::RDMAFAA(coro_id_t coro_id, RCQP* qp, char* local_buf,
+                                 uint64_t remote_offset, uint64_t add_value) {
+  auto rc = qp->post_faa(local_buf, remote_offset, add_value, IBV_SEND_SIGNALED,
+                         coro_id);
+  if (rc != SUCC) {
+    RDMA_LOG(ERROR) << "client: post cas fail. rc=" << rc << ", tid = " << t_id
+                    << ", coroid = " << coro_id;
+    return false;
+  }
+  AddPendingQP(coro_id, qp);
+  return true;
+}
+
 // Link coroutines in a loop manner
 ALWAYS_INLINE
 void CoroutineScheduler::LoopLinkCoroutine(coro_id_t coro_num) {
