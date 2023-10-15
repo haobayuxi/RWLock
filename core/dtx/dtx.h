@@ -71,8 +71,8 @@ class DTX {
                              // read+cas(lock) and background undo log
 
   bool Validate(coro_yield_t& yield);  // RDMA read value versions
-  bool IssueReadOnly(coro_yield_t& yield);
-  bool ReadCASLock(coro_yield_t& yield);
+  bool RWLock(coro_yield_t& yield);
+  bool DTX::Drtm(coro_yield_t& yield);
 
   // bool CoalescentCommit(coro_yield_t& yield);
 

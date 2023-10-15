@@ -2,7 +2,7 @@
 
 #include "dtx.h"
 
-bool DTX::IssueReadOnly(coro_yield_t& yield) {
+bool DTX::RWLock(coro_yield_t& yield) {
   for (auto& item : read_only_set) {
     if (item.is_fetched) continue;
     auto it = item.item_ptr;
