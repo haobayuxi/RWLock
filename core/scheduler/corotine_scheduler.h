@@ -70,8 +70,8 @@ class CoroutineScheduler {
 
   bool RDMACAS(coro_id_t coro_id, RCQP* qp, char* local_buf,
                uint64_t remote_offset, uint64_t compare, uint64_t swap);
-  bool RDMAReadSync(coro_id_t coro_id, RCQP* qp, char* rd_data,
-                    uint64_t remote_offset, size_t size);
+  bool RDMAFAA(coro_id_t coro_id, RCQP* qp, char* local_buf,
+               uint64_t remote_offset, uint64_t add_value);
 
   // For polling
   void PollCompletion();  // There is a coroutine polling ACKs
