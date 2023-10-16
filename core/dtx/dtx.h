@@ -142,7 +142,7 @@ class DTX {
 
   std::vector<size_t> locked_rw_set;  // For release lock during abort
 
-  // AddrCache* addr_cache;
+  AddrCache* addr_cache;
 
   // For validate the version for insertion
   // std::vector<OldVersionForInsert> old_version_for_insert;
