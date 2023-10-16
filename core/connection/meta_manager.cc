@@ -12,13 +12,12 @@ MetaManager::MetaManager() {
   auto local_node = json_config.get("local_compute_node");
   local_machine_id = (node_id_t)local_node.get("machine_id").get_int64();
   txn_system = local_node.get("txn_system").get_int64();
-  // RDMA_LOG(INFO) << "Run "
-  //                << (txn_system == 0
-  //                        ? "FaRM"
-  //                        : (txn_system == 1
-  //                               ? "DrTM+H"
-  //                               : (txn_system == 2 ? "FORD" :
-  //                               "FORD-LOCAL")));
+  RDMA_LOG(INFO) << "Run "
+                 << (txn_system == 0
+                         ? "rwlock"
+                         : (txn_system == 1
+                                ? "DrTM+H"
+                                : (txn_system == 2 ? "dlmr" : "LOCAL")));
 
   auto pm_nodes = json_config.get("remote_pm_nodes");
   auto remote_ips = pm_nodes.get("remote_ips");  // Array

@@ -7,6 +7,7 @@ bool DTX::TxExe(coro_yield_t& yield, bool fail_abort) {
   // Start executing transaction
   tx_status = TXStatus::TX_EXE;
   if (read_write_set.empty() && read_only_set.empty()) {
+    RDMA_LOG(INFO) << "wrong";
     return true;
   }
 
