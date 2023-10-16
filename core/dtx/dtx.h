@@ -57,7 +57,7 @@ class DTX {
  public:
   DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
       CoroutineScheduler* sched, RDMABufferAllocator* rdma_buffer_allocator,
-      LogOffsetAllocator* log_offset_allocator, int lease);
+      LogOffsetAllocator* log_offset_allocator, int lease, AddrCache* addr_buf);
   ~DTX() { Clean(); }
 
  public:
