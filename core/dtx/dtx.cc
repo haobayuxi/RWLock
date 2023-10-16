@@ -66,16 +66,15 @@ bool DTX::RWLock(coro_yield_t& yield) {
   }
   for (auto& item : read_write_set) {
     // cas lock
-    }
+  }
 
   coro_sched->Yield(yield, coro_id);
   // Receive data
-  std::list<InvisibleRead> pending_invisible_ro;
   std::list<HashRead> pending_next_hash_ro;
   // RDMA_LOG(DBG) << "coro: " << coro_id << " tx_id: " << tx_id << " check
   // read ro";
   auto res = CheckReadRO(pending_direct_ro, pending_hash_ro,
-                         pending_invisible_ro, pending_next_hash_ro, yield);
+                         pending_next_hash_ro, yield);
   return res;
 }
 
