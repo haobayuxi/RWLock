@@ -41,7 +41,7 @@ __thread QPManager* qp_man;
 
 __thread RDMABufferAllocator* rdma_buffer_allocator;
 __thread LogOffsetAllocator* log_offset_allocator;
-// __thread AddrCache* addr_cache;
+__thread AddrCache* addr_cache;
 
 // __thread TATPTxType* tatp_workgen_arr;
 // __thread TPCCTxType* tpcc_workgen_arr;
@@ -491,7 +491,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
           (msr_end.tv_sec - msr_start.tv_sec) +
           (double)(msr_end.tv_nsec - msr_start.tv_nsec) / 1000000000;
 
-            double attemp_tput = (double)stat_attempted_tx_total / msr_sec;
+      double attemp_tput = (double)stat_attempted_tx_total / msr_sec;
       double tx_tput = (double)stat_committed_tx_total / msr_sec;
 
       break;
@@ -697,7 +697,7 @@ void run_thread(thread_params* params) {
 
   auto json_config = JsonConfig::load_file(config_filepath);
   auto conf = json_config.get(bench_name);
-  // ATTEMPTED_NUM = conf.get("attempted_num").get_uint64();
+  ATTEMPTED_NUM = conf.get("attempted_num").get_uint64();
 
   // if (bench_name == "tatp") {
   //   tatp_client = tatp_cli;
@@ -730,25 +730,39 @@ void run_thread(thread_params* params) {
   thread_local_id = params->thread_local_id;
   thread_num = params->thread_num_per_machine;
   meta_man = params->global_meta_man;
-  // status = params->global_status;
-  // lock_table = params->global_lcache;
   coro_num = (coro_id_t)params->coro_num;
   coro_sched = new CoroutineScheduler(thread_gid, coro_num);
 
   auto alloc_rdma_region_range =
       params->global_rdma_region->GetThreadLocalRegion(thread_local_id);
-  // addr_cache = new AddrCache();
+  addr_cache = new AddrCache();
   rdma_buffer_allocator = new RDMABufferAllocator(
       alloc_rdma_region_range.first, alloc_rdma_region_range.second);
-  // log_offset_allocator =
-  //     new LogOffsetAllocator(thread_gid, params->total_thread_num);
+  log_offset_allocator =
+      new LogOffsetAllocator(thread_gid, params->total_thread_num);
   // timer = new double[ATTEMPTED_NUM]();
 
-  // // Init coroutine random gens specialized for TPCC benchmark
-  // random_generator = new FastRandom[coro_num];
+  // Initialize Zipf generator for MICRO benchmark
+  if (bench_name == "micro") {
+    uint64_t zipf_seed = 2 * thread_gid * GetCPUCycle();
+    uint64_t zipf_seed_mask = (uint64_t(1) << 48) - 1;
+    std::string micro_config_filepath = "micro_config.json";
+    auto json_config = JsonConfig::load_file(micro_config_filepath);
+    auto micro_conf = json_config.get("micro");
+    num_keys_global = align_pow2(micro_conf.get("num_keys").get_int64());
+    auto zipf_theta = micro_conf.get("zipf_theta").get_double();
+    is_skewed = micro_conf.get("is_skewed").get_bool();
+    write_ratio = micro_conf.get("write_ratio").get_uint64();
+    data_set_size = micro_conf.get("data_set_size").get_uint64();
+    zipf_gen =
+        new ZipfGen(num_keys_global, zipf_theta, zipf_seed & zipf_seed_mask);
+  }
 
-  // // Guarantee that each thread has a global different initial seed
-  // seed = 0xdeadbeef + thread_gid;
+  // Init coroutine random gens specialized for TPCC benchmark
+  random_generator = new FastRandom[coro_num];
+
+  // Guarantee that each thread has a global different initial seed
+  seed = 0xdeadbeef + thread_gid;
   qp_man = new QPManager(thread_gid);
 
   // Init coroutines

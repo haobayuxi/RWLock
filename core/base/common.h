@@ -39,3 +39,5 @@ const mr_id_t CLIENT_MR_ID = 100;
 
 // Indicating that memory store metas have been transmitted
 const uint64_t MEM_STORE_META_END = 0xE0FF0E0F;
+
+#define W_LOCKED 1

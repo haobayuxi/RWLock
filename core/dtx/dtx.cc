@@ -66,19 +66,17 @@ bool DTX::RWLock(coro_yield_t& yield) {
   }
   for (auto& item : read_write_set) {
     // cas lock
-  }
+    }
 
   coro_sched->Yield(yield, coro_id);
   // Receive data
-  // std::list<InvisibleRead> pending_invisible_ro;
-  // std::list<HashRead> pending_next_hash_ro;
-  // // RDMA_LOG(DBG) << "coro: " << coro_id << " tx_id: " << tx_id << " check
-  // read
-  // // ro";
-  // auto res = CheckReadRO(pending_direct_ro, pending_hash_ro,
-  //                        pending_invisible_ro, pending_next_hash_ro, yield);
-  // return res;
-  return true;
+  std::list<InvisibleRead> pending_invisible_ro;
+  std::list<HashRead> pending_next_hash_ro;
+  // RDMA_LOG(DBG) << "coro: " << coro_id << " tx_id: " << tx_id << " check
+  // read ro";
+  auto res = CheckReadRO(pending_direct_ro, pending_hash_ro,
+                         pending_invisible_ro, pending_next_hash_ro, yield);
+  return res;
 }
 
 bool DTX::Drtm(coro_yield_t& yield) {
@@ -127,13 +125,14 @@ bool DTX::Validate(coro_yield_t& yield) {
   // validate the reads
   std::vector<ValidateRead> pending_validate;
 
-  if (!IssueRemoteValidate(pending_validate)) return false;
+  // if (!IssueRemoteValidate(pending_validate)) return false;
 
-  // Yield to other coroutines when waiting for network replies
-  coro_sched->Yield(yield, coro_id);
+  // // Yield to other coroutines when waiting for network replies
+  // coro_sched->Yield(yield, coro_id);
 
-  auto res = CheckValidate(pending_validate);
-  return res;
+  // auto res = CheckValidate(pending_validate);
+  // return res;
+  return true;
 }
 
 void DTX::ParallelUndoLog() {

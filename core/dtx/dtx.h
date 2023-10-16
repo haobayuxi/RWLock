@@ -52,7 +52,7 @@ class DTX {
 
   void TxAbortReadWrite();
 
-  void RemoveLastROItem();
+  // void RemoveLastROItem();
 
  public:
   DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
@@ -61,13 +61,23 @@ class DTX {
   ~DTX() { Clean(); }
 
  public:
-  // size_t GetAddrCacheSize() { return addr_cache->TotalAddrSize(); }
+  size_t GetAddrCacheSize() { return addr_cache->TotalAddrSize(); }
 
  private:
   bool Validate(coro_yield_t& yield);  // RDMA read value versions
   bool RWLock(coro_yield_t& yield);
   bool Drtm(coro_yield_t& yield);
   bool Dlmr(coro_yield_t& yield);
+
+  //////////// check
+  bool CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
+                   std::vector<HashRead>& pending_hash_ro,
+                   std::list<HashRead>& pending_next_hash_ro,
+                   coro_yield_t& yield);
+  bool CheckHashRO(std::vector<HashRead>& pending_hash_ro,
+                   std::list<HashRead>& pending_next_hash_ro);
+  bool CheckDirectRO(std::vector<DirectRead>& pending_direct_ro);
+  bool CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro);
 
   // bool CoalescentCommit(coro_yield_t& yield);
 
