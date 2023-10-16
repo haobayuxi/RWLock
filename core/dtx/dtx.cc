@@ -48,6 +48,8 @@ bool DTX::RWLock(coro_yield_t& yield) {
       }
     } else {
       // hash read
+      HashMeta meta =
+          global_meta_man->GetPrimaryHashMetaWithTableID(it->table_id);
       uint64_t idx = MurmurHash64A(it->key, 0xdeadbeef) % meta.bucket_num;
       offset_t node_off = idx * meta.node_size + meta.base_off;
       char* local_hash_node = thread_rdma_buffer_alloc->Alloc(sizeof(HashNode));
