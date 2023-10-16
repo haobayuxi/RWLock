@@ -26,7 +26,7 @@ DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
 
 bool DTX::RWLock(coro_yield_t& yield) {
   std::vector<DirectRead> pending_direct_ro;
-  // std::vector<HashRead> pending_hash_ro;
+  std::vector<HashRead> pending_hash_ro;
   for (auto& item : read_only_set) {
     if (item.is_fetched) continue;
     auto it = item.item_ptr;
@@ -34,15 +34,33 @@ bool DTX::RWLock(coro_yield_t& yield) {
     // global_meta_man->GetPrimaryNodeID(it->table_id);
     node_id_t remote_node_id = 0;
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
-    // auto offset = addr_cache->Search(remote_node_id, it->table_id, it->key);
-    pending_direct_ro.emplace_back(DirectRead{.qp = qp,
-                                              .item = &item,
-                                              .buf = data_buf,
-                                              .remote_node = remote_node_id});
-    char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
-    // if (!coro_sched->RDMARead(coro_id, qp, data_buf, offset, DataItemSize)) {
-    //   return false;
-    // }
+
+    auto offset = addr_cache->Search(remote_node_id, it->table_id, it->key);
+    if (offset != NOT_FOUND) {
+      it->remote_offset = offset;
+      char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
+      pending_direct_ro.emplace_back(DirectRead{.qp = qp,
+                                                .item = &item,
+                                                .buf = data_buf,
+                                                .remote_node = remote_node_id});
+      if (!coro_sched->RDMARead(coro_id, qp, data_buf, offset, DataItemSize)) {
+        return false;
+      }
+    } else {
+      // hash read
+      uint64_t idx = MurmurHash64A(it->key, 0xdeadbeef) % meta.bucket_num;
+      offset_t node_off = idx * meta.node_size + meta.base_off;
+      char* local_hash_node = thread_rdma_buffer_alloc->Alloc(sizeof(HashNode));
+      pending_hash_ro.emplace_back(HashRead{.qp = qp,
+                                            .item = &item,
+                                            .buf = local_hash_node,
+                                            .remote_node = remote_node_id,
+                                            .meta = meta});
+      if (!coro_sched->RDMARead(coro_id, qp, local_hash_node, node_off,
+                                sizeof(HashNode))) {
+        return false;
+      }
+    }
   }
   for (auto& item : read_write_set) {
     // cas lock
@@ -104,27 +122,10 @@ bool DTX::Dlmr(coro_yield_t& yield) {
 bool DTX::Validate(coro_yield_t& yield) {
   // The transaction is read-write, and all the written data have
   // been locked before
-  if (not_eager_locked_rw_set.empty() && read_only_set.empty()) {
-    // TLOG(DBG, t_id) << "save validation";
-    return true;
-  }
-  // if (lease_expired) {
-  //   return true;
-  // }
-
+  // validate the reads
   std::vector<ValidateRead> pending_validate;
 
-#if LOCAL_VALIDATION
-  ValStatus ret = IssueLocalValidate(pending_validate);
-
-  if (ret == ValStatus::NO_NEED_VAL) {
-    return true;
-  } else if (ret == ValStatus::RDMA_ERROR || ret == ValStatus::MUST_ABORT) {
-    return false;
-  }
-#else
   if (!IssueRemoteValidate(pending_validate)) return false;
-#endif
 
   // Yield to other coroutines when waiting for network replies
   coro_sched->Yield(yield, coro_id);
@@ -132,41 +133,6 @@ bool DTX::Validate(coro_yield_t& yield) {
   auto res = CheckValidate(pending_validate);
   return res;
 }
-
-// // Invisible + write primary and backups
-// bool DTX::CoalescentCommit(coro_yield_t& yield) {
-//   tx_status = TXStatus::TX_COMMIT;
-//   char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
-// #if LOCAL_LOCK
-//   *(lock_t*)cas_buf = STATE_INVISIBLE;
-// #else
-//   *(lock_t*)cas_buf = STATE_LOCKED | STATE_INVISIBLE;
-// #endif
-
-//   std::vector<CommitWrite> pending_commit_write;
-
-//   // Check whether all the log ACKs have returned
-//   while (!coro_sched->CheckLogAck(coro_id)) {
-//     ;  // wait
-//   }
-
-// #if RFLUSH == 0
-//   if (!IssueCommitAll(pending_commit_write, cas_buf)) return false;
-// #elif RFLUSH == 1
-//   if (!IssueCommitAllFullFlush(pending_commit_write, cas_buf)) return false;
-// #elif RFLUSH == 2
-//   if (!IssueCommitAllSelectFlush(pending_commit_write, cas_buf)) return
-//   false;
-// #endif
-
-//   coro_sched->Yield(yield, coro_id);
-
-//   *((lock_t*)cas_buf) = 0;
-
-//   auto res = CheckCommitAll(pending_commit_write, cas_buf);
-
-//   return res;
-// }
 
 void DTX::ParallelUndoLog() {
   // Write the old data from read write set
