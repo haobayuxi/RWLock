@@ -112,8 +112,8 @@ void Handler::GenThreads(std::string bench_name) {
   // const int coro_num = 3;
   const int coro_num = (int)client_conf.get("coroutine_num").get_int64();
   assert(machine_id >= 0 && machine_id < machine_num);
-  RDMA_LOG(INFO) << "thread num=" << thread_num_per_machine
-                 << "coro_num num = " << coro_num;
+  // RDMA_LOG(INFO) << "thread num=" << thread_num_per_machine
+  //                << "coro_num num = " << coro_num;
   /* Start working */
   tx_id_generator = 0;  // Initial transaction id == 0
   connected_t_num = 0;  // Sync all threads' RDMA QP connections

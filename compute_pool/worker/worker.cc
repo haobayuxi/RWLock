@@ -481,12 +481,12 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
           (tx_end_time.tv_sec - tx_start_time.tv_sec) * 1000000 +
           (double)(tx_end_time.tv_nsec - tx_start_time.tv_nsec) / 1000;
       timer[stat_committed_tx_total++] = tx_usec;
+      micro_commit[thread_local_id] += 1;
     }
     if (stat_attempted_tx_total >= ATTEMPTED_NUM) {
       // A coroutine calculate the total execution time and exits
+
       clock_gettime(CLOCK_REALTIME, &msr_end);
-      // double msr_usec = (msr_end.tv_sec - msr_start.tv_sec) * 1000000 +
-      // (double) (msr_end.tv_nsec - msr_start.tv_nsec) / 1000;
       double msr_sec =
           (msr_end.tv_sec - msr_start.tv_sec) +
           (double)(msr_end.tv_nsec - msr_start.tv_nsec) / 1000000000;
@@ -604,93 +604,6 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
 //   uint64_t total_duration = 0;
 //   double average_lock_duration = 0;
 
-//   // only for test
-// #if LOCK_WAIT
-
-//   for (auto duration : dtx->lock_durations) {
-//     total_duration += duration;
-//   }
-
-//   std::string total_lock_duration_file =
-//       "bench_results/MICRO/" + thread_num_coro_num +
-//       "/total_lock_duration.txt";
-//   std::ofstream of;
-//   of.open(total_lock_duration_file, std::ios::app);
-//   std::sort(dtx->lock_durations.begin(), dtx->lock_durations.end());
-//   auto min_lock_duration =
-//       dtx->lock_durations.empty() ? 0 : dtx->lock_durations[0];
-//   auto max_lock_duration =
-//       dtx->lock_durations.empty()
-//           ? 0
-//           : dtx->lock_durations[dtx->lock_durations.size() - 1];
-//   average_lock_duration =
-//       dtx->lock_durations.empty()
-//           ? 0
-//           : (double)total_duration / dtx->lock_durations.size();
-//   lock_durations[thread_local_id] = average_lock_duration;
-//   of << thread_gid << " " << average_lock_duration << " " <<
-//   max_lock_duration
-//      << std::endl;
-//   of.close();
-// #endif
-
-//   // only for test
-// #if INV_BUSY_WAIT
-//   total_duration = 0;
-//   for (auto duration : dtx->invisible_durations) {
-//     total_duration += duration;
-//   }
-//   std::string total_inv_duration_file =
-//       "bench_results/MICRO/" + thread_num_coro_num +
-//       "/total_inv_duration.txt";
-//   std::ofstream ofs;
-//   ofs.open(total_inv_duration_file, std::ios::app);
-//   std::sort(dtx->invisible_durations.begin(),
-//   dtx->invisible_durations.end()); auto min_inv_duration =
-//       dtx->invisible_durations.empty() ? 0 : dtx->invisible_durations[0];
-//   auto max_inv_duration =
-//       dtx->invisible_durations.empty()
-//           ? 0
-//           : dtx->invisible_durations[dtx->invisible_durations.size() - 1];
-//   auto average_inv_duration =
-//       dtx->invisible_durations.empty()
-//           ? 0
-//           : (double)total_duration / dtx->invisible_durations.size();
-
-//   double total_execution_time = 0;
-//   for (uint64_t i = 0; i < stat_committed_tx_total; i++) {
-//     total_execution_time += timer[i];
-//   }
-
-//   uint64_t re_read_times = 0;
-//   for (uint64_t i = 0; i < dtx->invisible_reread.size(); i++) {
-//     re_read_times += dtx->invisible_reread[i];
-//   }
-
-//   uint64_t avg_re_read_times =
-//       dtx->invisible_reread.empty()
-//           ? 0
-//           : re_read_times / dtx->invisible_reread.size();
-
-//   auto average_execution_time =
-//       (total_execution_time / stat_committed_tx_total) * 1000000;  // us
-
-//   ofs << thread_gid << " " << average_inv_duration << " " <<
-//   max_inv_duration
-//       << " " << average_execution_time << " " << avg_re_read_times << " "
-//       << double(total_duration / total_execution_time) << " "
-//       << (double)(total_duration / total_msr_us) << std::endl;
-
-//   ofs.close();
-// #endif
-
-//   /********************************** Stat end
-//    * *****************************************/
-
-//   delete dtx;
-// }
-
-// void run_thread(thread_params* params, TATP* tatp_cli, TPCC* tpcc_cli) {
 void run_thread(thread_params* params) {
   auto bench_name = params->bench_name;
   std::string config_filepath = bench_name + "_config.json";

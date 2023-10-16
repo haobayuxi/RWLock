@@ -108,9 +108,6 @@ bool TxLockContention(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
 bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
                 tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size,
                 uint64_t num_keys_global, uint64_t write_ratio) {
-  // This is used to evaluate the performance of reading backup vs. not reading
-  // backup when the write ratio is 0 Remember to set remote_node_id = t_id %
-  // (BACKUP_DEGREE + 1); in dtx_issue.cc to enable read from primary and backup
   dtx->TxBegin(tx_id);
 
   micro_key_t micro_key;
