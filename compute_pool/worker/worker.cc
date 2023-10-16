@@ -437,7 +437,7 @@ void test_iops(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   // test rdma read and atomic
   RCQP* qp = qp_man->data_qps[0];
   auto offset = ((thread_gid * 20) + coro_id) * sizeof(int);
-  int count = 10000000;
+  int count = 1000000;
 
   char* data_buf = rdma_buffer_allocator->Alloc(sizeof(int));
   for (int i = 0; i < count; i++) {
@@ -454,6 +454,9 @@ void test_iops(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
     coro_sched->Yield(yield, coro_id);
     // success
     micro_commit[thread_local_id] += 1;
+    if (micro_commit[thread_local_id] > 2000000) {
+      break;
+    }
   }
 }
 
