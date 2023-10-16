@@ -463,8 +463,9 @@ void test_iops(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
 void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
               uint64_t lease) {
   // Each coroutine has a dtx: Each coroutine is a coordinator
-  DTX* dtx = new DTX(meta_man, qp_man, thread_gid, coro_id, coro_sched,
-                     rdma_buffer_allocator, log_offset_allocator, lease);
+  DTX* dtx =
+      new DTX(meta_man, qp_man, thread_gid, coro_id, coro_sched,
+              rdma_buffer_allocator, log_offset_allocator, lease, addr_cache);
   struct timespec tx_start_time, tx_end_time;
   bool tx_committed = false;
   clock_gettime(CLOCK_REALTIME, &msr_start);

@@ -5,7 +5,8 @@
 
 DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
          CoroutineScheduler* sched, RDMABufferAllocator* rdma_buffer_allocator,
-         LogOffsetAllocator* remote_log_offset_allocator, int lease) {
+         LogOffsetAllocator* remote_log_offset_allocator, int lease,
+         AddrCache* addr_buf) {
   // Transaction setup
   tx_id = 0;
   t_id = tid;
@@ -18,7 +19,7 @@ DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
   tx_status = TXStatus::TX_INIT;
 
   thread_remote_log_offset_alloc = remote_log_offset_allocator;
-  // addr_cache = addr_buf;
+  addr_cache = addr_buf;
 
   hit_local_cache_times = 0;
   miss_local_cache_times = 0;
