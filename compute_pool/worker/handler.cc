@@ -105,6 +105,7 @@ void Handler::GenThreads(std::string bench_name) {
   auto client_conf = json_config.get("local_compute_node");
   node_id_t machine_num = (node_id_t)client_conf.get("machine_num").get_int64();
   node_id_t machine_id = (node_id_t)client_conf.get("machine_id").get_int64();
+  int lease = client_conf.get("lease").get_int();
   t_id_t thread_num_per_machine =
       (t_id_t)client_conf.get("thread_num_per_machine").get_int64();
   // thread_num_per_machine = 1;
@@ -146,6 +147,7 @@ void Handler::GenThreads(std::string bench_name) {
   clock_gettime(CLOCK_REALTIME, &msr_start);
   for (t_id_t i = 0; i < thread_num_per_machine; i++) {
     param_arr[i].thread_local_id = i;
+    param_arr[i].lease = lease;
     param_arr[i].thread_global_id = (machine_id * thread_num_per_machine) + i;
     param_arr[i].coro_num = coro_num;
     param_arr[i].bench_name = bench_name;
