@@ -109,8 +109,8 @@ node_id_t MetaManager::GetMemStoreMeta(std::string& remote_ip,
   // Get number of meta
   size_t primary_meta_num = *((size_t*)snooper);
   snooper += sizeof(primary_meta_num);
-  size_t backup_meta_num = *((size_t*)snooper);
-  snooper += sizeof(backup_meta_num);
+  // size_t backup_meta_num = *((size_t*)snooper);
+  // snooper += sizeof(backup_meta_num);
   node_id_t remote_machine_id = *((node_id_t*)snooper);
   if (remote_machine_id >= MAX_REMOTE_NODE_NUM) {
     RDMA_LOG(FATAL) << "remote machine id " << remote_machine_id
@@ -118,7 +118,7 @@ node_id_t MetaManager::GetMemStoreMeta(std::string& remote_ip,
   }
   snooper += sizeof(remote_machine_id);
   // Get the `end of file' indicator: finish transmitting
-  char* eof = snooper + sizeof(HashMeta) * (primary_meta_num + backup_meta_num);
+  char* eof = snooper + sizeof(HashMeta) * (primary_meta_num);
   if ((*((uint64_t*)eof)) == MEM_STORE_META_END) {
     for (size_t i = 0; i < primary_meta_num; i++) {
       HashMeta meta;
