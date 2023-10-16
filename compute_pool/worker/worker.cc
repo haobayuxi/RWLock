@@ -441,12 +441,12 @@ void test_iops(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
 
   char* data_buf = rdma_buffer_allocator->Alloc(sizeof(int));
   for (int i = 0; i < count; i++) {
-    // if (!coro_sched->RDMARead(coro_id, qp, data_buf, offset, sizeof(int))) {
-    //   RDMA_LOG(INFO) << "rdma read fail";
-    // }
-    if (!coro_sched->RDMACAS(coro_id, qp, data_buf, offset, 0, 1)) {
+    if (!coro_sched->RDMARead(coro_id, qp, data_buf, offset, sizeof(int))) {
       RDMA_LOG(INFO) << "rdma read fail";
     }
+    // if (!coro_sched->RDMACAS(coro_id, qp, data_buf, offset, 0, 1)) {
+    //   RDMA_LOG(INFO) << "rdma read fail";
+    // }
     // if (!coro_sched->RDMARead(coro_id, qp, data_buf, offset, sizeof(int))) {
     //   RDMA_LOG(INFO) << "rdma read fail";
     // }
@@ -697,8 +697,10 @@ void run_thread(thread_params* params) {
       //   coro_sched->coro_array[coro_i].func =
       //       coro_call_t(bind(RunTPCC, _1, coro_i));
       // } else if (bench_name == "micro") {
+      // coro_sched->coro_array[coro_i].func =
+      //     coro_call_t(bind(RunMICRO, _1, coro_i, qp_man, params->lease));
       coro_sched->coro_array[coro_i].func =
-          coro_call_t(bind(RunMICRO, _1, coro_i, qp_man, params->lease));
+          coro_call_t(bind(test_iops, _1, coro_i, qp_man));
       // }
     }
   }
