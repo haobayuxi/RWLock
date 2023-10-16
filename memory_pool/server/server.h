@@ -9,14 +9,14 @@
 #include <cstring>
 #include <string>
 
-// #include "memstore/data_item.h"
-// #include "memstore/hash_store.h"
 #include "base/common.h"
 #include "connection/qp_manager.h"
+#include "memstore/data_item.h"
+#include "memstore/hash_store.h"
 #include "rlib/rdma_ctrl.hpp"
 
 // Load DB
-// #include "micro/micro_db.h"
+#include "micro/micro_db.h"
 // #include "smallbank/smallbank_db.h"
 // #include "tatp/tatp_db.h"
 // #include "tpcc/tpcc_db.h"
@@ -129,5 +129,5 @@ class Server {
 
   // TPCC* tpcc_server = nullptr;
 
-  // MICRO* micro_server = nullptr;
+  MICRO* micro_server = nullptr;
 };
