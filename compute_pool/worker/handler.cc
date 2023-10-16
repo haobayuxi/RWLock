@@ -195,8 +195,6 @@ void Handler::GenThreads(std::string bench_name) {
   delete[] param_arr;
   delete global_rdma_region;
   delete global_meta_man;
-  // delete global_vcache;
-  // delete global_lcache;
   // if (tatp_client) delete tatp_client;
   // if (tpcc_client) delete tpcc_client;
 }

@@ -52,7 +52,7 @@ class DTX {
 
   void TxAbortReadWrite();
 
-  // void RemoveLastROItem();
+  void RemoveLastROItem();
 
  public:
   DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
