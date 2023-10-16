@@ -53,7 +53,7 @@ __thread bool stop_run;
 
 // // Performance measurement (thread granularity)
 __thread struct timespec msr_start, msr_end;
-// __thread double* timer;
+__thread double* timer;
 __thread uint64_t stat_attempted_tx_total = 0;  // Issued transaction number
 __thread uint64_t stat_committed_tx_total = 0;  // Committed transaction
 // number
@@ -740,7 +740,7 @@ void run_thread(thread_params* params) {
       alloc_rdma_region_range.first, alloc_rdma_region_range.second);
   log_offset_allocator =
       new LogOffsetAllocator(thread_gid, params->total_thread_num);
-  // timer = new double[ATTEMPTED_NUM]();
+  timer = new double[ATTEMPTED_NUM]();
 
   // Initialize Zipf generator for MICRO benchmark
   if (bench_name == "micro") {
