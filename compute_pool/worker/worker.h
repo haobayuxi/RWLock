@@ -36,7 +36,7 @@ struct thread_params {
   RDMARegionAllocator* global_rdma_region;
   int coro_num;
   std::string bench_name;
-  int lease;
+  uint64_t lease;
 };
 
 // void run_thread(thread_params* params, TATP* tatp_client, TPCC* tpcc_client);
