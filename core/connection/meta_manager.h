@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "base/common.h"
+#include "memstore/hash_store.h"
 #include "rlib/rdma_ctrl.hpp"
 
 using namespace rdmaio;
@@ -23,7 +24,7 @@ class MetaManager {
  public:
   MetaManager();
 
-  // node_id_t GetMemStoreMeta(std::string& remote_ip, int remote_port);
+  node_id_t GetMemStoreMeta(std::string& remote_ip, int remote_port);
 
   void GetMRMeta(const RemoteNode& node);
 
