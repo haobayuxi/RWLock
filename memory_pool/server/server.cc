@@ -128,9 +128,9 @@ void Server::SendMeta(node_id_t machine_id, std::string& workload,
 void Server::PrepareHashMeta(node_id_t machine_id, std::string& workload,
                              char** hash_meta_buffer, size_t& total_meta_size) {
   // Get all hash meta
-  // std::vector<HashMeta*> primary_hash_meta_vec;
+  std::vector<HashMeta*> primary_hash_meta_vec;
   // std::vector<HashMeta*> backup_hash_meta_vec;
-  // std::vector<HashStore*> all_priamry_tables;
+  std::vector<HashStore*> all_priamry_tables;
   // std::vector<HashStore*> all_backup_tables;
 
   // if (workload == "TATP") {
@@ -143,58 +143,41 @@ void Server::PrepareHashMeta(node_id_t machine_id, std::string& workload,
   //   all_priamry_tables = tpcc_server->GetPrimaryHashStore();
   //   all_backup_tables = tpcc_server->GetBackupHashStore();
   // } else if (workload == "MICRO") {
-  //   all_priamry_tables = micro_server->GetPrimaryHashStore();
+  all_priamry_tables = micro_server->GetPrimaryHashStore();
   //   all_backup_tables = micro_server->GetBackupHashStore();
   // }
 
-  // for (auto& hash_table : all_priamry_tables) {
-  //   auto* hash_meta = new HashMeta(
-  //       hash_table->GetTableID(), (uint64_t)hash_table->GetDataPtr(),
-  //       hash_table->GetBucketNum(), hash_table->GetHashNodeSize(),
-  //       hash_table->GetBaseOff());
-  //   primary_hash_meta_vec.emplace_back(hash_meta);
-  // }
-  // for (auto& hash_table : all_backup_tables) {
-  //   auto* hash_meta = new HashMeta(
-  //       hash_table->GetTableID(), (uint64_t)hash_table->GetDataPtr(),
-  //       hash_table->GetBucketNum(), hash_table->GetHashNodeSize(),
-  //       hash_table->GetBaseOff());
-  //   backup_hash_meta_vec.emplace_back(hash_meta);
-  // }
+  for (auto& hash_table : all_priamry_tables) {
+    auto* hash_meta = new HashMeta(
+        hash_table->GetTableID(), (uint64_t)hash_table->GetDataPtr(),
+        hash_table->GetBucketNum(), hash_table->GetHashNodeSize(),
+        hash_table->GetBaseOff());
+    primary_hash_meta_vec.emplace_back(hash_meta);
+  }
 
-  // int hash_meta_len = sizeof(HashMeta);
-  // size_t primary_hash_meta_num = primary_hash_meta_vec.size();
-  // RDMA_LOG(INFO) << "primary hash meta num: " << primary_hash_meta_num;
-  // size_t backup_hash_meta_num = backup_hash_meta_vec.size();
-  // RDMA_LOG(INFO) << "backup hash meta num: " << backup_hash_meta_num;
-  // total_meta_size =
-  //     sizeof(primary_hash_meta_num) + sizeof(backup_hash_meta_num) +
-  //     sizeof(machine_id) + primary_hash_meta_num * hash_meta_len +
-  //     backup_hash_meta_num * hash_meta_len + sizeof(MEM_STORE_META_END);
-  // *hash_meta_buffer = (char*)malloc(total_meta_size);
+  int hash_meta_len = sizeof(HashMeta);
+  size_t primary_hash_meta_num = primary_hash_meta_vec.size();
+  RDMA_LOG(INFO) << "primary hash meta num: " << primary_hash_meta_num;
+  total_meta_size = sizeof(primary_hash_meta_num) + sizeof(machine_id) +
+                    primary_hash_meta_num * hash_meta_len +
+                    sizeof(MEM_STORE_META_END);
+  *hash_meta_buffer = (char*)malloc(total_meta_size);
 
-  // char* local_buf = *hash_meta_buffer;
+  char* local_buf = *hash_meta_buffer;
 
-  // // Fill primary hash meta
-  // *((size_t*)local_buf) = primary_hash_meta_num;
-  // local_buf += sizeof(primary_hash_meta_num);
-  // *((size_t*)local_buf) = backup_hash_meta_num;
-  // local_buf += sizeof(backup_hash_meta_num);
-  // *((node_id_t*)local_buf) = machine_id;
-  // local_buf += sizeof(machine_id);
-  // for (size_t i = 0; i < primary_hash_meta_num; i++) {
-  //   memcpy(local_buf + i * hash_meta_len, (char*)primary_hash_meta_vec[i],
-  //          hash_meta_len);
-  // }
-  // local_buf += primary_hash_meta_num * hash_meta_len;
-  // // Fill backup hash meta
-  // for (size_t i = 0; i < backup_hash_meta_num; i++) {
-  //   memcpy(local_buf + i * hash_meta_len, (char*)backup_hash_meta_vec[i],
-  //          hash_meta_len);
-  // }
-  // local_buf += backup_hash_meta_num * hash_meta_len;
-  // // EOF
-  // *((uint64_t*)local_buf) = MEM_STORE_META_END;
+  // Fill primary hash meta
+  *((size_t*)local_buf) = primary_hash_meta_num;
+  local_buf += sizeof(primary_hash_meta_num);
+  *((node_id_t*)local_buf) = machine_id;
+  local_buf += sizeof(machine_id);
+  for (size_t i = 0; i < primary_hash_meta_num; i++) {
+    memcpy(local_buf + i * hash_meta_len, (char*)primary_hash_meta_vec[i],
+           hash_meta_len);
+  }
+  local_buf += primary_hash_meta_num * hash_meta_len;
+
+  // EOF
+  *((uint64_t*)local_buf) = MEM_STORE_META_END;
 }
 
 void Server::SendHashMeta(char* hash_meta_buffer, size_t& total_meta_size) {
@@ -321,8 +304,8 @@ int main(int argc, char* argv[]) {
                                hash_buf_size, log_buf_size, mem_size);
   server->AllocMem();
   server->InitMem();
-  // server->LoadData(machine_id, machine_num, workload);
-  // server->SendMeta(machine_id, workload, compute_node_num);
+  server->LoadData(machine_id, machine_num, workload);
+  server->SendMeta(machine_id, workload, compute_node_num);
   server->InitRDMA();
   bool run_next_round = server->Run();
 
@@ -331,8 +314,8 @@ int main(int argc, char* argv[]) {
     server->InitMem();
     server->CleanTable();
     server->CleanQP();
-    // server->LoadData(machine_id, machine_num, workload);
-    // server->SendMeta(machine_id, workload, compute_node_num);
+    server->LoadData(machine_id, machine_num, workload);
+    server->SendMeta(machine_id, workload, compute_node_num);
     run_next_round = server->Run();
   }
 
