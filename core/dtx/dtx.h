@@ -21,6 +21,7 @@
 #include "allocator/buffer_allocator.h"
 #include "allocator/log_allocator.h"
 #include "base/common.h"
+#include "cache/addr_cache.h"
 #include "connection/meta_manager.h"
 #include "connection/qp_manager.h"
 #include "dtx/doorbell.h"
