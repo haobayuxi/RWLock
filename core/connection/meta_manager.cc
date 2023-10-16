@@ -90,7 +90,7 @@ node_id_t MetaManager::GetMemStoreMeta(std::string& remote_ip,
     close(client_socket);
     return -1;
   }
-
+  RDMA_LOG(INFO) << "connect success ready to receive meta";
   /* --------------- Receiving hash metadata ----------------- */
   size_t hash_meta_size = (size_t)1024 * 1024 * 1024;
   char* recv_buf = (char*)malloc(hash_meta_size);
