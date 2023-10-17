@@ -7,7 +7,7 @@ const uint64_t mem_size = 1024 * 1024 * 1024;
 char* test_memory;
 
 // test for random cas and read in memory
-void Server::run_test() {
+void run_test() {
   // init memory
   test_memory = (char*)malloc(mem_size);
   memset(test_memory, 0, mem_size);

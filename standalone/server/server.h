@@ -15,7 +15,6 @@
 
 class Server {
  public:
-  void run_test();
   void gen_threads(int thread_num);
 
  private:
