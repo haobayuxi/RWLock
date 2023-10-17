@@ -1,7 +1,7 @@
 
 #include "server.h"
 
-#include <atomic>
+#include <stdatomic.h>
 
 // using namespace std;
 
@@ -14,8 +14,8 @@ void run_test(int thread_id, int thread_num) {
   //   random cas
   auto offset = sizeof(uint64_t) * thread_id;
   for (int i = 0; i < 1000; i++) {
-    auto ptr = static_cast<std::atomic<uint64_t>*>(test_memory + offset);
-    ptr->compare_exchange_strong(0, 1);
+    auto ptr = (uint64_t*)(test_memory + offset);
+    atomic_compare_exchange_strong(ptr, 0, 1);
     offset = (offset + thread_num) % mem_size;
   }
   std::cout << " thread " << thread_id << std::endl;
