@@ -6,7 +6,7 @@
 #else
 #include <atomic>
 #define _Atomic(X) std::atomic<X>
-#endi
+#endif
 
 // using namespace std;
 
