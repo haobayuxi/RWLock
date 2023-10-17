@@ -52,12 +52,14 @@ void Server::gen_threads(int thread_num) {
   }
 
   uint64_t end_time = get_clock_sys_time_us();
-  double second = (end_time - start_time) / 1000.0;
-  std::cout << (thread_num * times) / second;
+  double second = (end_time - start_time) / 1000000.0;
+  std::cout << (thread_num * times) / second << std::endl;
 }
 
 int main(int argc, char* argv[]) {
   Server* s = new Server();
-  s->gen_threads(5);
+  int thread_num = std::int(argv[0]);
+  std::cout << "thread_num" << thread_num << std::endl;
+  s->gen_threads(thread_num);
   return 0;
 }
