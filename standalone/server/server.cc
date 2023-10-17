@@ -15,7 +15,7 @@ void run_test(int thread_id, int thread_num) {
   auto offset = sizeof(uint64_t) * thread_id;
   bool exp = 0;
   for (int i = 0; i < 1000; i++) {
-    auto ptr = (uint64_t*)(test_memory + offset);
+    uint64_t* ptr = (uint64_t*)(test_memory + offset);
     atomic_compare_exchange_strong(ptr, &exp, 1);
     offset = (offset + thread_num) % mem_size;
   }
