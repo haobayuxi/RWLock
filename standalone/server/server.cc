@@ -20,8 +20,8 @@ void run_test(int thread_id, int thread_num) {
   for (int i = 0; i < times; i++) {
     // auto ptr = (std::atomic<uint64_t>*)(test_memory + offset);
     // ptr->compare_exchange_strong(exp, 1);
-    result_u64 = *(test_memory + offset);
-    // memcpy(result, test_memory + offset, 512);
+    // result_u64 = *(test_memory + offset);
+    memcpy(&result_u64, test_memory + offset, 8);
     offset = (offset + thread_num * sizeof(uint64_t)) % mem_size;
   }
   //   std::cout << " thread " << thread_id << std::endl;
