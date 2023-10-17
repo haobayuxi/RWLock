@@ -5,7 +5,7 @@
 bool DTX::CheckDirectRO(std::vector<DirectRead>& pending_direct_ro) {
   // check if the tuple has been wlocked
   for (auto& res : pending_direct_ro) {
-    auto* it = res.item->item_ptr.get();
+    // auto* it = res.item->item_ptr.get();
     auto* fetched_item = (DataItem*)res.buf;
     if (fetched_item->lock == W_LOCKED) return false;
   }
@@ -110,4 +110,44 @@ bool DTX::CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
   }
 
   return true;
+}
+
+bool DTX::CheckCASRO(std::vector<CasRead>& pending_cas_ro,
+                     std::vector<HashRead>& pending_hash_ro,
+                     std::list<HashRead>& pending_next_hash_ro,
+                     coro_yield_t& yield) {
+  if (!CheckCASRead(pending_cas_ro)) return false;
+  if (!CheckHashRO(pending_hash_ro, pending_next_hash_ro)) return false;
+
+  // During results checking, we may re-read data due to invisibility and hash
+  // collisions
+  while (!pending_next_hash_ro.empty()) {
+    coro_sched->Yield(yield, coro_id);
+    if (!CheckNextHashRO(pending_next_hash_ro)) return false;
+  }
+
+  return true;
+}
+
+bool DTX::CheckCASRead(std::vector<CasRead>& pending_cas_ro) {
+  std::vector<CasRead> pending_next_cas;
+  for (auto& res : pending_cas_ro) {
+    auto lock = (uint64_t)res.cas_buf;
+    auto lease = lock >> 1;
+    if (!cas_lease_expired(lease)) {
+      // lease expired
+      //   pending_next_cas.emplace_back()
+    }
+    if (lock % 2 == 1) return false;
+  }
+  return true;
+}
+
+bool DTX::cas_lease_expired(uint64_t lease) {
+  auto now = get_clock_sys_time_us();
+  if (lease > now) {
+    return true;
+  } else {
+    return false;
+  }
 }

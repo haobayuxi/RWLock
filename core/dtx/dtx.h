@@ -69,11 +69,18 @@ class DTX {
   bool Drtm(coro_yield_t& yield);
   bool Dlmr(coro_yield_t& yield);
 
+  bool cas_lease_expired(uint64_t lease);
+
   //////////// check
   bool CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
                    std::vector<HashRead>& pending_hash_ro,
                    std::list<HashRead>& pending_next_hash_ro,
                    coro_yield_t& yield);
+  bool CheckCASRO(std::vector<CasRead>& pending_cas_ro,
+                  std::vector<HashRead>& pending_hash_ro,
+                  std::list<HashRead>& pending_next_hash_ro,
+                  coro_yield_t& yield);
+  bool CheckCASRead(std::vector<CasRead>& pending_cas_ro);
   bool CheckHashRO(std::vector<HashRead>& pending_hash_ro,
                    std::list<HashRead>& pending_next_hash_ro);
   bool CheckDirectRO(std::vector<DirectRead>& pending_direct_ro);
