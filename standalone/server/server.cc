@@ -15,11 +15,13 @@ void run_test(int thread_id, int thread_num) {
   //   random cas
   auto offset = sizeof(uint64_t) * thread_id;
   uint64_t exp = 0;
-  char* result = (char*)malloc(512);
+  //   char* result = (char*)malloc(512);
+  uint64_t result_u64 = 0;
   for (int i = 0; i < times; i++) {
     // auto ptr = (std::atomic<uint64_t>*)(test_memory + offset);
     // ptr->compare_exchange_strong(exp, 1);
-    memcpy(result, test_memory + offset, 512);
+    result_u64 = *(test_memory + offset);
+    // memcpy(result, test_memory + offset, 512);
     offset = (offset + thread_num * sizeof(uint64_t)) % mem_size;
   }
   //   std::cout << " thread " << thread_id << std::endl;
