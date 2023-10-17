@@ -7,18 +7,20 @@ const uint64_t mem_size = 1024 * 1024 * 1024;
 char* test_memory;
 
 // test for random cas and read in memory
-void run_test() {
+void run_test(int i) {
   // init memory
   test_memory = (char*)malloc(mem_size);
   memset(test_memory, 0, mem_size);
 
   //   random cas
+  std::cout << " thread " << i << std::endl;
+  sleep(1);
 }
 
 void Server::gen_threads(int thread_num) {
   auto thread_arr = new std::thread[thread_num];
   for (int i = 0; i < thread_num; i++) {
-    thread_arr[i] = std::thread(run_test);
+    thread_arr[i] = std::thread(run_test, i);
     /* Pin thread i to hardware thread i */
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
