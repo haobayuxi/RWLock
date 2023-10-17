@@ -58,7 +58,7 @@ void Server::gen_threads(int thread_num) {
 
 int main(int argc, char* argv[]) {
   Server* s = new Server();
-  int thread_num = (int)(argv[0]);
+  int thread_num = atoi(argv[1]);
   std::cout << "thread_num" << thread_num << std::endl;
   s->gen_threads(thread_num);
   return 0;
