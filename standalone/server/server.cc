@@ -39,4 +39,8 @@ void Server::gen_threads(int thread_num) {
   }
 }
 
-int main(int argc, char* argv[]) { return 0; }
+int main(int argc, char* argv[]) {
+  Server* s = new Server();
+  s->gen_threads(5);
+  return 0;
+}
