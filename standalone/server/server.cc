@@ -1,7 +1,7 @@
 
 #include "server.h"
 
-#include <stdatomic.h>
+#include <atomic>
 
 // using namespace std;
 
