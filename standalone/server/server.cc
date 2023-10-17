@@ -1,12 +1,7 @@
 
 #include "server.h"
 
-#ifndef __cplusplus
-#include <stdatomic.h>
-#else
 #include <atomic>
-#define _Atomic(X) std::atomic<X>
-#endif
 
 // using namespace std;
 
@@ -20,8 +15,8 @@ void run_test(int thread_id, int thread_num) {
   auto offset = sizeof(uint64_t) * thread_id;
   bool exp = 0;
   for (int i = 0; i < 1000; i++) {
-    uint64_t* ptr = (uint64_t*)(test_memory + offset);
-    std::atomic_compare_exchange_strong(ptr, 0, 1);
+    auto ptr = (std::atomic<uint64_t>*)(test_memory + offset);
+    ptr->compare_exchange_strong(0, 1);
     offset = (offset + thread_num) % mem_size;
   }
   std::cout << " thread " << thread_id << std::endl;
