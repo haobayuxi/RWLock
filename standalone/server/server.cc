@@ -18,8 +18,6 @@ void run_test() {
 void Server::gen_threads(int thread_num) {
   auto thread_arr = new std::thread[thread_num];
   for (int i = 0; i < thread_num; i++) {
-    // thread_arr[i] =
-    //     std::thread(run_thread, &param_arr[i], tatp_client, tpcc_client);
     thread_arr[i] = std::thread(run_test);
     /* Pin thread i to hardware thread i */
     cpu_set_t cpuset;
