@@ -17,7 +17,8 @@ void run_test(int thread_id, int thread_num) {
   uint64_t exp = 0;
   for (int i = 0; i < times; i++) {
     auto ptr = (std::atomic<uint64_t>*)(test_memory + offset);
-    ptr->compare_exchange_strong(exp, 1);
+    // ptr->compare_exchange_strong(exp, 1);
+    auto x = *ptr;
     offset = (offset + thread_num) % mem_size;
   }
   //   std::cout << " thread " << thread_id << std::endl;
