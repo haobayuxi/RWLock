@@ -8,7 +8,7 @@
 const uint64_t mem_size = 1024 * 1024 * 1024;
 char* test_memory;
 uint64_t commits[100];
-int times = 1000000;
+int times = 10000000;
 
 // test for random cas and read in memory
 void run_test(int thread_id, int thread_num) {
