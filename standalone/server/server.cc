@@ -10,6 +10,11 @@ char* test_memory;
 uint64_t commits[100];
 int times = 10000000;
 
+void init_memory(int bench) {
+  if (bench == BENCH_TYPE::RwBench) {
+  }
+}
+
 // test for random cas and read in memory
 void run_test(int thread_id, int thread_num) {
   //   random cas
@@ -18,10 +23,10 @@ void run_test(int thread_id, int thread_num) {
   //   char* result = (char*)malloc(512);
   uint64_t result_u64 = 0;
   for (int i = 0; i < times; i++) {
-    // auto ptr = (std::atomic<uint64_t>*)(test_memory + offset);
-    // ptr->compare_exchange_strong(exp, 1);
+    auto ptr = (std::atomic<uint64_t>*)(test_memory + offset);
+    ptr->compare_exchange_strong(exp, 1);
     // result_u64 = *(test_memory + offset);
-    memcpy(&result_u64, test_memory + offset, 8);
+    // memcpy(&result_u64, test_memory + offset, 8);
     offset = (offset + (100 + thread_num) * sizeof(uint64_t)) % mem_size;
   }
   //   std::cout << " thread " << thread_id << std::endl;
@@ -48,12 +53,12 @@ void Server::gen_threads(int thread_num) {
       std::cout << "Error calling pthread_setaffinity_np: " << rc;
     }
   }
-
-  for (int i = 0; i < thread_num; i++) {
-    if (thread_arr[i].joinable()) {
-      thread_arr[i].join();
-    }
-  }
+  sleep();
+  //   for (int i = 0; i < thread_num; i++) {
+  //     if (thread_arr[i].joinable()) {
+  //       thread_arr[i].join();
+  //     }
+  //   }
 
   uint64_t end_time = get_clock_sys_time_us();
   double second = (end_time - start_time) / 1000000.0;
