@@ -178,6 +178,7 @@ ALWAYS_INLINE
 void DTX::TxBegin(tx_id_t txid) {
   Clean();  // Clean the last transaction states
   tx_id = txid;
+  start_time = 0;
 }
 
 ALWAYS_INLINE
@@ -195,7 +196,7 @@ long long DTX::get_clock_sys_time_us() {
   struct timespec tp;
 
   clock_gettime(CLOCK_MONOTONIC, &tp);
-  return (long long)tp.tv_sec * 1000000 + tp.tv_nsec / 1000;
+  return (long long)(tp.tv_sec * 1000000 + tp.tv_nsec / 1000);
 }
 
 ALWAYS_INLINE
