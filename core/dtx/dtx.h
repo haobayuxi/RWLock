@@ -142,8 +142,6 @@ class DTX {
 
   std::vector<DataSetItem> read_write_set;
 
-  // std::vector<size_t> not_eager_locked_rw_set;  // For eager logging
-
   std::vector<size_t> locked_rw_set;  // For release lock during abort
 
   AddrCache* addr_cache;
@@ -160,12 +158,6 @@ class DTX {
 
   // Avoid inserting to the same slot in one transaction
   std::unordered_set<std::pair<node_id_t, offset_t>, pair_hash> inserted_pos;
-
-  // Global <table, key> version table
-  // VersionCache* global_vcache;
-
-  // // Global <key, lock> lock table
-  // LockCache* global_lcache;
 };
 
 /*************************************************************

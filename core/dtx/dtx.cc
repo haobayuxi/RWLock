@@ -75,6 +75,11 @@ bool DTX::RWLock(coro_yield_t& yield) {
     start_time = get_clock_sys_time_us();
   }
   coro_sched->Yield(yield, coro_id);
+  auto end_time = get_clock_sys_time_us();
+  auto cost = end_time - start_time;
+  if (cost > 5) {
+    RDMA_LOG(INFO) << "rdma get time = " << cost;
+  }
   // Receive data
   std::list<HashRead> pending_next_hash_ro;
   auto res = CheckReadRO(pending_direct_ro, pending_hash_ro,
