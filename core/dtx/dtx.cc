@@ -225,7 +225,7 @@ bool DTX::Validate(coro_yield_t& yield) {
   // Yield to other coroutines when waiting for network replies
   coro_sched->Yield(yield, coro_id);
 
-  auto res = CheckValidate(pending_validate);
+  // auto res = CheckValidate(pending_validate);
   return res;
 }
 
