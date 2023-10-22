@@ -68,6 +68,7 @@ class DTX {
   bool RWLock(coro_yield_t& yield);
   bool Drtm(coro_yield_t& yield);
   bool Dlmr(coro_yield_t& yield);
+  bool OCC(coro_yield_t& yield);
 
   bool cas_lease_expired(uint64_t lease);
 
@@ -85,6 +86,7 @@ class DTX {
                    std::list<HashRead>& pending_next_hash_ro);
   bool CheckDirectRO(std::vector<DirectRead>& pending_direct_ro);
   bool CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro);
+  bool CheckValidate(std::vector<ValidateRead>& pending_validate);
 
   // bool CoalescentCommit(coro_yield_t& yield);
 

@@ -25,6 +25,8 @@ DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
   miss_local_cache_times = 0;
 }
 
+bool DTX::OCC(coro_yield_t& yield) { return true; }
+
 bool DTX::RWLock(coro_yield_t& yield) {
   std::vector<DirectRead> pending_direct_ro;
   std::vector<HashRead> pending_hash_ro;
@@ -203,13 +205,40 @@ bool DTX::Validate(coro_yield_t& yield) {
   // validate the reads
   std::vector<ValidateRead> pending_validate;
 
-  // if (!IssueRemoteValidate(pending_validate)) return false;
+  // For read-only items, we only need to read their versions
+  for (auto& set_it : read_only_set) {
+    auto it = set_it.item_ptr;
+    // If reading from backup, using backup's qp to validate the version on
+    // backup. Otherwise, the qp mismatches the remote version addr
+    RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(set_it.read_which_node);
+    char* version_buf = thread_rdma_buffer_alloc->Alloc(sizeof(version_t));
+    pending_validate.push_back(ValidateRead{.qp = qp,
+                                            .item = &set_it,
+                                            .cas_buf = nullptr,
+                                            .version_buf = version_buf,
+                                            .has_lock_in_validate = false});
+    if (!coro_sched->RDMARead(coro_id, qp, version_buf,
+                              it->GetRemoteVersionAddr(), sizeof(version_t))) {
+      return false;
+    }
+  }
+  // Yield to other coroutines when waiting for network replies
+  coro_sched->Yield(yield, coro_id);
 
-  // // Yield to other coroutines when waiting for network replies
-  // coro_sched->Yield(yield, coro_id);
+  auto res = CheckValidate(pending_validate);
+  return res;
+}
 
-  // auto res = CheckValidate(pending_validate);
-  // return res;
+bool DTX::CheckValidate(std::vector<ValidateRead>& pending_validate) {
+  for (auto& re : pending_validate) {
+    auto it = re.item->item_ptr;
+    // Compare version
+    if (it->version != *((version_t*)re.version_buf)) {
+      // RDMA_LOG(DBG) << "MY VERSION " << it->version;
+      // RDMA_LOG(DBG) << "version_buf " << *((version_t*)re.version_buf);
+      return false;
+    }
+  }
   return true;
 }
 

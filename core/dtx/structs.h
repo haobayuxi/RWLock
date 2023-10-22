@@ -10,6 +10,7 @@ enum DTX_SYS : int {
   RWLock = 0,
   DrTMH = 1,
   DLMR = 2,
+  OCC = 3,
 };
 
 enum TXStatus : int {

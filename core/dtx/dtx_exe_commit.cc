@@ -11,7 +11,8 @@ bool DTX::TxExe(coro_yield_t& yield, bool fail_abort) {
     return true;
   }
 
-  if (global_meta_man->txn_system == DTX_SYS::RWLock) {
+  if (global_meta_man->txn_system == DTX_SYS::RWLock ||
+      global_meta_man->txn_system == DTX_SYS::OCC) {
     // Run our system
     if (RWLock(yield)) {
       return true;
@@ -62,13 +63,22 @@ bool DTX::TxCommit(coro_yield_t& yield) {
 
       // write data and unlock
     }
-  }
-
-  /*!
-    DrTM+H's commit protocol
+  } else if (global_meta_man->txn_system == DTX_SYS::OCC) {
+    /*
+      OCC commit protocol
     */
+    if (!Validate(yield)) {
+      goto ABORT;
+    }
+    // Next step. If read-write txns, we need to commit the updates to remote
+    // replicas
+    if (!read_write_set.empty()) {
+      // Write log
 
-  if (global_meta_man->txn_system == DTX_SYS::DrTMH) {
+      // write data and unlock
+    }
+
+  } else if (global_meta_man->txn_system == DTX_SYS::DrTMH) {
     // check lease
 
     if (!Validate(yield)) {
@@ -82,13 +92,7 @@ bool DTX::TxCommit(coro_yield_t& yield) {
 
       // write data and unlock
     }
-  }
-
-  /*!
-    DLMR's commit protocol
-    */
-
-  if (global_meta_man->txn_system == DTX_SYS::DLMR) {
+  } else if (global_meta_man->txn_system == DTX_SYS::DLMR) {
     if (!read_write_set.empty()) {
       // Write log
 
