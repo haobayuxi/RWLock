@@ -50,8 +50,10 @@ bool DTX::TxCommit(coro_yield_t& yield) {
   if (global_meta_man->txn_system == DTX_SYS::RWLock) {
     // check lease
     auto end_time = get_clock_sys_time_us();
-    // RDMA_LOG(INFO) << "rwlock commit" << end_time - start_time;
+
     if ((end_time - start_time) > lease) {
+      RDMA_LOG(INFO) << "rwlock commit" << end_time - start_time << " lease"
+                     << lease;
       if (!Validate(yield)) {
         goto ABORT;
       }
