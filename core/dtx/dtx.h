@@ -201,7 +201,7 @@ void DTX::AddToReadOnlySet(DataItemPtr item) {
   DataSetItem data_set_item{.item_ptr = std::move(item),
                             .is_fetched = false,
                             .is_logged = false,
-                            .read_which_node = -1,
+                            .read_which_node = 0,
                             .bkt_idx = -1};
   read_only_set.emplace_back(data_set_item);
 }

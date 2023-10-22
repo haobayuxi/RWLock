@@ -213,7 +213,7 @@ bool DTX::Validate(coro_yield_t& yield) {
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(set_it.read_which_node);
     char* version_buf = thread_rdma_buffer_alloc->Alloc(sizeof(version_t));
     pending_validate.push_back(ValidateRead{.qp = qp,
-                                            .item = &it,
+                                            .item = &set_it,
                                             .cas_buf = nullptr,
                                             .version_buf = version_buf,
                                             .has_lock_in_validate = false});
