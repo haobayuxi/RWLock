@@ -172,7 +172,7 @@ void Handler::GenThreads(std::string bench_name) {
     }
   }
   sleep(10);
-  // memset(micro_commit, 0, 100 * sizeof(uint64_t));
+  memset(micro_commit, 0, 100 * sizeof(uint64_t));
   sleep(10);
   running = false;
   // for (t_id_t i = 0; i < thread_num_per_machine; i++) {
@@ -196,7 +196,7 @@ void Handler::GenThreads(std::string bench_name) {
   }
 
   RDMA_LOG(INFO) << "committed " << total << "time " << msr_sec
-                 << " persecond=" << (total * 1.0) / msr_sec;
+                 << " persecond=" << total / 10.0;
 
   delete[] param_arr;
   delete global_rdma_region;
