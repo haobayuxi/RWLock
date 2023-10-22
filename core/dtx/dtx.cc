@@ -3,18 +3,19 @@
 
 #include "dtx/dtx.h"
 
-DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
-         CoroutineScheduler* sched, RDMABufferAllocator* rdma_buffer_allocator,
-         LogOffsetAllocator* remote_log_offset_allocator, int lease,
+DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t _tid,
+         coro_id_t coroid, CoroutineScheduler* sched,
+         RDMABufferAllocator* rdma_buffer_allocator,
+         LogOffsetAllocator* remote_log_offset_allocator, int _lease,
          AddrCache* addr_buf) {
   // Transaction setup
   tx_id = 0;
-  t_id = tid;
+  t_id = _tid;
   coro_id = coroid;
   coro_sched = sched;
   global_meta_man = meta_man;
   thread_qp_man = qp_man;
-  lease = lease;
+  lease = _lease;
   thread_rdma_buffer_alloc = rdma_buffer_allocator;
   tx_status = TXStatus::TX_INIT;
 
