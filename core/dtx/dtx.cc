@@ -208,8 +208,7 @@ bool DTX::Validate(coro_yield_t& yield) {
   // For read-only items, we only need to read their versions
   for (auto& set_it : read_only_set) {
     auto it = set_it.item_ptr;
-    // If reading from backup, using backup's qp to validate the version on
-    // backup. Otherwise, the qp mismatches the remote version addr
+    RDMA_LOG(INFO) << "validate key = " << it->key;
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(set_it.read_which_node);
     char* version_buf = thread_rdma_buffer_alloc->Alloc(sizeof(version_t));
     pending_validate.push_back(ValidateRead{.qp = qp,
