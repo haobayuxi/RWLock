@@ -37,7 +37,7 @@ bool DTX::RWLock(coro_yield_t& yield) {
     // global_meta_man->GetPrimaryNodeID(it->table_id);
     node_id_t remote_node_id = 0;
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
-
+    item.read_which_node = remote_node_id;
     auto offset = addr_cache->Search(remote_node_id, it->table_id, it->key);
     if (offset != NOT_FOUND) {
       it->remote_offset = offset;
