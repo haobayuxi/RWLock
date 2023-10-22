@@ -18,7 +18,7 @@
 #define SLOT_LOCKED -3
 #define SLOT_FOUND 0
 
-const int ITEM_NUM_PER_NODE = 22;
+const int ITEM_NUM_PER_NODE = 12;
 
 struct HashMeta {
   // To which table this hash store belongs
