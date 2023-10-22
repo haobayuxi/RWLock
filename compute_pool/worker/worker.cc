@@ -438,10 +438,9 @@ void test_iops(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   // test rdma read and atomic
   RCQP* qp = qp_man->data_qps[0];
   auto offset = ((thread_gid * 20) + coro_id) * sizeof(int);
-  int count = 1000000;
 
   char* data_buf = rdma_buffer_allocator->Alloc(sizeof(int));
-  for (int i = 0; i < count; i++) {
+  while (running) {
     if (!coro_sched->RDMARead(coro_id, qp, data_buf, offset, sizeof(int))) {
       RDMA_LOG(INFO) << "rdma read fail";
     }
@@ -455,9 +454,6 @@ void test_iops(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
     coro_sched->Yield(yield, coro_id);
     // success
     micro_commit[thread_local_id] += 1;
-    if (micro_commit[thread_local_id] > 2000000) {
-      break;
-    }
   }
 }
 
@@ -702,10 +698,10 @@ void run_thread(thread_params* params) {
       //   coro_sched->coro_array[coro_i].func =
       //       coro_call_t(bind(RunTPCC, _1, coro_i));
       // } else if (bench_name == "micro") {
-      coro_sched->coro_array[coro_i].func =
-          coro_call_t(bind(RunMICRO, _1, coro_i, qp_man, params->lease));
       // coro_sched->coro_array[coro_i].func =
-      //     coro_call_t(bind(test_iops, _1, coro_i, qp_man));
+      //     coro_call_t(bind(RunMICRO, _1, coro_i, qp_man, params->lease));
+      coro_sched->coro_array[coro_i].func =
+          coro_call_t(bind(test_iops, _1, coro_i, qp_man));
       // }
     }
   }
