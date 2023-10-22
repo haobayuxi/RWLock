@@ -437,7 +437,8 @@ void PollCompletion(coro_yield_t& yield) {
 void test_iops(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   // test rdma read and atomic
   RCQP* qp = qp_man->data_qps[0];
-  auto offset = ((thread_gid * 20) + coro_id) * sizeof(int);
+  // auto offset = ((thread_gid * 20) + coro_id) * sizeof(int);
+  auto offset = 96;
 
   char* data_buf = rdma_buffer_allocator->Alloc(sizeof(int));
   while (running) {
