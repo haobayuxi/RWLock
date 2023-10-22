@@ -71,7 +71,9 @@ bool DTX::RWLock(coro_yield_t& yield) {
   for (auto& item : read_write_set) {
     // cas lock
   }
-
+  if (start_time == 0) {
+    start_time = get_clock_sys_time_us();
+  }
   coro_sched->Yield(yield, coro_id);
   // Receive data
   std::list<HashRead> pending_next_hash_ro;

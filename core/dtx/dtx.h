@@ -102,21 +102,6 @@ class DTX {
 
   void Clean();  // Clean data sets after commit/abort
 
-  // void DebugFetchDataItem(RCQP* qp, uint64_t remote_offset) {
-  //   char* buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
-  //   RDMAReadRoundTrip(qp, buf, remote_offset, DataItemSize);
-  //   DataItem* item = (DataItem*)buf;
-  //   item->Debug();
-  // }
-
-  // void DebugFetchHashBucket(RCQP* qp, uint64_t remote_offset) {
-  //   auto* tmp_hash_node = thread_rdma_buffer_alloc->Alloc(sizeof(HashNode));
-  //   RDMAReadRoundTrip(qp, tmp_hash_node, remote_offset, sizeof(HashNode));
-  //   HashNode* bucket = (HashNode*)tmp_hash_node;
-  //   for (int i = 0; i < ITEM_NUM_PER_NODE; i++)
-  //   bucket->data_items[i].Debug();
-  // }
-
  public:
   tx_id_t tx_id;  // Transaction ID
 
@@ -193,7 +178,6 @@ ALWAYS_INLINE
 void DTX::TxBegin(tx_id_t txid) {
   Clean();  // Clean the last transaction states
   tx_id = txid;
-  start_time = get_clock_sys_time_us();
 }
 
 ALWAYS_INLINE
@@ -209,12 +193,9 @@ void DTX::AddToReadOnlySet(DataItemPtr item) {
 ALWAYS_INLINE
 long long DTX::get_clock_sys_time_us() {
   struct timespec tp;
-  long long time_us = 0;
 
   clock_gettime(CLOCK_MONOTONIC, &tp);
-  time_us = (long long)tp.tv_sec * 1000000 + tp.tv_nsec / 1000;
-
-  return time_us;
+  return (long long)tp.tv_sec * 1000000 + tp.tv_nsec / 1000;
 }
 
 ALWAYS_INLINE
