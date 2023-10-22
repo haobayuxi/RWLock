@@ -30,7 +30,7 @@ void CoroutineScheduler::PollRegularCompletion() {
     }
     auto coro_id = wc.wr_id;
     if (coro_id == 0) continue;
-    // assert(pending_counts[coro_id] > 0);
+    assert(pending_counts[coro_id] > 0);
     pending_counts[coro_id] -= 1;
     if (pending_counts[coro_id] == 0) {
       AppendCoroutine(&coro_array[coro_id]);
