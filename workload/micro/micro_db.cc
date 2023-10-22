@@ -16,8 +16,8 @@ void MICRO::LoadTable(node_id_t node_id, node_id_t num_server,
     // std::string config_filepath = "micro.json";
     // auto json_config = JsonConfig::load_file(config_filepath);
     // auto table_config = json_config.get("table");
-    micro_table = new HashStore((table_id_t)MicroTableType::kMicroTable, 200000,
-                                mem_store_alloc_param);
+    micro_table = new HashStore((table_id_t)MicroTableType::kMicroTable,
+                                2000000, mem_store_alloc_param);
     PopulateMicroTable(mem_store_reserve_param);
     primary_table_ptrs.push_back(micro_table);
   }
