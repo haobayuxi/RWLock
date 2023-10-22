@@ -226,7 +226,7 @@ bool DTX::Validate(coro_yield_t& yield) {
   coro_sched->Yield(yield, coro_id);
 
   // auto res = CheckValidate(pending_validate);
-  return res;
+  return true;
 }
 
 bool DTX::CheckValidate(std::vector<ValidateRead>& pending_validate) {
