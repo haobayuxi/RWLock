@@ -46,7 +46,7 @@ bool DTX::TxCommit(coro_yield_t& yield) {
   /*!
     RWLock's commit protocol
     */
-  RDMA_LOG(INFO) << "tx commit" << global_meta_man->txn_system;
+  // RDMA_LOG(INFO) << "tx commit" << global_meta_man->txn_system;
   if (global_meta_man->txn_system == DTX_SYS::RWLock) {
     // check lease
     auto end_time = get_clock_sys_time_us();
@@ -68,7 +68,7 @@ bool DTX::TxCommit(coro_yield_t& yield) {
     /*
       OCC commit protocol
     */
-    RDMA_LOG(INFO) << "occ commit";
+    // RDMA_LOG(INFO) << "occ commit";
     if (!Validate(yield)) {
       goto ABORT;
     }
@@ -82,7 +82,7 @@ bool DTX::TxCommit(coro_yield_t& yield) {
 
   } else if (global_meta_man->txn_system == DTX_SYS::DrTMH) {
     // check lease
-    RDMA_LOG(INFO) << "drtm commit";
+    // RDMA_LOG(INFO) << "drtm commit";
     if (!Validate(yield)) {
       goto ABORT;
     }
@@ -95,7 +95,7 @@ bool DTX::TxCommit(coro_yield_t& yield) {
       // write data and unlock
     }
   } else if (global_meta_man->txn_system == DTX_SYS::DLMR) {
-    RDMA_LOG(INFO) << "dlmr commit";
+    // RDMA_LOG(INFO) << "dlmr commit";
     if (!read_write_set.empty()) {
       // Write log
 
