@@ -16,6 +16,7 @@ extern std::vector<double> attemp_tp_vec;
 extern std::vector<double> tp_vec;
 extern std::vector<double> medianlat_vec;
 extern std::vector<double> taillat_vec;
+extern bool running;
 
 extern std::vector<uint64_t> total_try_times;
 extern std::vector<uint64_t> total_commit_times;
@@ -469,7 +470,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
   struct timespec tx_start_time, tx_end_time;
   bool tx_committed = false;
   clock_gettime(CLOCK_REALTIME, &msr_start);
-  while (true) {
+  while (running) {
     uint64_t iter = ++tx_id_generator;  // Global atomic transaction id
     stat_attempted_tx_total++;
     clock_gettime(CLOCK_REALTIME, &tx_start_time);
@@ -487,19 +488,19 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
       timer[stat_committed_tx_total++] = tx_usec;
       micro_commit[thread_local_id] += 1;
     }
-    if (stat_attempted_tx_total >= ATTEMPTED_NUM) {
-      // A coroutine calculate the total execution time and exits
+    // if (stat_attempted_tx_total >= ATTEMPTED_NUM) {
+    //   // A coroutine calculate the total execution time and exits
 
-      clock_gettime(CLOCK_REALTIME, &msr_end);
-      double msr_sec =
-          (msr_end.tv_sec - msr_start.tv_sec) +
-          (double)(msr_end.tv_nsec - msr_start.tv_nsec) / 1000000000;
+    //   clock_gettime(CLOCK_REALTIME, &msr_end);
+    //   double msr_sec =
+    //       (msr_end.tv_sec - msr_start.tv_sec) +
+    //       (double)(msr_end.tv_nsec - msr_start.tv_nsec) / 1000000000;
 
-      double attemp_tput = (double)stat_attempted_tx_total / msr_sec;
-      double tx_tput = (double)stat_committed_tx_total / msr_sec;
+    //   double attemp_tput = (double)stat_attempted_tx_total / msr_sec;
+    //   double tx_tput = (double)stat_committed_tx_total / msr_sec;
 
-      break;
-    }
+    //   break;
+    // }
   }
   return;
 }

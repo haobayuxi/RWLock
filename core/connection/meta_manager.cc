@@ -17,7 +17,7 @@ MetaManager::MetaManager() {
                          ? "rwlock"
                          : (txn_system == 1
                                 ? "DrTM+H"
-                                : (txn_system == 2 ? "dlmr" : "LOCAL")));
+                                : (txn_system == 2 ? "dlmr" : "OCC")));
 
   auto pm_nodes = json_config.get("remote_pm_nodes");
   auto remote_ips = pm_nodes.get("remote_ips");  // Array

@@ -15,6 +15,7 @@ std::vector<double> lock_durations;
 std::vector<uint64_t> total_try_times;
 std::vector<uint64_t> total_commit_times;
 uint64_t micro_commit[100];
+bool running;
 
 void Handler::test() {
   char* local_mem = (char*)malloc(8192);
@@ -116,6 +117,7 @@ void Handler::GenThreads(std::string bench_name) {
   tx_id_generator = 0;  // Initial transaction id == 0
   connected_t_num = 0;  // Sync all threads' RDMA QP connections
   auto thread_arr = new std::thread[thread_num_per_machine];
+  running = true;
 
   auto* global_meta_man = new MetaManager();
   RDMA_LOG(INFO) << "Alloc local memory: "
@@ -126,7 +128,7 @@ void Handler::GenThreads(std::string bench_name) {
       new RDMARegionAllocator(global_meta_man, thread_num_per_machine);
 
   auto* param_arr = new struct thread_params[thread_num_per_machine];
-  memset(micro_commit, 0, 100);
+  memset(micro_commit, 0, 100 * sizeof(uint64_t));
   // TATP* tatp_client = nullptr;
   // TPCC* tpcc_client = nullptr;
 
@@ -169,12 +171,15 @@ void Handler::GenThreads(std::string bench_name) {
       RDMA_LOG(WARNING) << "Error calling pthread_setaffinity_np: " << rc;
     }
   }
-
-  for (t_id_t i = 0; i < thread_num_per_machine; i++) {
-    if (thread_arr[i].joinable()) {
-      thread_arr[i].join();
-    }
-  }
+  sleep(10);
+  memset(micro_commit, 0, 100 * sizeof(uint64_t));
+  sleep(10);
+  running = false;
+  // for (t_id_t i = 0; i < thread_num_per_machine; i++) {
+  //   if (thread_arr[i].joinable()) {
+  //     thread_arr[i].join();
+  //   }
+  // }
 
   clock_gettime(CLOCK_REALTIME, &msr_end);
   // double msr_usec = (msr_end.tv_sec - msr_start.tv_sec) * 1000000 +
