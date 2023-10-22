@@ -109,22 +109,22 @@ bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
                 tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size,
                 uint64_t num_keys_global, uint64_t write_ratio) {
   dtx->TxBegin(tx_id);
+  for (int i = 0; i < data_set_size; i++) {
+    micro_key_t micro_key;
+    if (is_skewed) {
+      // Skewed distribution
+      micro_key.micro_id = (itemkey_t)(zipf_gen->next());
+    } else {
+      // Uniformed distribution
+      micro_key.micro_id = (itemkey_t)FastRand(seed) & (num_keys_global - 1);
+    }
+    assert(micro_key.item_key >= 0 && micro_key.item_key < num_keys_global);
 
-  micro_key_t micro_key;
-  if (is_skewed) {
-    // Skewed distribution
-    // micro_key.micro_id = (itemkey_t)(zipf_gen->next());
-    micro_key.micro_id = 100;
-  } else {
-    // Uniformed distribution
-    micro_key.micro_id = (itemkey_t)FastRand(seed) & (num_keys_global - 1);
+    DataItemPtr micro_obj = std::make_shared<DataItem>(
+        (table_id_t)MicroTableType::kMicroTable, micro_key.item_key);
+
+    dtx->AddToReadOnlySet(micro_obj);
   }
-  assert(micro_key.item_key >= 0 && micro_key.item_key < num_keys_global);
-
-  DataItemPtr micro_obj = std::make_shared<DataItem>(
-      (table_id_t)MicroTableType::kMicroTable, micro_key.item_key);
-
-  dtx->AddToReadOnlySet(micro_obj);
 
   if (!dtx->TxExe(yield)) {
     // TLOG(DBG, thread_gid) << "tx " << tx_id << " aborts after exe";
