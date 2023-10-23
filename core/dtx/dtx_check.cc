@@ -96,7 +96,7 @@ bool DTX::CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro) {
 }
 
 bool DTX::CheckReadRO(coro_yield_t& yield) {
-  // return true;
+  return true;
   if (!CheckDirectRO(pending_direct_ro)) return false;
   if (!CheckHashRO(pending_hash_ro, pending_next_hash_ro)) return false;
 
