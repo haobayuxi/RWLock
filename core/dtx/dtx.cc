@@ -79,8 +79,7 @@ bool DTX::RWLock(coro_yield_t& yield) {
   //   RDMA_LOG(INFO) << "rdma get time = " << cost;
   // }
   // Receive data
-  auto res = CheckReadRO(pending_direct_ro, pending_hash_ro,
-                         pending_next_hash_ro, yield);
+  auto res = CheckReadRO(yield);
   return res;
 }
 
@@ -198,8 +197,7 @@ bool DTX::Dlmr(coro_yield_t& yield) {
   coro_sched->Yield(yield, coro_id);
   // Receive data
   std::list<HashRead> pending_next_hash_ro;
-  auto res = CheckReadRO(pending_direct_ro, pending_hash_ro,
-                         pending_next_hash_ro, yield);
+  auto res = CheckReadRO(yield);
 
   return true;
 }
