@@ -28,7 +28,6 @@ DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t _tid,
 
 bool DTX::OCC(coro_yield_t& yield) { return true; }
 
-ALWAYS_INLINE
 bool DTX::RWLock(coro_yield_t& yield) {
   std::vector<DirectRead> pending_direct_ro;
   std::vector<HashRead> pending_hash_ro;

@@ -13,15 +13,22 @@ const offset_t NOT_FOUND = -1;
 // For fast remote address lookup
 class AddrCache {
  public:
-  void Insert(node_id_t remote_node_id, table_id_t table_id, itemkey_t key, offset_t remote_offset) {
+  ALWAYS_INLINE
+  void Insert(node_id_t remote_node_id, table_id_t table_id, itemkey_t key,
+              offset_t remote_offset) {
     auto node_search = addr_map.find(remote_node_id);
     if (node_search == addr_map.end()) {
       // There is no such node. Init the node and table
-      addr_map[remote_node_id] = std::unordered_map<table_id_t, std::unordered_map<itemkey_t, offset_t>>();
-      addr_map[remote_node_id][table_id] = std::unordered_map<itemkey_t, offset_t>();
-    } else if (node_search->second.find(table_id) == node_search->second.end()) {
+      addr_map[remote_node_id] =
+          std::unordered_map<table_id_t,
+                             std::unordered_map<itemkey_t, offset_t>>();
+      addr_map[remote_node_id][table_id] =
+          std::unordered_map<itemkey_t, offset_t>();
+    } else if (node_search->second.find(table_id) ==
+               node_search->second.end()) {
       // The node exists, but the table does not exist. Init the table
-      addr_map[remote_node_id][table_id] = std::unordered_map<itemkey_t, offset_t>();
+      addr_map[remote_node_id][table_id] =
+          std::unordered_map<itemkey_t, offset_t>();
     }
 
     // The node and table both exist, then insert/update the <key,offset> pair
@@ -29,17 +36,21 @@ class AddrCache {
   }
 
   // We know which node to read, but we do not konw whether it is cached before
-  offset_t Search(node_id_t remote_node_id, table_id_t table_id, itemkey_t key) {
+  ALWAYS_INLINE
+  offset_t Search(node_id_t remote_node_id, table_id_t table_id,
+                  itemkey_t key) {
     auto node_search = addr_map.find(remote_node_id);
     if (node_search == addr_map.end()) return NOT_FOUND;
     auto table_search = node_search->second.find(table_id);
     if (table_search == node_search->second.end()) return NOT_FOUND;
     auto offset_search = table_search->second.find(key);
-    return offset_search == table_search->second.end() ? NOT_FOUND : offset_search->second;
+    return offset_search == table_search->second.end() ? NOT_FOUND
+                                                       : offset_search->second;
   }
 
   // If we have read this record, we do not read it from another node
-  void Search(table_id_t query_table_id, itemkey_t query_key, node_id_t& remote_node_id, offset_t& remote_offset) {
+  void Search(table_id_t query_table_id, itemkey_t query_key,
+              node_id_t& remote_node_id, offset_t& remote_offset) {
     // look up node first
     for (auto it = addr_map.begin(); it != addr_map.end(); it++) {
       auto table_search = it->second.find(query_table_id);
@@ -76,5 +87,8 @@ class AddrCache {
   }
 
  private:
-  std::unordered_map<node_id_t, std::unordered_map<table_id_t, std::unordered_map<itemkey_t, offset_t>>> addr_map;
+  std::unordered_map<
+      node_id_t,
+      std::unordered_map<table_id_t, std::unordered_map<itemkey_t, offset_t>>>
+      addr_map;
 };
