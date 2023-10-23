@@ -13,7 +13,7 @@ const offset_t NOT_FOUND = -1;
 // For fast remote address lookup
 class AddrCache {
  public:
-  // ALWAYS_INLINE
+  ALWAYS_INLINE
   void Insert(node_id_t remote_node_id, table_id_t table_id, itemkey_t key,
               offset_t remote_offset) {
     auto node_search = addr_map.find(remote_node_id);
@@ -36,7 +36,7 @@ class AddrCache {
   }
 
   // We know which node to read, but we do not konw whether it is cached before
-  // ALWAYS_INLINE
+  ALWAYS_INLINE
   offset_t Search(node_id_t remote_node_id, table_id_t table_id,
                   itemkey_t key) {
     auto node_search = addr_map.find(remote_node_id);
