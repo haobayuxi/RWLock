@@ -32,10 +32,8 @@ bool DTX::RWLock(coro_yield_t& yield) {
   std::vector<DirectRead> pending_direct_ro;
   std::vector<HashRead> pending_hash_ro;
   for (auto& item : read_only_set) {
-    if (item.is_fetched) continue;
+    // if (item.is_fetched) continue;
     auto it = item.item_ptr;
-    // node_id_t remote_node_id =
-    // global_meta_man->GetPrimaryNodeID(it->table_id);
     node_id_t remote_node_id = 0;
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
     item.read_which_node = remote_node_id;
@@ -47,7 +45,8 @@ bool DTX::RWLock(coro_yield_t& yield) {
                                                 .item = &item,
                                                 .buf = data_buf,
                                                 .remote_node = remote_node_id});
-      if (!coro_sched->RDMARead(coro_id, qp, data_buf, offset, DataItemSize)) {
+      if (unlikely(!coro_sched->RDMARead(coro_id, qp, data_buf, offset,
+                                         DataItemSize))) {
         return false;
       }
     } else {
