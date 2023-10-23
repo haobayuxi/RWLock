@@ -61,7 +61,7 @@ class DTX {
   ~DTX() { Clean(); }
 
  public:
-  size_t GetAddrCacheSize() { return addr_cache->TotalAddrSize(); }
+  // size_t GetAddrCacheSize() { return addr_cache->TotalAddrSize(); }
 
  private:
   bool Validate(coro_yield_t& yield);  // RDMA read value versions
