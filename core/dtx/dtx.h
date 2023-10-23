@@ -145,6 +145,10 @@ class DTX {
   std::vector<size_t> locked_rw_set;  // For release lock during abort
 
   AddrCache* addr_cache;
+  std::vector<DirectRead> pending_direct_ro;
+  std::vector<HashRead> pending_hash_ro;
+
+  std::list<HashRead> pending_next_hash_ro;
 
   // For validate the version for insertion
   // std::vector<OldVersionForInsert> old_version_for_insert;
@@ -170,6 +174,10 @@ ALWAYS_INLINE
 void DTX::TxBegin(tx_id_t txid) {
   Clean();  // Clean the last transaction states
   tx_id = txid;
+  pending_direct_ro.clear();
+  pending_hash_ro.clear();
+
+  pending_next_hash_ro.clear();
   start_time = 0;
 }
 
@@ -270,8 +278,6 @@ void DTX::Clean() {
 
 ALWAYS_INLINE
 bool DTX::RWLock(coro_yield_t& yield) {
-  std::vector<DirectRead> pending_direct_ro;
-  std::vector<HashRead> pending_hash_ro;
   for (auto& item : read_only_set) {
     // if (item.is_fetched) continue;
     auto it = item.item_ptr;
@@ -322,7 +328,6 @@ bool DTX::RWLock(coro_yield_t& yield) {
   //   RDMA_LOG(INFO) << "rdma get time = " << cost;
   // }
   // Receive data
-  std::list<HashRead> pending_next_hash_ro;
   auto res = CheckReadRO(pending_direct_ro, pending_hash_ro,
                          pending_next_hash_ro, yield);
   return res;
