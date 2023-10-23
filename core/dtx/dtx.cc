@@ -159,7 +159,7 @@ bool DTX::Validate(coro_yield_t& yield) {
     auto it = set_it.item_ptr;
     // RDMA_LOG(INFO) << "validate key = " << it->key;
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(set_it.read_which_node);
-    char* version_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize;
+    char* version_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
     pending_validate.push_back(ValidateRead{.qp = qp,
                                             .item = &set_it,
                                             .cas_buf = nullptr,
