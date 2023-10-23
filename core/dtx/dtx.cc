@@ -51,6 +51,7 @@ bool DTX::RWLock(coro_yield_t& yield) {
       }
     } else {
       // hash read
+      RDMA_LOG(INFO) << "hash read";
       HashMeta meta =
           global_meta_man->GetPrimaryHashMetaWithTableID(it->table_id);
       uint64_t idx = MurmurHash64A(it->key, 0xdeadbeef) % meta.bucket_num;
