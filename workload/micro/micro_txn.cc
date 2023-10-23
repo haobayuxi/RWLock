@@ -117,8 +117,8 @@ bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
       // micro_key.micro_id = 100;
     } else {
       // Uniformed distribution
-      // micro_key.micro_id = (itemkey_t)FastRand(seed) & (num_keys_global - 1);
-      micro_key.micro_id = dtx->t_id * 100 + dtx->coro_id;
+      micro_key.micro_id = (itemkey_t)FastRand(seed) & (num_keys_global - 1);
+      // micro_key.micro_id = dtx->t_id * 100 + dtx->coro_id;
     }
     assert(micro_key.item_key >= 0 && micro_key.item_key < num_keys_global);
 
