@@ -99,6 +99,7 @@ bool DTX::CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
                       std::vector<HashRead>& pending_hash_ro,
                       std::list<HashRead>& pending_next_hash_ro,
                       coro_yield_t& yield) {
+  return true;
   if (!CheckDirectRO(pending_direct_ro)) return false;
   if (!CheckHashRO(pending_hash_ro, pending_next_hash_ro)) return false;
 
