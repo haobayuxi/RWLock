@@ -73,10 +73,7 @@ class DTX {
   bool cas_lease_expired(uint64_t lease);
 
   //////////// check
-  bool CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
-                   std::vector<HashRead>& pending_hash_ro,
-                   std::list<HashRead>& pending_next_hash_ro,
-                   coro_yield_t& yield);
+  bool CheckReadRO(coro_yield_t& yield);
   bool CheckCASRO(std::vector<CasRead>& pending_cas_ro,
                   std::vector<HashRead>& pending_hash_ro,
                   std::list<HashRead>& pending_next_hash_ro,
