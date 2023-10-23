@@ -104,7 +104,7 @@ bool DTX::CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
 
   // During results checking, we may re-read data due to invisibility and hash
   // collisions
-  while (!pending_next_hash_ro.empty()) {
+  while (unlikely(!pending_next_hash_ro.empty())) {
     coro_sched->Yield(yield, coro_id);
     if (!CheckNextHashRO(pending_next_hash_ro)) return false;
   }
