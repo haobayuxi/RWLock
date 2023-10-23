@@ -24,8 +24,9 @@ class AddrCache {
   offset_t Search(node_id_t remote_node_id, table_id_t table_id,
                   itemkey_t key) {
     auto offset_search = addr_map[remote_node_id][table_id].find(key);
-    return offset_search == table_search->second.end() ? NOT_FOUND
-                                                       : offset_search->second;
+    return offset_search == addr_map[remote_node_id][table_id].end()
+               ? NOT_FOUND
+               : offset_search->second;
   }
 
   // size_t TotalAddrSize() {
