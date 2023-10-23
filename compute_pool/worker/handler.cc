@@ -145,7 +145,6 @@ void Handler::GenThreads(std::string bench_name) {
   RDMA_LOG(INFO) << "Spawn threads to execute...";
   RDMA_LOG(INFO) << "lease = " << lease;
   struct timespec msr_start, msr_end;
-  clock_gettime(CLOCK_REALTIME, &msr_start);
   for (t_id_t i = 0; i < thread_num_per_machine; i++) {
     param_arr[i].thread_local_id = i;
     param_arr[i].lease = lease;
@@ -173,6 +172,8 @@ void Handler::GenThreads(std::string bench_name) {
   }
   sleep(10);
   memset(micro_commit, 0, 100 * sizeof(uint64_t));
+
+  clock_gettime(CLOCK_REALTIME, &msr_start);
   sleep(10);
   running = false;
   for (t_id_t i = 0; i < thread_num_per_machine; i++) {
