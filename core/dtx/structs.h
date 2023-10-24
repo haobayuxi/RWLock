@@ -37,7 +37,7 @@ enum ValStatus : int {
 struct DataSetItem {
   DataItemPtr item_ptr;
   bool is_fetched;
-  bool insert;
+  bool is_logged;
   node_id_t read_which_node;  // From which node this data item is read. This is
                               // a node id, e.g., 0, 1, 2...
 };
