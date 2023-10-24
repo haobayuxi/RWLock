@@ -152,7 +152,7 @@ class DTX {
   std::vector<HashRead> pending_hash_ro;
 
   std::list<HashRead> pending_next_hash_ro;
-  std::vector<CasRead>& pending_cas_ro;
+  std::vector<CasRead> pending_cas_ro;
 
   // For validate the version for insertion
   // std::vector<OldVersionForInsert> old_version_for_insert;
