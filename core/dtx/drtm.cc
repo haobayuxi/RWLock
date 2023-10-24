@@ -1,5 +1,8 @@
 #include "dtx.h"
 
+int read_only_lease = 1000;   // us
+int read_write_leaase = 400;  // us
+
 bool DTX::Drtm(coro_yield_t& yield) {
   std::vector<CasRead> pending_cas_rw;
   std::vector<HashRead> pending_hash_ro;
@@ -21,7 +24,7 @@ bool DTX::Drtm(coro_yield_t& yield) {
                                           .cas_buf = cas_buf,
                                           .data_buf = data_buf,
                                           .primary_node_id = remote_node_id});
-      auto expired_time = start_time + lease;
+      auto expired_time = start_time + read_only_lease;
       auto swap = expired_time << 1;
       if (!coro_sched->RDMACAS(coro_id, qp, cas_buf,
                                it->GetRemoteLockAddr(offset), 0, swap)) {
@@ -60,4 +63,36 @@ bool DTX::Drtm(coro_yield_t& yield) {
       CheckCASRO(pending_cas_rw, pending_hash_ro, pending_next_hash_ro, yield);
 
   return true;
+}
+
+bool DTX::DrtmCheckHashRead(coro_yield_t& yield) {
+  // check if wlocked
+}
+
+bool DTX::DrtmCheckCas(coro_yield_t& yield) {
+  // check cas
+  std::vector<CasRead> pending_next_cas;
+  for (auto& res : pending_cas_ro) {
+    auto lock = (uint64_t)res.cas_buf;
+    auto lease = lock >> 1;
+    if (!cas_lease_expired(lease)) {
+      // lease expired, retry to get read lock
+
+      // pending_next_cas.emplace_back()
+    }
+    if (lock % 2 == 1) {
+      // write locked
+      return false;
+    }
+  }
+  return true;
+}
+
+bool DTX::cas_lease_expired(uint64_t lease) {
+  auto now = get_clock_sys_time_us();
+  if (lease > now) {
+    return true;
+  } else {
+    return false;
+  }
 }

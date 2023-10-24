@@ -129,31 +129,3 @@ bool DTX::CheckCASRO(std::vector<CasRead>& pending_cas_ro,
 }
 
 bool DTX::CheckCASRead(std::vector<CasRead>& pending_cas_ro) {}
-
-bool DTX::DrtmCheckCas(coro_yield_t& yield) {
-  // check cas
-  std::vector<CasRead> pending_next_cas;
-  for (auto& res : pending_cas_ro) {
-    auto lock = (uint64_t)res.cas_buf;
-    auto lease = lock >> 1;
-    if (!cas_lease_expired(lease)) {
-      // lease expired, retry to get read lock
-
-      // pending_next_cas.emplace_back()
-    }
-    if (lock % 2 == 1) {
-      // write locked
-      return false;
-    }
-  }
-  return true;
-}
-
-bool DTX::cas_lease_expired(uint64_t lease) {
-  auto now = get_clock_sys_time_us();
-  if (lease > now) {
-    return true;
-  } else {
-    return false;
-  }
-}
