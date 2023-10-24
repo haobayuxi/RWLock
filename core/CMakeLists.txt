@@ -9,7 +9,7 @@ set(CONNECTION_SRC
 set(DTX_SRC
         dtx/doorbell.cc
         dtx/dtx.cc
-        dtx/dtx_exe_commit.cc
+        dtx/oocc.cc
         dtx/dtx_check.cc
         dtx/drtm.cc
         dtx/dlmr.cc

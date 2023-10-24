@@ -33,102 +33,6 @@ bool DTX::ExeRW(coro_yield_t& yield) {
   }
 }
 
-bool DTX::RWLock(coro_yield_t& yield) {
-  for (auto& item : read_only_set) {
-    if (item.is_fetched) continue;
-    auto it = item.item_ptr;
-    node_id_t remote_node_id = 0;
-    RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
-    item.read_which_node = remote_node_id;
-    auto offset = addr_cache->Search(remote_node_id, it->table_id, it->key);
-    // auto offset = it->key;
-    if (offset != NOT_FOUND) {
-      it->remote_offset = offset;
-      char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
-      pending_direct_ro.emplace_back(DirectRead{.qp = qp,
-                                                .item = &item,
-                                                .buf = data_buf,
-                                                .remote_node = remote_node_id});
-      if (unlikely(!coro_sched->RDMARead(coro_id, qp, data_buf, offset,
-                                         DataItemSize))) {
-        return false;
-      }
-    } else {
-      // hash read
-      // RDMA_LOG(INFO) << "hash read";
-      HashMeta meta =
-          global_meta_man->GetPrimaryHashMetaWithTableID(it->table_id);
-      uint64_t idx = MurmurHash64A(it->key, 0xdeadbeef) % meta.bucket_num;
-      offset_t node_off = idx * meta.node_size + meta.base_off;
-      char* local_hash_node = thread_rdma_buffer_alloc->Alloc(sizeof(HashNode));
-      pending_hash_ro.emplace_back(HashRead{.qp = qp,
-                                            .item = &item,
-                                            .buf = local_hash_node,
-                                            .remote_node = remote_node_id,
-                                            .meta = meta});
-      if (!coro_sched->RDMARead(coro_id, qp, local_hash_node, node_off,
-                                sizeof(HashNode))) {
-        return false;
-      }
-    }
-  }
-
-  if (start_time == 0) {
-    start_time = get_clock_sys_time_us();
-  }
-  coro_sched->Yield(yield, coro_id);
-  // auto end_time = get_clock_sys_time_us();
-  // auto cost = end_time - start_time;
-  // if (cost > 5) {
-  //   RDMA_LOG(INFO) << "rdma get time = " << cost;
-  // }
-  // Receive data
-  auto res = CheckReadRO(yield);
-  return res;
-}
-
-bool DTX::Validate(coro_yield_t& yield) {
-  // The transaction is read-write, and all the written data have
-  // been locked before
-  // validate the reads
-  std::vector<ValidateRead> pending_validate;
-
-  // For read-only items, we only need to read their versions
-  for (auto& set_it : read_only_set) {
-    auto it = set_it.item_ptr;
-    // RDMA_LOG(INFO) << "validate key = " << it->key;
-    RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(set_it.read_which_node);
-    char* version_buf = thread_rdma_buffer_alloc->Alloc(sizeof(version_t));
-    pending_validate.push_back(ValidateRead{.qp = qp,
-                                            .item = &set_it,
-                                            .cas_buf = nullptr,
-                                            .version_buf = version_buf,
-                                            .has_lock_in_validate = false});
-    if (!coro_sched->RDMARead(coro_id, qp, version_buf,
-                              it->GetRemoteVersionAddr(), sizeof(version_t))) {
-      return false;
-    }
-  }
-  // Yield to other coroutines when waiting for network replies
-  coro_sched->Yield(yield, coro_id);
-
-  auto res = CheckValidate(pending_validate);
-  return res;
-}
-
-bool DTX::CheckValidate(std::vector<ValidateRead>& pending_validate) {
-  for (auto& re : pending_validate) {
-    auto it = re.item->item_ptr;
-    // Compare version
-    if (it->version != *((version_t*)re.version_buf)) {
-      // RDMA_LOG(DBG) << "MY VERSION " << it->version;
-      // RDMA_LOG(DBG) << "version_buf " << *((version_t*)re.version_buf);
-      return false;
-    }
-  }
-  return true;
-}
-
 void DTX::ParallelUndoLog() {
   // Write the old data from read write set
   size_t log_size = sizeof(tx_id) + sizeof(t_id);
@@ -185,4 +89,114 @@ void DTX::Abort() {
     }
   }
   tx_status = TXStatus::TX_ABORT;
+}
+
+bool DTX::TxExe(coro_yield_t& yield, bool fail_abort) {
+  // Start executing transaction
+  tx_status = TXStatus::TX_EXE;
+  if (read_write_set.empty() && read_only_set.empty()) {
+    RDMA_LOG(INFO) << "wrong";
+    return true;
+  }
+
+  if (global_meta_man->txn_system == DTX_SYS::RWLock ||
+      global_meta_man->txn_system == DTX_SYS::OCC) {
+    // Run our system
+    if (OOCC(yield)) {
+      return true;
+    } else {
+      goto ABORT;
+    }
+  } else if (global_meta_man->txn_system == DTX_SYS::DrTMH) {
+    if (Drtm(yield)) {
+      return true;
+    } else {
+      goto ABORT;
+    }
+  } else if (global_meta_man->txn_system == DTX_SYS::DLMR) {
+    // get read lock
+
+    // get write lock
+  } else {
+    RDMA_LOG(FATAL) << "NOT SUPPORT SYSTEM ID: " << global_meta_man->txn_system;
+  }
+
+  return true;
+
+ABORT:
+  if (fail_abort) Abort();
+  return false;
+}
+
+bool DTX::TxCommit(coro_yield_t& yield) {
+  bool commit_stat;
+
+  /*!
+    RWLock's commit protocol
+    */
+  // RDMA_LOG(INFO) << "tx commit" << global_meta_man->txn_system;
+  if (global_meta_man->txn_system == DTX_SYS::RWLock) {
+    // check lease
+    auto end_time = get_clock_sys_time_us();
+
+    if ((end_time - start_time) > lease) {
+      // RDMA_LOG(INFO) << "rwlock commit" << end_time - start_time << "
+      // lease "
+      // << lease;
+      if (!Validate(yield)) {
+        goto ABORT;
+      }
+    }
+
+    // Next step. If read-write txns, we need to commit the updates to remote
+    // replicas
+    if (!read_write_set.empty()) {
+      // Write log
+
+      // write data and unlock
+    }
+  } else if (global_meta_man->txn_system == DTX_SYS::OCC) {
+    /*
+      OCC commit protocol
+    */
+    // RDMA_LOG(INFO) << "occ commit";
+    if (!Validate(yield)) {
+      goto ABORT;
+    }
+    // Next step. If read-write txns, we need to commit the updates to remote
+    // replicas
+    if (!read_write_set.empty()) {
+      // Write log
+
+      // write data and unlock
+    }
+
+  } else if (global_meta_man->txn_system == DTX_SYS::DrTMH) {
+    // check lease
+    // RDMA_LOG(INFO) << "drtm commit";
+    if (!Validate(yield)) {
+      goto ABORT;
+    }
+
+    // Next step. If read-write txns, we need to commit the updates to remote
+    // replicas
+    if (!read_write_set.empty()) {
+      // Write log
+
+      // write data and unlock
+    }
+  } else if (global_meta_man->txn_system == DTX_SYS::DLMR) {
+    // RDMA_LOG(INFO) << "dlmr commit";
+    if (!read_write_set.empty()) {
+      // Write log
+
+      // write data and unlock
+    }
+    // unlock read lock and write lock
+  }
+
+  return true;
+ABORT:
+  Abort();
+  return false;
 }

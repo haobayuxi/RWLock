@@ -64,12 +64,15 @@ class DTX {
   // size_t GetAddrCacheSize() { return addr_cache->TotalAddrSize(); }
 
  private:
+  // oocc
   bool Validate(coro_yield_t& yield);  // RDMA read value versions
-  bool RWLock(coro_yield_t& yield);
+  bool OOCC(coro_yield_t& yield);
+  bool CasWriteLockAndRead(coro_yield_t& yield);
+  // drtm
   bool Drtm(coro_yield_t& yield);
 
   bool DrtmCheckCas(coro_yield_t& yield);
-
+  // dlmr
   bool Dlmr(coro_yield_t& yield);
   bool DlmrCheck(coro_yield_t& yield);
 
