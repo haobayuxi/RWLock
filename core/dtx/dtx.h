@@ -159,12 +159,11 @@ class DTX {
   AddrCache* addr_cache;
   std::vector<DirectRead> pending_direct_ro;
   std::vector<HashRead> pending_hash_ro;
-
+  std::vector<HashRead> pending_hash_rw;
   std::list<HashRead> pending_next_hash_ro;
+  std::list<HashRead> pending_next_hash_rw;
   std::vector<CasRead> pending_cas_ro;
-
-  // For validate the version for insertion
-  // std::vector<OldVersionForInsert> old_version_for_insert;
+  std::vector<CasRead> pending_cas_rw;
 
   struct pair_hash {
     inline std::size_t operator()(
@@ -189,9 +188,11 @@ void DTX::TxBegin(tx_id_t txid) {
   tx_id = txid;
   pending_direct_ro.clear();
   pending_hash_ro.clear();
-
+  pending_hash_rw.clear();
   pending_next_hash_ro.clear();
+  pending_next_hash_rw.clear();
   pending_cas_ro.clear();
+  pending_cas_rw.clear();
   start_time = 0;
   wlock_start_time = 0;
 }
