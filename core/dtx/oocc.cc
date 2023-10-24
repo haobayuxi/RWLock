@@ -18,7 +18,7 @@ bool DTX::OOCC(coro_yield_t& yield) {
   }
 
   // Receive data
-  return CheckReadRO(yield, read_only);
+  return OOCCCheck(yield, read_only);
 }
 
 bool DTX::OccReadOnly(coro_yield_t& yield) {
@@ -291,7 +291,7 @@ bool DTX::CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro) {
   return true;
 }
 
-bool DTX::CheckReadRO(coro_yield_t& yield, bool read_only) {
+bool DTX::OOCCCheck(coro_yield_t& yield, bool read_only) {
   if (!CheckDirectRO(pending_direct_ro)) return false;
   if (!CheckHashRO(pending_hash_ro, pending_next_hash_ro)) return false;
   if (!read_only) {

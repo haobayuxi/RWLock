@@ -50,7 +50,7 @@ bool DTX::Dlmr(coro_yield_t& yield) {
   coro_sched->Yield(yield, coro_id);
   // Receive data
   std::list<HashRead> pending_next_hash_ro;
-  auto res = CheckReadRO(yield);
+  // auto res = CheckReadRO(yield);
 
   return true;
 }

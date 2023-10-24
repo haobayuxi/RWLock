@@ -71,7 +71,7 @@ class DTX {
   bool CasWriteLockAndRead(coro_yield_t& yield);
   // check
 
-  bool CheckReadRO(coro_yield_t& yield);
+  bool OOCCCheck(coro_yield_t& yield, bool read_only);
   bool CheckDirectRO(std::vector<DirectRead>& pending_direct_ro);
   bool CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro);
   bool CheckCasRw();
