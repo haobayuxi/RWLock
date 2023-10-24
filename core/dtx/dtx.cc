@@ -33,43 +33,6 @@ bool DTX::ExeRW(coro_yield_t& yield) {
   }
 }
 
-void DTX::ParallelUndoLog() {
-  // Write the old data from read write set
-  size_t log_size = sizeof(tx_id) + sizeof(t_id);
-  for (auto& set_it : read_write_set) {
-    if (!set_it.is_logged && !set_it.item_ptr->user_insert) {
-      // For the newly inserted data, the old data are not needed to be
-      // recorded
-      log_size += DataItemSize;
-    }
-  }
-  char* written_log_buf = thread_rdma_buffer_alloc->Alloc(log_size);
-
-  offset_t cur = 0;
-  *((tx_id_t*)(written_log_buf + cur)) = tx_id;
-  cur += sizeof(tx_id);
-  *((t_id_t*)(written_log_buf + cur)) = t_id;
-  cur += sizeof(t_id);
-
-  for (auto& set_it : read_write_set) {
-    if (!set_it.is_logged && !set_it.item_ptr->user_insert) {
-      memcpy(written_log_buf + cur, (char*)(set_it.item_ptr.get()),
-             DataItemSize);
-      cur += DataItemSize;
-      set_it.is_logged = true;
-    }
-  }
-
-  // Write undo logs to all memory nodes
-  // for (int i = 0; i < global_meta_man->remote_nodes.size(); i++) {
-  //   offset_t log_offset =
-  //       thread_remote_log_offset_alloc->GetNextLogOffset(i, log_size);
-  //   RCQP* qp = thread_qp_man->GetRemoteLogQPWithNodeID(i);
-  //   coro_sched->RDMALog(coro_id, tx_id, qp, written_log_buf, log_offset,
-  //                       log_size);
-  // }
-}
-
 void DTX::Abort() {
   // When failures occur, transactions need to be aborted.
   // In general, the transaction will not abort during committing replicas if

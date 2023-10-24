@@ -20,9 +20,9 @@ void QPManager::BuildQPConnection(MetaManager* meta_man) {
         create_rc_idx(remote_node.node_id, (int)global_tid),
         meta_man->opened_rnic, &local_mr);
 
-    // RCQP* log_qp = meta_man->global_rdma_ctrl->create_rc_qp(
-    //     create_rc_idx(remote_node.node_id, (int)global_tid * 2 + 1),
-    //     meta_man->opened_rnic, &local_mr);
+    RCQP* log_qp = meta_man->global_rdma_ctrl->create_rc_qp(
+        create_rc_idx(remote_node.node_id, (int)global_tid * 2 + 1),
+        meta_man->opened_rnic, &local_mr);
 
     // Queue pair connection, exchange queue pair info via TCP
     ConnStatus rc;
@@ -41,18 +41,19 @@ void QPManager::BuildQPConnection(MetaManager* meta_man) {
       usleep(2000);
     } while (rc != SUCC);
 
-    // do {
-    //   rc = log_qp->connect(remote_node.ip, remote_node.port);
-    //   if (rc == SUCC) {
-    //     log_qp->bind_remote_mr(
-    //         remote_log_mr);  // Bind the log mr as the default remote mr for
-    //                          // convenient parameter passing
-    //     log_qps[remote_node.node_id] = log_qp;
-    //     // RDMA_LOG(INFO) << "Thread " << global_tid << ": Log QP connected!
-    //     // with remote node: " << remote_node.node_id << " ip: " <<
-    //     // remote_node.ip;
-    //   }
-    //   usleep(2000);
-    // } while (rc != SUCC);
+    do {
+      rc = log_qp->connect(remote_node.ip, remote_node.port);
+      if (rc == SUCC) {
+        log_qp->bind_remote_mr(
+            meta_man
+                ->log_hash_mrs[0]);  // Bind the log mr as the default remote mr
+                                     // for convenient parameter passing
+        log_qps[remote_node.node_id] = log_qp;
+        // RDMA_LOG(INFO) << "Thread " << global_tid << ": Log QP connected!
+        // with remote node: " << remote_node.node_id << " ip: " <<
+        // remote_node.ip;
+      }
+      usleep(2000);
+    } while (rc != SUCC);
   }
 }

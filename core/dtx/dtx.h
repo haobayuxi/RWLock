@@ -65,9 +65,17 @@ class DTX {
 
  private:
   // oocc
-  bool Validate(coro_yield_t& yield);  // RDMA read value versions
+  bool Validate(coro_yield_t& yield);
   bool OOCC(coro_yield_t& yield);
+  bool OccReadOnly(coro_yield_t& yield);
   bool CasWriteLockAndRead(coro_yield_t& yield);
+  // check
+
+  bool CheckReadRO(coro_yield_t& yield, , bool read_only);
+  bool CheckDirectRO(std::vector<DirectRead>& pending_direct_ro);
+  bool CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro);
+  bool CheckCasRw();
+  bool CheckHashRw();
   // drtm
   bool Drtm(coro_yield_t& yield);
 
@@ -81,7 +89,6 @@ class DTX {
   bool cas_lease_expired(uint64_t lease);
 
   //////////// check
-  bool CheckReadRO(coro_yield_t& yield);
   bool CheckCASRO(std::vector<CasRead>& pending_cas_ro,
                   std::vector<HashRead>& pending_hash_ro,
                   std::list<HashRead>& pending_next_hash_ro,
@@ -89,8 +96,6 @@ class DTX {
   bool CheckCASRead(std::vector<CasRead>& pending_cas_ro);
   bool CheckHashRO(std::vector<HashRead>& pending_hash_ro,
                    std::list<HashRead>& pending_next_hash_ro);
-  bool CheckDirectRO(std::vector<DirectRead>& pending_direct_ro);
-  bool CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro);
   bool CheckValidate(std::vector<ValidateRead>& pending_validate);
 
   // bool CoalescentCommit(coro_yield_t& yield);
@@ -117,6 +122,7 @@ class DTX {
   // For statistics
   std::vector<uint64_t> lock_durations;  // us
   long long start_time;
+  long long wlock_start_time;
 
   std::vector<uint64_t> invisible_durations;  // us
 
@@ -187,6 +193,7 @@ void DTX::TxBegin(tx_id_t txid) {
   pending_next_hash_ro.clear();
   pending_cas_ro.clear();
   start_time = 0;
+  wlock_start_time = 0;
 }
 
 ALWAYS_INLINE

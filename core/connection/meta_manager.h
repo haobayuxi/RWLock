@@ -75,8 +75,6 @@ class MetaManager {
  private:
   std::unordered_map<table_id_t, node_id_t> primary_table_nodes;
 
-  std::unordered_map<node_id_t, MemoryAttr> remote_log_mrs;
-
   node_id_t local_machine_id;
 
   std::unordered_map<table_id_t, HashMeta> primary_hash_metas;
@@ -90,6 +88,7 @@ class MetaManager {
   RNicHandler* opened_rnic;
 
   std::unordered_map<node_id_t, MemoryAttr> remote_hash_mrs;
+  std::unordered_map<node_id_t, MemoryAttr> remote_log_mrs;
 
   // Below are some parameteres from json file
   int64_t txn_system;
