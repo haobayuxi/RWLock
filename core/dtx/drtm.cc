@@ -65,9 +65,9 @@ bool DTX::Drtm(coro_yield_t& yield) {
   return true;
 }
 
-bool DTX::DrtmCheckHashRead(coro_yield_t& yield) {
-  // check if wlocked
-}
+// bool DTX::DrtmCheckHashRead(coro_yield_t& yield) {
+//   // check if wlocked
+// }
 
 bool DTX::DrtmCheckCas(coro_yield_t& yield) {
   // check cas
