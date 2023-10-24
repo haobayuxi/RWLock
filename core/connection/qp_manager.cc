@@ -46,8 +46,8 @@ void QPManager::BuildQPConnection(MetaManager* meta_man) {
       if (rc == SUCC) {
         log_qp->bind_remote_mr(
             meta_man
-                ->log_hash_mrs[0]);  // Bind the log mr as the default remote mr
-                                     // for convenient parameter passing
+                ->remote_log_mrs[0]);  // Bind the log mr as the default remote
+                                       // mr for convenient parameter passing
         log_qps[remote_node.node_id] = log_qp;
         // RDMA_LOG(INFO) << "Thread " << global_tid << ": Log QP connected!
         // with remote node: " << remote_node.node_id << " ip: " <<
