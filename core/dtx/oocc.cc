@@ -94,28 +94,26 @@ bool DTX::CasWriteLockAndRead(coro_yield_t& yield) {
       }
     } else {
       // Only read
-      // miss_local_cache_times++;
-      not_eager_locked_rw_set.emplace_back(i);
       const HashMeta& meta =
           global_meta_man->GetPrimaryHashMetaWithTableID(it->table_id);
       uint64_t idx = MurmurHash64A(it->key, 0xdeadbeef) % meta.bucket_num;
       offset_t node_off = idx * meta.node_size + meta.base_off;
       char* local_hash_node = thread_rdma_buffer_alloc->Alloc(sizeof(HashNode));
-      if (it->user_insert) {
-        pending_insert_off_rw.emplace_back(
-            InsertOffRead{.qp = qp,
-                          .item = &read_write_set[i],
-                          .buf = local_hash_node,
-                          .remote_node = remote_node_id,
-                          .meta = meta,
-                          .node_off = node_off});
-      } else {
-        pending_hash_rw.emplace_back(HashRead{.qp = qp,
-                                              .item = &read_write_set[i],
-                                              .buf = local_hash_node,
-                                              .remote_node = remote_node_id,
-                                              .meta = meta});
-      }
+      //   if (it->user_insert) {
+      //     pending_insert_off_rw.emplace_back(
+      //         InsertOffRead{.qp = qp,
+      //                       .item = &read_write_set[i],
+      //                       .buf = local_hash_node,
+      //                       .remote_node = remote_node_id,
+      //                       .meta = meta,
+      //                       .node_off = node_off});
+      //   } else {
+      pending_hash_rw.emplace_back(HashRead{.qp = qp,
+                                            .item = &read_write_set[i],
+                                            .buf = local_hash_node,
+                                            .remote_node = remote_node_id,
+                                            .meta = meta});
+      //   }
       if (!coro_sched->RDMARead(coro_id, qp, local_hash_node, node_off,
                                 sizeof(HashNode))) {
         return false;
@@ -159,8 +157,6 @@ bool DTX::CheckValidate(std::vector<ValidateRead>& pending_validate) {
     auto it = re.item->item_ptr;
     // Compare version
     if (it->version != *((version_t*)re.version_buf)) {
-      // RDMA_LOG(DBG) << "MY VERSION " << it->version;
-      // RDMA_LOG(DBG) << "version_buf " << *((version_t*)re.version_buf);
       return false;
     }
   }
@@ -313,8 +309,13 @@ bool DTX::CheckReadRO(coro_yield_t& yield, bool read_only) {
 }
 
 bool DTX::CheckCasRw() {
-  //   for () {
-  //   }
+  // check if w locked
+  for (auto& res : pending_cas_ro) {
+    // auto* it = res.item->item_ptr.get();
+    res.item->is_fetched = true;
+    auto cas = (uint64_t)*res.cas_buf;
+    if (cas != tx_id) return false;
+  }
   return true;
 }
 
