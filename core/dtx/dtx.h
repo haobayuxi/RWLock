@@ -71,7 +71,7 @@ class DTX {
   bool DrtmCheckCas(coro_yield_t& yield);
 
   bool Dlmr(coro_yield_t& yield);
-  bool DlmrExeRO(coro_yield_t& yield);
+  bool DlmrCheck(coro_yield_t& yield);
 
   bool ExeRW(coro_yield_t& yield);
 
@@ -152,6 +152,7 @@ class DTX {
   std::vector<HashRead> pending_hash_ro;
 
   std::list<HashRead> pending_next_hash_ro;
+  std::vector<CasRead>& pending_cas_ro;
 
   // For validate the version for insertion
   // std::vector<OldVersionForInsert> old_version_for_insert;
@@ -181,6 +182,7 @@ void DTX::TxBegin(tx_id_t txid) {
   pending_hash_ro.clear();
 
   pending_next_hash_ro.clear();
+  pending_cas_ro.clear();
   start_time = 0;
 }
 
