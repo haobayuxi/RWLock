@@ -6,6 +6,7 @@ bool DTX::CheckDirectRO(std::vector<DirectRead>& pending_direct_ro) {
   // check if the tuple has been wlocked
   for (auto& res : pending_direct_ro) {
     // auto* it = res.item->item_ptr.get();
+    res.is_fetched = true;
     auto* fetched_item = (DataItem*)res.buf;
     if (fetched_item->lock == W_LOCKED) return false;
   }
@@ -35,6 +36,7 @@ bool DTX::CheckHashRO(std::vector<HashRead>& pending_hash_ro,
       if (unlikely(it->lock == W_LOCKED)) {
         return false;
       } else {
+        res.is_fetched = true;
         if (local_hash_node->next == nullptr) return false;
         // Not found, we need to re-read the next bucket
         auto node_off = (uint64_t)local_hash_node->next - res.meta.data_ptr +
@@ -76,6 +78,7 @@ bool DTX::CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro) {
       if (unlikely(it->lock == W_LOCKED)) {
         return false;
       } else {
+        res.is_fetched = true;
         if (local_hash_node->next == nullptr) return false;
         // Not found, we need to re-read the next bucket
         auto node_off = (uint64_t)local_hash_node->next - res.meta.data_ptr +
@@ -127,16 +130,24 @@ bool DTX::CheckCASRO(std::vector<CasRead>& pending_cas_ro,
   return true;
 }
 
-bool DTX::CheckCASRead(std::vector<CasRead>& pending_cas_ro) {
+bool DTX::CheckCASRead(std::vector<CasRead>& pending_cas_ro) {}
+
+bool DTX::DrtmCheckCas(std::vector<CasRead>& pending_cas_ro,
+                       coro_yield_t& yield) {
+  // check cas
   std::vector<CasRead> pending_next_cas;
   for (auto& res : pending_cas_ro) {
     auto lock = (uint64_t)res.cas_buf;
     auto lease = lock >> 1;
     if (!cas_lease_expired(lease)) {
-      // lease expired
-      //   pending_next_cas.emplace_back()
+      // lease expired, retry to get read lock
+
+      pending_next_cas.emplace_back()
     }
-    if (lock % 2 == 1) return false;
+    if (lock % 2 == 1) {
+      // write locked
+      return false;
+    }
   }
   return true;
 }

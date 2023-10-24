@@ -65,7 +65,7 @@ __thread ZipfGen* zipf_gen = nullptr;
 __thread bool is_skewed;
 __thread uint64_t data_set_size;
 __thread uint64_t num_keys_global;
-__thread uint64_t write_ratio;
+__thread uint64_t rw_ratio;
 
 // // Stat the commit rate
 __thread uint64_t* thread_local_try_times;
@@ -472,7 +472,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
     // stat_attempted_tx_total++;
     // clock_gettime(CLOCK_REALTIME, &tx_start_time);
     tx_committed = TxReadOnly(zipf_gen, &seed, yield, iter, dtx, is_skewed,
-                              data_set_size, num_keys_global, 0);
+                              data_set_size, num_keys_global, rw_ratio);
 
     /********************************** Stat begin
      * *****************************************/
@@ -518,7 +518,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
 //     clock_gettime(CLOCK_REALTIME, &tx_start_time);
 //     tx_committed =
 //         TxLockContention(zipf_gen, &seed, yield, iter, dtx, is_skewed,
-//                          data_set_size, num_keys_global, write_ratio);
+//                          data_set_size, num_keys_global, rw_ratio);
 //     /********************************** Stat begin
 //      * *****************************************/
 //     // Stat after one transaction finishes
@@ -633,7 +633,7 @@ void run_thread(thread_params* params) {
   //   num_keys_global = align_pow2(micro_conf.get("num_keys").get_int64());
   //   auto zipf_theta = micro_conf.get("zipf_theta").get_double();
   //   is_skewed = micro_conf.get("is_skewed").get_bool();
-  //   write_ratio = micro_conf.get("write_ratio").get_uint64();
+  //   rw_ratio = micro_conf.get("rw_ratio").get_uint64();
   //   data_set_size = micro_conf.get("data_set_size").get_uint64();
   //   zipf_gen =
   //       new ZipfGen(num_keys_global, zipf_theta, zipf_seed &
@@ -667,7 +667,7 @@ void run_thread(thread_params* params) {
     num_keys_global = align_pow2(micro_conf.get("num_keys").get_int64());
     auto zipf_theta = micro_conf.get("zipf_theta").get_double();
     is_skewed = micro_conf.get("is_skewed").get_bool();
-    write_ratio = micro_conf.get("write_ratio").get_uint64();
+    rw_ratio = micro_conf.get("rw_ratio").get_uint64();
     data_set_size = micro_conf.get("data_set_size").get_uint64();
     zipf_gen =
         new ZipfGen(num_keys_global, zipf_theta, zipf_seed & zipf_seed_mask);

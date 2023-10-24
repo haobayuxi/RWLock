@@ -67,8 +67,13 @@ class DTX {
   bool Validate(coro_yield_t& yield);  // RDMA read value versions
   bool RWLock(coro_yield_t& yield);
   bool Drtm(coro_yield_t& yield);
+
+  bool DrtmCheckCas(coro_yield_t& yield);
+
   bool Dlmr(coro_yield_t& yield);
-  bool OCC(coro_yield_t& yield);
+  bool DlmrExeRO(coro_yield_t& yield);
+
+  bool ExeRW(coro_yield_t& yield);
 
   bool cas_lease_expired(uint64_t lease);
 
@@ -119,6 +124,7 @@ class DTX {
   size_t miss_local_cache_times;
 
   MetaManager* global_meta_man;  // Global metadata manager
+  int rw_ratio;
 
  private:
   int lease;

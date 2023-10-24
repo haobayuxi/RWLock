@@ -107,8 +107,14 @@ bool TxLockContention(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
 
 bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
                 tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size,
-                uint64_t num_keys_global, uint64_t write_ratio) {
+                uint64_t num_keys_global, uint64_t rw_ratio) {
   dtx->TxBegin(tx_id);
+  bool read_only = true;
+  dtx->rw_ratio += 1;
+  if (dtx->rw_ratio == rw_ratio) {
+    read_only = false;
+    rw_ratio = 0;
+  }
   for (int i = 0; i < data_set_size; i++) {
     micro_key_t micro_key;
     if (is_skewed) {
@@ -124,8 +130,11 @@ bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
 
     DataItemPtr micro_obj = std::make_shared<DataItem>(
         (table_id_t)MicroTableType::kMicroTable, micro_key.item_key);
-
-    dtx->AddToReadOnlySet(micro_obj);
+    if (read_only) {
+      dtx->AddToReadOnlySet(micro_obj);
+    } else {
+      dtx->AddToReadWriteSet(micro_obj);
+    }
   }
 
   if (!dtx->TxExe(yield)) {
