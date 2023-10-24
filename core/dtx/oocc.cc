@@ -123,6 +123,26 @@ bool DTX::CasWriteLockAndRead(coro_yield_t& yield) {
   return true;
 }
 
+bool DTX::OOCCCheck(coro_yield_t& yield, bool read_only) {
+  if (!CheckDirectRO(pending_direct_ro)) return false;
+  if (!CheckHashRO(pending_hash_ro, pending_next_hash_ro)) return false;
+  if (!read_only) {
+    // check rw results
+    if (!OccCheckCasRw()) return false;
+    if (!OccCheckHashRw()) return false;
+  }
+
+  // During results checking, we may re-read data due to invisibility and hash
+  // collisions
+  while (unlikely(!pending_next_hash_ro.empty() || !pending_cas_rw.empty)) {
+    coro_sched->Yield(yield, coro_id);
+    if (!CheckNextHashRO(pending_next_hash_ro)) return false;
+    if (!OccCheckCasRw()) return false;
+  }
+
+  return true;
+}
+
 bool DTX::Validate(coro_yield_t& yield) {
   // The transaction is read-write, and all the written data have
   // been locked before
@@ -230,21 +250,20 @@ bool DTX::CheckHashRO(std::vector<HashRead>& pending_hash_ro,
     if (likely(find)) {
       if (unlikely(it->lock == W_LOCKED)) {
         return false;
-      } else {
-        if (local_hash_node->next == nullptr) return false;
-        // Not found, we need to re-read the next bucket
-        auto node_off = (uint64_t)local_hash_node->next - res.meta.data_ptr +
-                        res.meta.base_off;
-        pending_next_hash_ro.emplace_back(
-            HashRead{.qp = res.qp,
-                     .item = res.item,
-                     .buf = res.buf,
-                     .remote_node = res.remote_node,
-                     .meta = res.meta});
-        if (!coro_sched->RDMARead(coro_id, res.qp, res.buf, node_off,
-                                  sizeof(HashNode)))
-          return false;
       }
+    } else {
+      if (local_hash_node->next == nullptr) return false;
+      // Not found, we need to re-read the next bucket
+      auto node_off = (uint64_t)local_hash_node->next - res.meta.data_ptr +
+                      res.meta.base_off;
+      pending_next_hash_ro.emplace_back(HashRead{.qp = res.qp,
+                                                 .item = res.item,
+                                                 .buf = res.buf,
+                                                 .remote_node = res.remote_node,
+                                                 .meta = res.meta});
+      if (!coro_sched->RDMARead(coro_id, res.qp, res.buf, node_off,
+                                sizeof(HashNode)))
+        return false;
     }
   }
   return true;
@@ -271,44 +290,26 @@ bool DTX::CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro) {
     if (likely(find)) {
       if (unlikely(it->lock == W_LOCKED)) {
         return false;
-      } else {
-        if (local_hash_node->next == nullptr) return false;
-        // Not found, we need to re-read the next bucket
-        auto node_off = (uint64_t)local_hash_node->next - res.meta.data_ptr +
-                        res.meta.base_off;
-        pending_next_hash_ro.emplace_back(
-            HashRead{.qp = res.qp,
-                     .item = res.item,
-                     .buf = res.buf,
-                     .remote_node = res.remote_node,
-                     .meta = res.meta});
-        if (!coro_sched->RDMARead(coro_id, res.qp, res.buf, node_off,
-                                  sizeof(HashNode)))
-          return false;
       }
+    } else {
+      if (local_hash_node->next == nullptr) return false;
+      // Not found, we need to re-read the next bucket
+      auto node_off = (uint64_t)local_hash_node->next - res.meta.data_ptr +
+                      res.meta.base_off;
+      pending_next_hash_ro.emplace_back(HashRead{.qp = res.qp,
+                                                 .item = res.item,
+                                                 .buf = res.buf,
+                                                 .remote_node = res.remote_node,
+                                                 .meta = res.meta});
+      if (!coro_sched->RDMARead(coro_id, res.qp, res.buf, node_off,
+                                sizeof(HashNode)))
+        return false;
     }
   }
   return true;
 }
 
-bool DTX::OOCCCheck(coro_yield_t& yield, bool read_only) {
-  if (!CheckDirectRO(pending_direct_ro)) return false;
-  if (!CheckHashRO(pending_hash_ro, pending_next_hash_ro)) return false;
-  if (!read_only) {
-    // check rw results
-  }
-
-  // During results checking, we may re-read data due to invisibility and hash
-  // collisions
-  while (unlikely(!pending_next_hash_ro.empty())) {
-    coro_sched->Yield(yield, coro_id);
-    if (!CheckNextHashRO(pending_next_hash_ro)) return false;
-  }
-
-  return true;
-}
-
-bool DTX::CheckCasRw() {
+bool DTX::OccCheckCasRw() {
   // check if w locked
   for (auto& res : pending_cas_ro) {
     // auto* it = res.item->item_ptr.get();
@@ -319,4 +320,62 @@ bool DTX::CheckCasRw() {
   return true;
 }
 
-bool DTX::CheckHashRw() { return true; }
+bool DTX::OccCheckHashRw() {
+  // find the tuple
+  for (auto& res : pending_hash_rw) {
+    auto* local_hash_node = (HashNode*)res.buf;
+    auto* it = res.item->item_ptr.get();
+    bool find = false;
+
+    for (auto& item : local_hash_node->data_items) {
+      if (item.valid && item.key == it->key && item.table_id == it->table_id) {
+        *it = item;
+        addr_cache->Insert(res.remote_node, it->table_id, it->key,
+                           it->remote_offset);
+        res.item->is_fetched = true;
+        find = true;
+        break;
+      }
+    }
+    if (likely(find)) {
+      if (unlikely(it->lock != 0)) {
+        // w lock by others
+        return false;
+      } else {
+        // lock and read the tuple
+        char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
+        char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
+        pending_cas_rw.emplace_back(
+            CasRead{.qp = res.qp,
+                    .item = &read_write_set[i],
+                    .cas_buf = cas_buf,
+                    .data_buf = data_buf,
+                    .primary_node_id = res.remote_node_id});
+        if (!coro_sched->RDMACAS(coro_id, res.qp, cas_buf,
+                                 it->GetRemoteLockAddr(it->remote_offset), 0,
+                                 tx_id)) {
+          return false;
+        }
+        if (!coro_sched->RDMARead(coro_id, res.qp, data_buf, it->remote_offset,
+                                  DataItemSize)) {
+          return false;
+        }
+      }
+    } else {
+      if (local_hash_node->next == nullptr) return false;
+      // Not found, we need to re-read the next bucket
+      auto node_off = (uint64_t)local_hash_node->next - res.meta.data_ptr +
+                      res.meta.base_off;
+      pending_next_hash_ro.emplace_back(HashRead{.qp = res.qp,
+                                                 .item = res.item,
+                                                 .buf = res.buf,
+                                                 .remote_node = res.remote_node,
+                                                 .meta = res.meta});
+      if (!coro_sched->RDMARead(coro_id, res.qp, res.buf, node_off,
+                                sizeof(HashNode)))
+        return false;
+    }
+  }
+
+  return true;
+}
