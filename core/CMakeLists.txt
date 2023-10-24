@@ -11,6 +11,8 @@ set(DTX_SRC
         dtx/dtx.cc
         dtx/dtx_exe_commit.cc
         dtx/dtx_check.cc
+        dtx/drtm.cc
+        dtx/dlmr.cc
         )
 
 set(SCHEDULER_SRC

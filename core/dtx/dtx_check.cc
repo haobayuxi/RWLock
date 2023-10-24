@@ -139,7 +139,7 @@ bool DTX::DrtmCheckCas(coro_yield_t& yield) {
     if (!cas_lease_expired(lease)) {
       // lease expired, retry to get read lock
 
-      pending_next_cas.emplace_back()
+      // pending_next_cas.emplace_back()
     }
     if (lock % 2 == 1) {
       // write locked
