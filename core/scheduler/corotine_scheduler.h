@@ -387,6 +387,7 @@ void CoroutineScheduler::AppendCoroutine(Coroutine* coro) {
 }
 ALWAYS_INLINE
 void CoroutineScheduler::PollRegularCompletion() {
+  RDMA_LOG(INFO) << "pending qp size= " << pending_qps.size();
   for (auto it = pending_qps.begin(); it != pending_qps.end();) {
     RCQP* qp = *it;
     struct ibv_wc wc;
