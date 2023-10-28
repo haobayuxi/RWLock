@@ -159,11 +159,11 @@ bool DTX::OOCCCheck(coro_yield_t& yield) {
 
 bool DTX::CheckDirectRO() {
   // check if the tuple has been wlocked
-
-  for (auto& res : pending_direct_ro) {
+  auto len = pending_direct_ro.size();
+  for (int i = 0; i < len; i++) {
     // auto* it = res.item->item_ptr.get();
-    res.item->is_fetched = true;
-    auto* fetched_item = (DataItem*)res.buf;
+    pending_direct_ro[i].item->is_fetched = true;
+    auto* fetched_item = (DataItem*)pending_direct_ro[i].buf;
     if (fetched_item->lock == W_LOCKED) return false;
   }
   //   pending_direct_ro.clear();
