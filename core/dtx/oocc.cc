@@ -138,7 +138,7 @@ bool DTX::OOCCCheck(coro_yield_t& yield, bool read_only) {
   if (!CheckDirectRO()) return false;
   if (!CheckCAS()) return false;
   if (!CheckHash()) return false;
-  auto end = get_clock_sys_time_us();
+  end = get_clock_sys_time_us();
   RDMA_LOG(INFO) << "cost time =" << end - start_time;
   // During results checking, we may re-read data due to invisibility and hash
   // collisions
