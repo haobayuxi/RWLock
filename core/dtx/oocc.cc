@@ -256,6 +256,7 @@ bool DTX::CheckNextHash() {
       if (unlikely(it->lock == W_LOCKED)) {
         return false;
       }
+      iter = pending_next_hash.erase(iter);
     } else {
       if (local_hash_node->next == nullptr) return false;
       // Not found, we need to re-read the next bucket
