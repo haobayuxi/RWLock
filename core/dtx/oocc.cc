@@ -25,7 +25,7 @@ bool DTX::OOCC(coro_yield_t& yield) {
   //   }
   // Receive data
   auto end_time = get_clock_sys_time_us();
-  if ((end_time - start_time) > 10) {
+  if ((end_time - start_time) > 5) {
     RDMA_LOG(INFO) << "cost time =" << end_time - start_time << "  " << expire;
     expire += 1;
   }
