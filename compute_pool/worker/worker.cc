@@ -685,34 +685,34 @@ void run_thread(thread_params* params) {
   qp_man = new QPManager(thread_gid);
 
   // Init coroutines
-  for (coro_id_t coro_i = 0; coro_i < coro_num; coro_i++) {
-    uint64_t coro_seed =
-        static_cast<uint64_t>((static_cast<uint64_t>(thread_gid) << 32) |
-                              static_cast<uint64_t>(coro_i));
-    // random_generator[coro_i].SetSeed(coro_seed);
-    coro_sched->coro_array[coro_i].coro_id = coro_i;
-    // Bind workload to coroutine
-    if (coro_i == POLL_ROUTINE_ID) {
-      coro_sched->coro_array[coro_i].func =
-          coro_call_t(bind(PollCompletion, _1));
-    } else {
-      // if (bench_name == "tatp") {
-      //   coro_sched->coro_array[coro_i].func =
-      //       coro_call_t(bind(RunTATP, _1, coro_i));
-      // }else if (bench_name == "tpcc") {
-      //   coro_sched->coro_array[coro_i].func =
-      //       coro_call_t(bind(RunTPCC, _1, coro_i));
-      // } else if (bench_name == "micro") {
-      coro_sched->coro_array[coro_i].func =
-          coro_call_t(bind(RunMICRO, _1, coro_i, qp_man, params->lease));
-      // coro_sched->coro_array[coro_i].func =
-      //     coro_call_t(bind(test_iops, _1, coro_i, qp_man));
-      // }
-    }
-  }
+  // for (coro_id_t coro_i = 0; coro_i < coro_num; coro_i++) {
+  //   uint64_t coro_seed =
+  //       static_cast<uint64_t>((static_cast<uint64_t>(thread_gid) << 32) |
+  //                             static_cast<uint64_t>(coro_i));
+  //   // random_generator[coro_i].SetSeed(coro_seed);
+  //   coro_sched->coro_array[coro_i].coro_id = coro_i;
+  //   // Bind workload to coroutine
+  //   if (coro_i == POLL_ROUTINE_ID) {
+  //     coro_sched->coro_array[coro_i].func =
+  //         coro_call_t(bind(PollCompletion, _1));
+  //   } else {
+  //     // if (bench_name == "tatp") {
+  //     //   coro_sched->coro_array[coro_i].func =
+  //     //       coro_call_t(bind(RunTATP, _1, coro_i));
+  //     // }else if (bench_name == "tpcc") {
+  //     //   coro_sched->coro_array[coro_i].func =
+  //     //       coro_call_t(bind(RunTPCC, _1, coro_i));
+  //     // } else if (bench_name == "micro") {
+  //     coro_sched->coro_array[coro_i].func =
+  //         coro_call_t(bind(RunMICRO, _1, coro_i, qp_man, params->lease));
+  //     // coro_sched->coro_array[coro_i].func =
+  //     //     coro_call_t(bind(test_iops, _1, coro_i, qp_man));
+  //     // }
+  //   }
+  // }
 
   // Link all coroutines via pointers in a loop manner
-  coro_sched->LoopLinkCoroutine(coro_num);
+  // coro_sched->LoopLinkCoroutine(coro_num);
 
   // Build qp connection in thread granularity
   // RDMA_LOG(INFO) << "qpman gid = " << qp_man->global_tid;
@@ -723,9 +723,10 @@ void run_thread(thread_params* params) {
   while (connected_t_num != thread_num) {
     usleep(2000);  // wait for all threads connections
   }
+  RunMICRO(_1, 0, qp_man, params->lease);
 
   // Start the first coroutine
-  coro_sched->coro_array[0].func();
+  // coro_sched->coro_array[0].func();
 
   // Stop running
   stop_run = true;

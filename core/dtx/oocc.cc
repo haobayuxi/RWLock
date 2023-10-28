@@ -12,7 +12,15 @@ bool DTX::OOCC(coro_yield_t& yield) {
   if (start_time == 0) {
     start_time = get_clock_sys_time_us();
   }
-  coro_sched->Yield(yield, coro_id);
+  //   coro_sched->Yield(yield, coro_id);
+  RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(0);
+  while (true) {
+    struct ibv_wc wc;
+    auto poll_result = qp->poll_send_completion(wc);
+    if (poll_result != 0) {
+      break;
+    }
+  }
   //   if (!read_only) {
   //     auto _wlock_start_time = get_clock_sys_time_us();
   //     if (wlock_start_time < _wlock_start_time) {
