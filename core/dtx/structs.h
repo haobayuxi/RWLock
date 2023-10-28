@@ -14,9 +14,9 @@ enum DTX_SYS : int {
 };
 
 enum OP : int {
-  read = 0,
-  write = 1,
-  insert = 2,
+  Read = 0,
+  Write = 1,
+  Insert = 2,
 };
 
 enum TXStatus : int {

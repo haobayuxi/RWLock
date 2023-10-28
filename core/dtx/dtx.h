@@ -86,8 +86,6 @@ class DTX {
   // bool Dlmr(coro_yield_t& yield);
   // bool DlmrCheck(coro_yield_t& yield);
 
-  // bool ExeRW(coro_yield_t& yield);
-
   // bool cas_lease_expired(uint64_t lease);
 
   //////////// check

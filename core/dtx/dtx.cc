@@ -27,12 +27,6 @@ DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t _tid,
   miss_local_cache_times = 0;
 }
 
-bool DTX::ExeRW(coro_yield_t& yield) {
-  for (auto& item : read_write_set) {
-    // cas lock
-  }
-}
-
 void DTX::Abort() {
   // When failures occur, transactions need to be aborted.
   // In general, the transaction will not abort during committing replicas if
