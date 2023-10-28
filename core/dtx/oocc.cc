@@ -138,6 +138,10 @@ bool DTX::CasWriteLockAndRead(coro_yield_t& yield) {
 bool DTX::OOCCCheck(coro_yield_t& yield) {
   //   auto end = get_clock_sys_time_us();
   if (!CheckDirectRO()) return false;
+  auto end_time = get_clock_sys_time_us();
+  if ((end_time - start_time) > 100) {
+    RDMA_LOG(INFO) << "cost time =" << end_time - start_time;
+  }
   //   if (!CheckCAS()) return false;
   if (!CheckHash()) return false;
 
