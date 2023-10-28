@@ -72,6 +72,7 @@ __thread uint64_t* thread_local_try_times;
 __thread uint64_t* thread_local_commit_times;
 
 // Coroutine 0 in each thread does polling
+ALWAYS_INLINE
 void PollCompletion(coro_yield_t& yield) {
   while (true) {
     coro_sched->PollCompletion();
