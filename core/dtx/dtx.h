@@ -181,7 +181,6 @@ ALWAYS_INLINE
 void DTX::TxBegin(tx_id_t txid) {
   Clean();  // Clean the last transaction states
   tx_id = txid;
-  read_only_set.clear();
   pending_direct_ro.clear();
   pending_hash.clear();
   // pending_hash_rw.clear();
