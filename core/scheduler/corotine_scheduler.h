@@ -449,7 +449,7 @@ void CoroutineScheduler::PollLogCompletion() {
 ALWAYS_INLINE
 void CoroutineScheduler::PollCompletion() {
   PollRegularCompletion();
-  // PollLogCompletion();
+  PollLogCompletion();
 }
 ALWAYS_INLINE
 bool CoroutineScheduler::CheckLogAck(coro_id_t c_id) {
