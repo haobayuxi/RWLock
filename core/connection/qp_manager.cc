@@ -17,7 +17,7 @@ void QPManager::BuildQPConnection(MetaManager* meta_man) {
         meta_man->global_rdma_ctrl->get_local_mr(CLIENT_MR_ID);
     // RDMA_LOG(INFO) << "build qp connection " << global_tid;
     RCQP* data_qp = meta_man->global_rdma_ctrl->create_rc_qp(
-        create_rc_idx(remote_node.node_id, (int)global_tid),
+        create_rc_idx(remote_node.node_id, (int)global_tid * 2),
         meta_man->opened_rnic, &local_mr);
 
     RCQP* log_qp = meta_man->global_rdma_ctrl->create_rc_qp(

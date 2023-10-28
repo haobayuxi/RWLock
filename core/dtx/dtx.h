@@ -95,8 +95,6 @@ class DTX {
   bool CheckNextHash();
   bool CheckValidate(std::vector<ValidateRead>& pending_validate);
 
-  // bool CoalescentCommit(coro_yield_t& yield);
-
   void Abort();
 
   bool RDMAWriteRoundTrip(RCQP* qp, char* wt_data, uint64_t remote_offset,
