@@ -170,7 +170,7 @@ void Handler::GenThreads(std::string bench_name) {
       RDMA_LOG(WARNING) << "Error calling pthread_setaffinity_np: " << rc;
     }
   }
-  sleep(5);
+  // sleep(5);
   memset(micro_commit, 0, 100 * sizeof(uint64_t));
 
   clock_gettime(CLOCK_REALTIME, &msr_start);
