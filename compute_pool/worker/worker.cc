@@ -723,11 +723,11 @@ void run_thread(thread_params* params) {
   while (connected_t_num != thread_num) {
     usleep(2000);  // wait for all threads connections
   }
-  coro_yield_t t = NULL;
+  coro_yield_t t = 0;
   RunMICRO(&t, 0, qp_man, params->lease);
 
   // Start the first coroutine
-  // coro_sched->coro_array[0].func();
+  coro_sched->coro_array[0].func();
 
   // Stop running
   stop_run = true;
