@@ -262,8 +262,8 @@ bool CoroutineScheduler::RDMARead(coro_id_t coro_id, RCQP* qp, char* rd_data,
   auto rc = qp->post_send(IBV_WR_RDMA_READ, rd_data, size, remote_offset,
                           IBV_SEND_SIGNALED, coro_id);
   if (rc != SUCC) {
-    RDMA_LOG(ERROR) << "client: post read fail. rc=" << rc << ", tid = " << t_id
-                    << ", coroid = " << coro_id;
+    RDMA_LOG(INFO) << "client: post read fail. rc=" << rc << ", tid = " << t_id
+                   << ", coroid = " << coro_id;
     return false;
   }
   AddPendingQP(coro_id, qp);
