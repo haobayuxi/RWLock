@@ -1,5 +1,7 @@
 #include "dtx.h"
 
+int expire = 0;
+
 bool DTX::OOCC(coro_yield_t& yield) {
   //   bool read_only = read_write_set.empty();
   OccReadOnly(yield);
@@ -24,7 +26,8 @@ bool DTX::OOCC(coro_yield_t& yield) {
   // Receive data
   auto end_time = get_clock_sys_time_us();
   if ((end_time - start_time) > 10) {
-    RDMA_LOG(INFO) << "cost time =" << end_time - start_time;
+    RDMA_LOG(INFO) << "cost time =" << end_time - start_time << "  " << expire;
+    expire += 1;
   }
   auto res = OOCCCheck(yield);
   //   if (res && !read_only) {
