@@ -134,12 +134,14 @@ bool DTX::CasWriteLockAndRead(coro_yield_t& yield) {
 
 bool DTX::OOCCCheck(coro_yield_t& yield, bool read_only) {
   auto end = get_clock_sys_time_us();
-  RDMA_LOG(INFO) << "cost time =" << end - start_time;
   if (!CheckDirectRO()) return false;
-  //   if (!CheckCAS()) return false;
+  if (!CheckCAS()) return false;
   if (!CheckHash()) return false;
-  end = get_clock_sys_time_us();
+
+  auto end1 = get_clock_sys_time_us();
+
   RDMA_LOG(INFO) << "cost time =" << end - start_time;
+  RDMA_LOG(INFO) << "cost time =" << end1 - start_time;
   // During results checking, we may re-read data due to invisibility and hash
   // collisions
   //   while (unlikely(!pending_next_hash.empty() || !pending_cas.empty())) {
