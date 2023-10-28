@@ -57,7 +57,8 @@ bool DTX::OccReadOnly(coro_yield_t& yield) {
                                          .item = &item,
                                          .buf = local_hash_node,
                                          .remote_node = remote_node_id,
-                                         .meta = meta});
+                                         .meta = meta,
+                                         .op = OP::read});
       if (!coro_sched->RDMARead(coro_id, qp, local_hash_node, node_off,
                                 sizeof(HashNode))) {
         return false;
