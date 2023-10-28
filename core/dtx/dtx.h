@@ -75,9 +75,6 @@ class DTX {
 
   bool OOCCCheck(coro_yield_t& yield, bool read_only);
   bool CheckDirectRO(std::vector<DirectRead>& pending_direct_ro);
-  bool CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro);
-  bool OccCheckCasRw();
-  bool OccCheckHashRw();
   // drtm
   // bool Drtm(coro_yield_t& yield);
 
@@ -89,13 +86,13 @@ class DTX {
   // bool cas_lease_expired(uint64_t lease);
 
   //////////// check
-  bool CheckCASRO(std::vector<CasRead>& pending_cas_ro,
-                  std::vector<HashRead>& pending_hash_ro,
-                  std::list<HashRead>& pending_next_hash_ro,
-                  coro_yield_t& yield);
-  bool CheckCASRead(std::vector<CasRead>& pending_cas_ro);
-  bool CheckHashRO(std::vector<HashRead>& pending_hash_ro,
-                   std::list<HashRead>& pending_next_hash_ro);
+  // bool CheckCASRO(std::vector<CasRead>& pending_cas_ro,
+  //                 std::vector<HashRead>& pending_hash_ro,
+  //                 std::list<HashRead>& pending_next_hash_ro,
+  //                 coro_yield_t& yield);
+  bool CheckCAS();
+  bool CheckHash();
+  bool CheckNextHash();
   bool CheckValidate(std::vector<ValidateRead>& pending_validate);
 
   // bool CoalescentCommit(coro_yield_t& yield);
