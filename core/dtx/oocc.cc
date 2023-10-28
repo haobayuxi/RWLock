@@ -89,7 +89,8 @@ bool DTX::CasWriteLockAndRead(coro_yield_t& yield) {
                                        .item = &read_write_set[i],
                                        .cas_buf = cas_buf,
                                        .data_buf = data_buf,
-                                       .primary_node_id = remote_node_id});
+                                       .primary_node_id = remote_node_id,
+                                       .op = OP::Write});
       if (!coro_sched->RDMACAS(coro_id, qp, cas_buf,
                                it->GetRemoteLockAddr(offset), 0, tx_id)) {
         return false;
@@ -136,7 +137,7 @@ bool DTX::OOCCCheck(coro_yield_t& yield, bool read_only) {
 
   // During results checking, we may re-read data due to invisibility and hash
   // collisions
-  while (unlikely(!pending_next_hash.empty() || !pending_cas.empty)) {
+  while (unlikely(!pending_next_hash.empty() || !pending_cas.empty())) {
     coro_sched->Yield(yield, coro_id);
     if (!CheckCAS()) return false;
     if (!CheckNextHash()) return false;

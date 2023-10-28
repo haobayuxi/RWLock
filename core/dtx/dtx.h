@@ -74,7 +74,7 @@ class DTX {
   // check
 
   bool OOCCCheck(coro_yield_t& yield, bool read_only);
-  bool CheckDirectRO(std::vector<DirectRead>& pending_direct_ro);
+  bool CheckDirectRO();
   // drtm
   // bool Drtm(coro_yield_t& yield);
 

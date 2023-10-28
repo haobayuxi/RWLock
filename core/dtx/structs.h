@@ -88,6 +88,7 @@ struct CasRead {
   char* cas_buf;
   char* data_buf;
   node_id_t primary_node_id;
+  OP op;
 };
 
 struct InsertOffRead {
