@@ -4,6 +4,7 @@ bool DTX::OOCC(coro_yield_t& yield) {
   bool read_only = read_write_set.empty();
   OccReadOnly(yield);
   if (!read_only) {
+    RDMA_LOG(INFO) << "read write";
     CasWriteLockAndRead(yield);
   }
   if (start_time == 0) {
