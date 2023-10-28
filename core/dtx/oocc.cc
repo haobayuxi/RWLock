@@ -332,12 +332,16 @@ bool DTX::Validate(coro_yield_t& yield) {
                                             .has_lock_in_validate = false});
     if (!coro_sched->RDMARead(coro_id, qp, version_buf,
                               it->GetRemoteVersionAddr(), sizeof(version_t))) {
+      RDMA_LOG(INFO) << "read version fail";
       return false;
     }
   }
   // Yield to other coroutines when waiting for network replies
   coro_sched->Yield(yield, coro_id);
   auto res = CheckValidate(pending_validate);
+  if (!res) {
+    RDMA_LOG(INFO) << "check version fail";
+  }
   return res;
 }
 
