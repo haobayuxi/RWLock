@@ -409,7 +409,6 @@ void CoroutineScheduler::PollRegularCompletion() {
       }
     }
     auto coro_id = wc.wr_id;
-    RDMA_LOG(INFO) << "coro id= " << coro_id;
     if (coro_id == 0) continue;
     assert(pending_counts[coro_id] > 0);
     pending_counts[coro_id] -= 1;
