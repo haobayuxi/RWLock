@@ -385,7 +385,7 @@ void CoroutineScheduler::AppendCoroutine(Coroutine* coro) {
   coro_tail->next_coro = coro_head;
   coro_tail->prev_coro = prev;
 }
-ALWAYS_INLINE
+
 void CoroutineScheduler::PollRegularCompletion() {
   for (auto it = pending_qps.begin(); it != pending_qps.end();) {
     RCQP* qp = *it;
@@ -417,7 +417,7 @@ void CoroutineScheduler::PollRegularCompletion() {
     it = pending_qps.erase(it);
   }
 }
-ALWAYS_INLINE
+
 void CoroutineScheduler::PollLogCompletion() {
   for (auto it = pending_log_qps.begin(); it != pending_log_qps.end();) {
     RCQP* qp = *it;
