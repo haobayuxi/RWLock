@@ -177,7 +177,7 @@ bool DTX::CheckCAS() {
       if (cas != tx_id) return false;
     }
   }
-  pending_cas.clear();
+  //   pending_cas.clear();
   return true;
 }
 
@@ -240,7 +240,7 @@ bool DTX::CheckHash() {
         return false;
     }
   }
-  pending_hash.clear();
+  //   pending_hash.clear();
   return true;
 }
 
