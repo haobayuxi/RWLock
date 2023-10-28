@@ -18,7 +18,11 @@ bool DTX::OOCC(coro_yield_t& yield) {
   }
 
   // Receive data
-  return OOCCCheck(yield, read_only);
+  auto res = OOCCCheck(yield, read_only);
+  if (res && !read_only) {
+    ParallelUndoLog();
+  }
+  return res;
 }
 
 bool DTX::OccReadOnly(coro_yield_t& yield) {
@@ -49,11 +53,11 @@ bool DTX::OccReadOnly(coro_yield_t& yield) {
       uint64_t idx = MurmurHash64A(it->key, 0xdeadbeef) % meta.bucket_num;
       offset_t node_off = idx * meta.node_size + meta.base_off;
       char* local_hash_node = thread_rdma_buffer_alloc->Alloc(sizeof(HashNode));
-      pending_hash_ro.emplace_back(HashRead{.qp = qp,
-                                            .item = &item,
-                                            .buf = local_hash_node,
-                                            .remote_node = remote_node_id,
-                                            .meta = meta});
+      pending_hash.emplace_back(HashRead{.qp = qp,
+                                         .item = &item,
+                                         .buf = local_hash_node,
+                                         .remote_node = remote_node_id,
+                                         .meta = meta});
       if (!coro_sched->RDMARead(coro_id, qp, local_hash_node, node_off,
                                 sizeof(HashNode))) {
         return false;
@@ -77,7 +81,7 @@ bool DTX::CasWriteLockAndRead(coro_yield_t& yield) {
       // hit_local_cache_times++;
       it->remote_offset = offset;
       locked_rw_set.emplace_back(i);
-      // After getting address, use doorbell CAS + READ
+      // After getting address, use CAS + READ
       char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
       char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
       pending_cas_rw.emplace_back(CasRead{.qp = qp,

@@ -114,9 +114,18 @@ bool DTX::TxCommit(coro_yield_t& yield) {
     // Next step. If read-write txns, we need to commit the updates to remote
     // replicas
     if (!read_write_set.empty()) {
-      // Write log
-
+      // check log ack
+      while (!coro_sched->CheckLogAck(coro_id)) {
+        ;  // wait
+      }
+      // wait until lease pass
+      end_time = get_clock_sys_time_us();
+      while ((end_time - wlock_start_time) < lease) {
+        end_time = get_clock_sys_time_us();
+      }
       // write data and unlock
+
+      coro_sched->Yield(yield, coro_id);
     }
   } else if (global_meta_man->txn_system == DTX_SYS::OCC) {
     /*
@@ -129,7 +138,7 @@ bool DTX::TxCommit(coro_yield_t& yield) {
     // Next step. If read-write txns, we need to commit the updates to remote
     // replicas
     if (!read_write_set.empty()) {
-      // Write log
+      // check log ack
 
       // write data and unlock
     }
@@ -163,3 +172,31 @@ ABORT:
   Abort();
   return false;
 }
+
+bool DTX::commit_data(coro_yield_t& yield) {
+  for (size_t i = 0; i < read_write_set.size(); i++) {
+    auto it = read_write_set[i].item_ptr;
+    auto remote_node_id = global_meta_man->GetPrimaryNodeID(it->table_id);
+    read_write_set[i].read_which_node = remote_node_id;
+    RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
+    auto offset = it->remote_offset;
+    locked_rw_set.emplace_back(i);
+    // After getting address, use doorbell CAS + READ
+    char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
+    char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
+    pending_cas_rw.emplace_back(CasRead{.qp = qp,
+                                        .item = &read_write_set[i],
+                                        .cas_buf = cas_buf,
+                                        .data_buf = data_buf,
+                                        .primary_node_id = remote_node_id});
+    if (!coro_sched->RDMACAS(coro_id, qp, cas_buf,
+                             it->GetRemoteLockAddr(offset), 0, tx_id)) {
+      return false;
+    }
+    if (!coro_sched->RDMAWrite(coro_id, qp, data_buf, offset, DataItemSize)) {
+      return false;
+    }
+  }
+  return true;
+}
+bool DTX::release_write_lock(coro_yield_t& yield) { return true; }

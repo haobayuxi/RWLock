@@ -13,6 +13,12 @@ enum DTX_SYS : int {
   OCC = 3,
 };
 
+enum OP : int {
+  read = 0,
+  write = 1,
+  insert = 2,
+};
+
 enum TXStatus : int {
   TX_INIT = 0,  // Transaction initialization
   TX_EXE,       // Transaction execution, read only
@@ -67,6 +73,7 @@ struct HashRead {
   char* buf;
   node_id_t remote_node;
   const HashMeta meta;
+  OP op;
 };
 
 struct InvisibleRead {

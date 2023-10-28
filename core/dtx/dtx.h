@@ -64,6 +64,8 @@ class DTX {
   // size_t GetAddrCacheSize() { return addr_cache->TotalAddrSize(); }
 
  private:
+  bool commit_data(coro_yield_t& yield);
+  bool release_write_lock(coro_yield_t& yield);
   // oocc
   bool Validate(coro_yield_t& yield);
   bool OOCC(coro_yield_t& yield);
@@ -77,16 +79,16 @@ class DTX {
   bool OccCheckCasRw();
   bool OccCheckHashRw();
   // drtm
-  bool Drtm(coro_yield_t& yield);
+  // bool Drtm(coro_yield_t& yield);
 
-  bool DrtmCheckCas(coro_yield_t& yield);
-  // dlmr
-  bool Dlmr(coro_yield_t& yield);
-  bool DlmrCheck(coro_yield_t& yield);
+  // bool DrtmCheckCas(coro_yield_t& yield);
+  // // dlmr
+  // bool Dlmr(coro_yield_t& yield);
+  // bool DlmrCheck(coro_yield_t& yield);
 
-  bool ExeRW(coro_yield_t& yield);
+  // bool ExeRW(coro_yield_t& yield);
 
-  bool cas_lease_expired(uint64_t lease);
+  // bool cas_lease_expired(uint64_t lease);
 
   //////////// check
   bool CheckCASRO(std::vector<CasRead>& pending_cas_ro,
@@ -158,12 +160,12 @@ class DTX {
 
   AddrCache* addr_cache;
   std::vector<DirectRead> pending_direct_ro;
-  std::vector<HashRead> pending_hash_ro;
-  std::vector<HashRead> pending_hash_rw;
-  std::list<HashRead> pending_next_hash_ro;
-  std::list<HashRead> pending_next_hash_rw;
-  std::vector<CasRead> pending_cas_ro;
-  std::vector<CasRead> pending_cas_rw;
+  std::vector<HashRead> pending_hash;
+  // std::vector<HashRead> pending_hash_rw;
+  std::list<HashRead> pending_next_hash;
+  // std::list<HashRead> pending_next_hash_rw;
+  // std::vector<CasRead> pending_cas_ro;
+  std::vector<CasRead> pending_cas;
 
   struct pair_hash {
     inline std::size_t operator()(
@@ -187,12 +189,12 @@ void DTX::TxBegin(tx_id_t txid) {
   Clean();  // Clean the last transaction states
   tx_id = txid;
   pending_direct_ro.clear();
-  pending_hash_ro.clear();
-  pending_hash_rw.clear();
-  pending_next_hash_ro.clear();
-  pending_next_hash_rw.clear();
-  pending_cas_ro.clear();
-  pending_cas_rw.clear();
+  pending_hash.clear();
+  // pending_hash_rw.clear();
+  pending_next_hash.clear();
+  // pending_next_hash_rw.clear();
+  pending_cas.clear();
+  // pending_cas_rw.clear();
   start_time = 0;
   wlock_start_time = 0;
 }

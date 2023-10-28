@@ -4,8 +4,11 @@ int read_only_lease = 1000;   // us
 int read_write_leaase = 400;  // us
 
 bool DTX::Drtm(coro_yield_t& yield) {
-  std::vector<CasRead> pending_cas_rw;
-  std::vector<HashRead> pending_hash_ro;
+  //   std::vector<CasRead> pending_cas_rw;
+  //   std::vector<HashRead> pending_hash_ro;
+
+  auto expired_time = start_time + read_only_lease;
+  auto swap = expired_time << 1;
   for (auto& item : read_only_set) {
     if (item.is_fetched) continue;
     auto it = item.item_ptr;
@@ -24,8 +27,6 @@ bool DTX::Drtm(coro_yield_t& yield) {
                                           .cas_buf = cas_buf,
                                           .data_buf = data_buf,
                                           .primary_node_id = remote_node_id});
-      auto expired_time = start_time + read_only_lease;
-      auto swap = expired_time << 1;
       if (!coro_sched->RDMACAS(coro_id, qp, cas_buf,
                                it->GetRemoteLockAddr(offset), 0, swap)) {
         return false;
@@ -69,21 +70,38 @@ bool DTX::Drtm(coro_yield_t& yield) {
 //   // check if wlocked
 // }
 
-bool DTX::DrtmCheckCas(coro_yield_t& yield) {
-  // check cas
-  std::vector<CasRead> pending_next_cas;
-  for (auto& res : pending_cas_ro) {
+bool DTX::DrTMCheckDirectRO() {
+  //
+  for (auto& res : pending_cas) {
+    auto it = res.item->item_ptr;
+    auto* fetched_item = (DataItem*)(res.data_buf);
+    // check the lease
     auto lock = (uint64_t)res.cas_buf;
+    if (lock % 2 == 1) {
+      // write locked
+      return false;
+    }
     auto lease = lock >> 1;
+
     if (!cas_lease_expired(lease)) {
       // lease expired, retry to get read lock
 
       // pending_next_cas.emplace_back()
     }
-    if (lock % 2 == 1) {
-      // write locked
-      return false;
-    }
+  }
+  return true;
+}
+
+bool DTX::DrTMCheckDirectRW() {
+  // if read locked return false
+
+  return true;
+}
+
+bool DTX::DrtmCheckCas(coro_yield_t& yield) {
+  // check cas
+  std::vector<CasRead> pending_next_cas;
+  for (auto& res : pending_cas_ro) {
   }
   return true;
 }
