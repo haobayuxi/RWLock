@@ -12,15 +12,8 @@ bool DTX::OOCC(coro_yield_t& yield) {
   if (start_time == 0) {
     start_time = get_clock_sys_time_us();
   }
-  //   coro_sched->Yield(yield, coro_id);
-  RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(0);
-  while (true) {
-    struct ibv_wc wc;
-    auto poll_result = qp->poll_send_completion(wc);
-    if (poll_result != 0) {
-      break;
-    }
-  }
+  coro_sched->Yield(yield, coro_id);
+
   //   if (!read_only) {
   //     auto _wlock_start_time = get_clock_sys_time_us();
   //     if (wlock_start_time < _wlock_start_time) {
@@ -222,7 +215,7 @@ bool DTX::CheckHash() {
                            it->remote_offset);
         res.item->is_fetched = true;
         find = true;
-        RDMA_LOG(INFO) << "find key" << it->key;
+        // RDMA_LOG(INFO) << "find key" << it->key;
         break;
       }
     }
@@ -328,8 +321,8 @@ bool DTX::Validate(coro_yield_t& yield) {
   // For read-only items, we only need to read their versions
   for (auto& set_it : read_only_set) {
     auto it = set_it.item_ptr;
-    RDMA_LOG(INFO) << "validate key = " << it->key << "node "
-                   << it->remote_offset;
+    // RDMA_LOG(INFO) << "validate key = " << it->key << "node "
+    //                << it->remote_offset;
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(set_it.read_which_node);
     char* version_buf = thread_rdma_buffer_alloc->Alloc(sizeof(version_t));
     pending_validate.push_back(ValidateRead{.qp = qp,
@@ -344,7 +337,6 @@ bool DTX::Validate(coro_yield_t& yield) {
   }
   // Yield to other coroutines when waiting for network replies
   coro_sched->Yield(yield, coro_id);
-  RDMA_LOG(INFO) << "recv validate";
   auto res = CheckValidate(pending_validate);
   return res;
 }
