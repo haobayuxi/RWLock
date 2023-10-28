@@ -330,8 +330,8 @@ bool DTX::Validate(coro_yield_t& yield) {
                                             .cas_buf = nullptr,
                                             .version_buf = version_buf,
                                             .has_lock_in_validate = false});
-    if (!coro_sched->RDMARead(coro_id, qp, version_buf, it->remote_offset,
-                              sizeof(version_t))) {
+    if (!coro_sched->RDMARead(coro_id, qp, version_buf,
+                              it->GetRemoteVersionAddr(), sizeof(version_t))) {
       return false;
     }
   }
