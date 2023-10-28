@@ -19,7 +19,7 @@ bool DTX::OOCC(coro_yield_t& yield) {
   //   }
 
   // Receive data
-  auto res = OOCCCheck(yield, true);
+  auto res = OOCCCheck(yield);
   //   if (res && !read_only) {
   //     RDMA_LOG(INFO) << "log";
   //     ParallelUndoLog();
