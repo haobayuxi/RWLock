@@ -485,9 +485,9 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
       //     (double)(tx_end_time.tv_nsec - tx_start_time.tv_nsec) / 1000;
       // timer[stat_committed_tx_total++] = tx_usec;
       micro_commit[thread_local_id] += 1;
-      if (micro_commit[thread_local_id] > 9999) {
-        return;
-      }
+      // if (micro_commit[thread_local_id] > 9999) {
+      //   return;
+      // }
     }
     // if (stat_attempted_tx_total >= ATTEMPTED_NUM) {
     //   // A coroutine calculate the total execution time and exits

@@ -174,8 +174,8 @@ void Handler::GenThreads(std::string bench_name) {
   memset(micro_commit, 0, 100 * sizeof(uint64_t));
 
   clock_gettime(CLOCK_REALTIME, &msr_start);
-  // sleep(10);
-  // running = false;
+  sleep(10);
+  running = false;
   for (t_id_t i = 0; i < thread_num_per_machine; i++) {
     if (thread_arr[i].joinable()) {
       thread_arr[i].join();
