@@ -684,7 +684,7 @@ void run_thread(thread_params* params) {
   seed = 0xdeadbeef + thread_gid;
   qp_man = new QPManager(thread_gid);
 
-  Init coroutines for (coro_id_t coro_i = 0; coro_i < coro_num; coro_i++) {
+  for (coro_id_t coro_i = 0; coro_i < coro_num; coro_i++) {
     uint64_t coro_seed =
         static_cast<uint64_t>((static_cast<uint64_t>(thread_gid) << 32) |
                               static_cast<uint64_t>(coro_i));
