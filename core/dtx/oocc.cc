@@ -161,7 +161,7 @@ bool DTX::CheckDirectRO() {
     auto* fetched_item = (DataItem*)res.buf;
     if (fetched_item->lock == W_LOCKED) return false;
   }
-  pending_direct_ro.clear();
+  //   pending_direct_ro.clear();
   return true;
 }
 
