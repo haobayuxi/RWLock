@@ -392,6 +392,8 @@ void CoroutineScheduler::PollRegularCompletion() {
     struct ibv_wc wc;
     auto poll_result = qp->poll_send_completion(wc);  // The qp polls its own wc
     if (poll_result == 0) {
+      RDMA_LOG(INFO) << "not recv";
+      sleep(1);
       it++;
       continue;
     }
