@@ -21,6 +21,7 @@ bool DTX::OOCC(coro_yield_t& yield) {
   // Receive data
   auto res = OOCCCheck(yield, read_only);
   if (res && !read_only) {
+    RDMA_LOG(INFO) << "log";
     ParallelUndoLog();
   }
   return res;
@@ -149,6 +150,7 @@ bool DTX::OOCCCheck(coro_yield_t& yield, bool read_only) {
 
 bool DTX::CheckDirectRO() {
   // check if the tuple has been wlocked
+
   for (auto& res : pending_direct_ro) {
     // auto* it = res.item->item_ptr.get();
     res.item->is_fetched = true;
@@ -197,6 +199,7 @@ bool DTX::CheckHash() {
         // if write, cas read to lock and get the data
         if (res.op == OP::Write) {
           // After getting address, use CAS + READ
+          RDMA_LOG(INFO) << "hash read wirt";
           char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
           char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
           pending_cas.emplace_back(CasRead{.qp = res.qp,
