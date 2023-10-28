@@ -99,9 +99,9 @@ bool DTX::TxCommit(coro_yield_t& yield) {
     if ((end_time - start_time) > lease) {
       // RDMA_LOG(INFO) << "rwlock commit" << end_time - start_time << "lease "
       //                << lease;
-      // if (!Validate(yield)) {
-      //   goto ABORT;
-      // }
+      if (!Validate(yield)) {
+        goto ABORT;
+      }
     }
 
     // Next step. If read-write txns, we need to commit the updates to remote
