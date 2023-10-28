@@ -23,8 +23,7 @@ void CoroutineScheduler::PollRegularCompletion() {
                      << ibv_wc_status_str(wc.status) << ";@ node "
                      << qp->idx_.node_id;
       if (wc.status != IBV_WC_RETRY_EXC_ERR) {
-        RDMA_LOG(EMPH) << "completion status != IBV_WC_RETRY_EXC_ERR.
-            abort() "; abort();
+        RDMA_LOG(EMPH) << "completion status != IBV_WC_RETRY_EXC_ERR.abort() ";
       } else {
         it++;
         continue;
