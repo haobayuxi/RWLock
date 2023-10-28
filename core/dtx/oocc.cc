@@ -346,6 +346,7 @@ bool DTX::CheckValidate(std::vector<ValidateRead>& pending_validate) {
     auto it = re.item->item_ptr;
     // Compare version
     if (it->version != *((version_t*)re.version_buf)) {
+      RDMA_LOG(INFO) << it->version << "  " << *((version_t*)re.version_buf);
       return false;
     }
   }
