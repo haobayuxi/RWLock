@@ -22,7 +22,7 @@ bool DTX::OOCC(coro_yield_t& yield) {
   //     RDMA_LOG(INFO) << "cost time =" << end_time - start_time;
   //   }
   // Receive data
-  auto res = OOCCCheck(yield);
+  //   auto res = OOCCCheck(yield);
   //   if (res && !read_only) {
   //     RDMA_LOG(INFO) << "log";
   //     ParallelUndoLog();
