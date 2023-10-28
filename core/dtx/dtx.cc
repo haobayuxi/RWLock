@@ -128,7 +128,6 @@ bool DTX::TxCommit(coro_yield_t& yield) {
     if (!Validate(yield)) {
       goto ABORT;
     }
-    RDMA_LOG(INFO) << "occ commit";
     // Next step. If read-write txns, we need to commit the updates to remote
     // replicas
     if (!read_write_set.empty()) {
