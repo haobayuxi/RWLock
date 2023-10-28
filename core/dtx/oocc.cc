@@ -23,9 +23,9 @@ bool DTX::OOCC(coro_yield_t& yield) {
   //   }
   // Receive data
   auto end_time = get_clock_sys_time_us();
-  //   if ((end_time - start_time) > 100) {
-  RDMA_LOG(INFO) << "cost time =" << end_time - start_time;
-  //   }
+  if ((end_time - start_time) > 10) {
+    RDMA_LOG(INFO) << "cost time =" << end_time - start_time;
+  }
   auto res = OOCCCheck(yield);
   //   if (res && !read_only) {
   //     RDMA_LOG(INFO) << "log";
