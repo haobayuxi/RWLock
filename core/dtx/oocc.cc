@@ -1,29 +1,29 @@
 #include "dtx.h"
 
 bool DTX::OOCC(coro_yield_t& yield) {
-  bool read_only = read_write_set.empty();
+  //   bool read_only = read_write_set.empty();
   OccReadOnly(yield);
-  if (!read_only) {
-    RDMA_LOG(INFO) << "read write";
-    CasWriteLockAndRead(yield);
-  }
+  //   if (!read_only) {
+  //     RDMA_LOG(INFO) << "read write";
+  //     CasWriteLockAndRead(yield);
+  //   }
   if (start_time == 0) {
     start_time = get_clock_sys_time_us();
   }
   coro_sched->Yield(yield, coro_id);
-  if (!read_only) {
-    auto _wlock_start_time = get_clock_sys_time_us();
-    if (wlock_start_time < _wlock_start_time) {
-      wlock_start_time = _wlock_start_time;
-    }
-  }
+  //   if (!read_only) {
+  //     auto _wlock_start_time = get_clock_sys_time_us();
+  //     if (wlock_start_time < _wlock_start_time) {
+  //       wlock_start_time = _wlock_start_time;
+  //     }
+  //   }
 
   // Receive data
-  auto res = OOCCCheck(yield, read_only);
-  if (res && !read_only) {
-    RDMA_LOG(INFO) << "log";
-    ParallelUndoLog();
-  }
+  auto res = OOCCCheck(yield, true);
+  //   if (res && !read_only) {
+  //     RDMA_LOG(INFO) << "log";
+  //     ParallelUndoLog();
+  //   }
   return res;
 }
 
@@ -135,7 +135,7 @@ bool DTX::CasWriteLockAndRead(coro_yield_t& yield) {
 bool DTX::OOCCCheck(coro_yield_t& yield, bool read_only) {
   //   auto end = get_clock_sys_time_us();
   if (!CheckDirectRO()) return false;
-  if (!CheckCAS()) return false;
+  //   if (!CheckCAS()) return false;
   if (!CheckHash()) return false;
 
   //   auto end1 = get_clock_sys_time_us();
