@@ -73,7 +73,7 @@ class DTX {
   bool CasWriteLockAndRead(coro_yield_t& yield);
   // check
 
-  bool OOCCCheck(coro_yield_t& yield, bool read_only);
+  bool OOCCCheck(coro_yield_t& yield);
   bool CheckDirectRO();
   // drtm
   // bool Drtm(coro_yield_t& yield);

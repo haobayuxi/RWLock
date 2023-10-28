@@ -19,7 +19,7 @@ bool DTX::OOCC(coro_yield_t& yield) {
   //   }
 
   // Receive data
-  //   auto res = OOCCCheck(yield, true);
+  auto res = OOCCCheck(yield, true);
   //   if (res && !read_only) {
   //     RDMA_LOG(INFO) << "log";
   //     ParallelUndoLog();
@@ -132,11 +132,11 @@ bool DTX::CasWriteLockAndRead(coro_yield_t& yield) {
   return true;
 }
 
-bool DTX::OOCCCheck(coro_yield_t& yield, bool read_only) {
+bool DTX::OOCCCheck(coro_yield_t& yield) {
   //   auto end = get_clock_sys_time_us();
   if (!CheckDirectRO()) return false;
   //   if (!CheckCAS()) return false;
-  if (!CheckHash()) return false;
+  //   if (!CheckHash()) return false;
 
   //   auto end1 = get_clock_sys_time_us();
 
