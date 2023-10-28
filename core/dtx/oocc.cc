@@ -230,7 +230,7 @@ bool DTX::CheckHash() {
         return false;
     }
   }
-  pending_cas.clear();
+  pending_hash.clear();
   return true;
 }
 
