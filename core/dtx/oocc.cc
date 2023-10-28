@@ -222,6 +222,7 @@ bool DTX::CheckHash() {
                            it->remote_offset);
         res.item->is_fetched = true;
         find = true;
+        RDMA_LOG(INFO) << "find key" << it->key;
         break;
       }
     }
