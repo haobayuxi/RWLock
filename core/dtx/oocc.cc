@@ -140,6 +140,7 @@ bool DTX::OOCCCheck(coro_yield_t& yield, bool read_only) {
   // During results checking, we may re-read data due to invisibility and hash
   // collisions
   while (unlikely(!pending_next_hash.empty() || !pending_cas.empty())) {
+    RDMA_LOG(INFO) << "while fail";
     coro_sched->Yield(yield, coro_id);
     if (!CheckCAS()) return false;
     if (!CheckNextHash()) return false;
