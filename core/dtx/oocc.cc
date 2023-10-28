@@ -164,7 +164,7 @@ bool DTX::OOCCCheck(coro_yield_t& yield) {
 
   return true;
 }
-ALWAYS_INLINE
+// ALWAYS_INLINE
 bool DTX::CheckDirectRO() {
   // check if the tuple has been wlocked
 
