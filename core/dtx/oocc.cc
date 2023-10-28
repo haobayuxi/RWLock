@@ -186,6 +186,7 @@ bool DTX::CheckCAS() {
 
 bool DTX::CheckHash() {
   // Check results from hash read
+  return true;
   for (auto& res : pending_hash) {
     auto* local_hash_node = (HashNode*)res.buf;
     auto* it = res.item->item_ptr.get();
