@@ -17,7 +17,10 @@ bool DTX::OOCC(coro_yield_t& yield) {
   //       wlock_start_time = _wlock_start_time;
   //     }
   //   }
-
+  auto end_time = dtx->get_clock_sys_time_us();
+  if ((end_time - dtx->start_time) > 100) {
+    RDMA_LOG(INFO) << "cost time =" << end_time - dtx->start_time;
+  }
   // Receive data
   auto res = OOCCCheck(yield);
   //   if (res && !read_only) {
