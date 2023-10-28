@@ -396,7 +396,7 @@ void CoroutineScheduler::PollRegularCompletion() {
       continue;
     }
     if (unlikely(wc.status != IBV_WC_SUCCESS)) {
-      RDMA_LOG(EMPH) << "Bad completion status: " << wc.status << " with error "
+      RDMA_LOG(INFO) << "Bad completion status: " << wc.status << " with error "
                      << ibv_wc_status_str(wc.status) << ";@ node "
                      << qp->idx_.node_id;
       if (wc.status != IBV_WC_RETRY_EXC_ERR) {
