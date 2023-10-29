@@ -12,7 +12,7 @@ bool DTX::OOCC(coro_yield_t& yield) {
   if (start_time == 0) {
     start_time = get_clock_sys_time_us();
   }
-  coro_sched->Yield(yield, coro_id);
+  //   coro_sched->Yield(yield, coro_id);
 
   //   if (!read_only) {
   //     auto _wlock_start_time = get_clock_sys_time_us();
@@ -54,8 +54,8 @@ bool DTX::OccReadOnly(coro_yield_t& yield) {
                                                 .item = &item,
                                                 .buf = data_buf,
                                                 .remote_node = remote_node_id});
-      if (unlikely(!coro_sched->RDMARead(coro_id, qp, data_buf, offset,
-                                         DataItemSize))) {
+      if (unlikely(!coro_sched->RDMAReadSync(coro_id, qp, data_buf, offset,
+                                             DataItemSize))) {
         return false;
       }
     } else {
@@ -72,8 +72,8 @@ bool DTX::OccReadOnly(coro_yield_t& yield) {
                                          .remote_node = remote_node_id,
                                          .meta = meta,
                                          .op = OP::Read});
-      if (!coro_sched->RDMARead(coro_id, qp, local_hash_node, node_off,
-                                sizeof(HashNode))) {
+      if (!coro_sched->RDMAReadSync(coro_id, qp, local_hash_node, node_off,
+                                    sizeof(HashNode))) {
         return false;
       }
     }
