@@ -1,9 +1,12 @@
 
 #include "dtx.h"
 
+bool DTX::DlmrReadOnly(coro_yield_t& yield) { return true; }
+
+bool DTX::DlmrReadOnly(coro_yield_t& yield) { return true; }
+
 bool DTX::Dlmr(coro_yield_t& yield) {
   std::vector<DirectRead> pending_direct_ro;
-  std::vector<uint64_t> pending_lock;
   std::vector<HashRead> pending_hash_ro;
   for (auto& item : read_only_set) {
     if (item.is_fetched) continue;
