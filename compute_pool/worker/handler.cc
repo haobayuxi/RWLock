@@ -171,7 +171,7 @@ void Handler::GenThreads(std::string bench_name) {
     }
   }
   sleep(10);
-  // memset(micro_commit, 0, 100 * sizeof(uint64_t));
+  memset(micro_commit, 0, 100 * sizeof(uint64_t));
 
   clock_gettime(CLOCK_REALTIME, &msr_start);
   sleep(10);
