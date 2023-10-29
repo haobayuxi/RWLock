@@ -186,7 +186,7 @@ bool DTX::CheckDirectRO() {
     memcpy(&lock, res.buf, sizeof(lock_t));
     if (lock > 0) {
       //   RDMA_LOG(INFO) << "lock";
-      return false;
+      //   return false;
     }
   }
   //   pending_direct_ro.clear();
