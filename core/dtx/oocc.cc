@@ -4,14 +4,15 @@ int expire = 0;
 
 bool DTX::OOCC(coro_yield_t& yield) {
   //   bool read_only = read_write_set.empty();
+  if (start_time == 0) {
+    start_time = get_clock_sys_time_us();
+  }
   OccReadOnly(yield);
   //   if (!read_only) {
   //     RDMA_LOG(INFO) << "read write";
   //     CasWriteLockAndRead(yield);
   //   }
-  if (start_time == 0) {
-    start_time = get_clock_sys_time_us();
-  }
+
   //   coro_sched->Yield(yield, coro_id);
 
   //   if (!read_only) {
