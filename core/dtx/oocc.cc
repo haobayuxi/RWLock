@@ -184,10 +184,10 @@ bool DTX::CheckDirectRO() {
     // auto* lock = (lock_t*)res.buf;
     lock_t lock = 0;
     memcpy(&lock, res.buf, sizeof(lock_t));
-    // if (lock > 0) {
-    //   RDMA_LOG(INFO) << "lock";
-    //   return false;
-    // }
+    if (lock > 0) {
+      //   RDMA_LOG(INFO) << "lock";
+      //   return false;
+    }
   }
   //   pending_direct_ro.clear();
   return true;
