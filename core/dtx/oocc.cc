@@ -177,7 +177,7 @@ bool DTX::OOCCCheck(coro_yield_t& yield) {
 ALWAYS_INLINE
 bool DTX::CheckDirectRO() {
   // check if the tuple has been wlocked
-
+  bool succ = true;
   lock_t lock = 0;
   for (auto& res : pending_direct_ro) {
     // auto* it = res.item->item_ptr.get();
@@ -186,11 +186,11 @@ bool DTX::CheckDirectRO() {
     memcpy(&lock, res.buf, sizeof(lock_t));
     if (lock > 0) {
       //   RDMA_LOG(INFO) << "lock";
-      return false;
+      succ = false;
     }
   }
   //   pending_direct_ro.clear();
-  return true;
+  return succ;
 }
 
 bool DTX::CheckCAS() {
