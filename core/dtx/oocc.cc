@@ -181,10 +181,10 @@ bool DTX::CheckDirectRO() {
     res.item->is_fetched = true;
     // auto* lock = (lock_t*)res.buf;
     int lock = *(lock_t*)res.buf;
-    if (lock != 0) {
-      RDMA_LOG(INFO) << "lock";
-      return false;
-    }
+    // if (lock != 0) {
+    //   RDMA_LOG(INFO) << "lock";
+    //   return false;
+    // }
   }
   //   pending_direct_ro.clear();
   return true;
