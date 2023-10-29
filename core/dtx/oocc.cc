@@ -149,7 +149,7 @@ bool DTX::OOCCCheck(coro_yield_t& yield) {
     RDMA_LOG(INFO) << "cost time =" << end_time - start_time;
   }
   //   auto end = get_clock_sys_time_us();
-  if (!CheckDirectRO()) return false;
+  //   if (!CheckDirectRO()) return false;
   end_time = get_clock_sys_time_us();
   if ((end_time - start_time) > 100) {
     RDMA_LOG(INFO) << "cost time =" << end_time - start_time;
