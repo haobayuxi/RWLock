@@ -13,6 +13,7 @@
 #include "util/debug.h"
 
 struct DataItem {
+  lock_t lock;
   table_id_t table_id;
   size_t value_size;  // The length of uint8* value
   itemkey_t key;
@@ -20,7 +21,6 @@ struct DataItem {
   // it's helpful for addressing each filed in DataItem
   offset_t remote_offset;
   version_t version;
-  lock_t lock;
   uint8_t value[MAX_ITEM_SIZE];
   uint8_t valid;  // 1: Not deleted, 0: Deleted
   uint8_t
@@ -29,34 +29,34 @@ struct DataItem {
   DataItem() {}
   // Build an empty item for fetching data from remote
   DataItem(table_id_t t, itemkey_t k)
-      : table_id(t),
+      : lock(0),
+        table_id(t),
         value_size(0),
         key(k),
         remote_offset(0),
         version(0),
-        lock(0),
         valid(1),
         user_insert(0) {}
 
   // For user insert item
   DataItem(table_id_t t, size_t s, itemkey_t k, version_t v, uint8_t ins)
-      : table_id(t),
+      : lock(0),
+        table_id(t),
         value_size(s),
         key(k),
         remote_offset(0),
         version(v),
-        lock(0),
         valid(1),
         user_insert(ins) {}
 
   // For server load data
   DataItem(table_id_t t, size_t s, itemkey_t k, uint8_t* d)
-      : table_id(t),
+      : lock(0),
+        table_id(t),
         value_size(s),
         key(k),
         remote_offset(0),
         version(0),
-        lock(0),
         valid(1),
         user_insert(0) {
     memcpy(value, d, s);
@@ -71,27 +71,23 @@ struct DataItem {
   }
 
   ALWAYS_INLINE
-  uint64_t GetRemoteLockAddr() {
-    return remote_offset + sizeof(table_id) + sizeof(value_size) + sizeof(key) +
-           sizeof(remote_offset) + sizeof(version);
-  }
+  uint64_t GetRemoteLockAddr() { return remote_offset; }
 
   ALWAYS_INLINE
   uint64_t GetRemoteLockAddr(offset_t remote_item_off) {
-    return remote_item_off + sizeof(table_id) + sizeof(value_size) +
-           sizeof(key) + sizeof(remote_offset) + sizeof(version);
+    return remote_item_off;
   }
 
   ALWAYS_INLINE
   uint64_t GetRemoteVersionAddr() {
-    return remote_offset + sizeof(table_id) + sizeof(value_size) + sizeof(key) +
-           sizeof(remote_offset);
+    return remote_offset + sizeof(lock_t) + sizeof(table_id) +
+           sizeof(value_size) + sizeof(key) + sizeof(remote_offset);
   }
 
   ALWAYS_INLINE
   uint64_t GetRemoteVersionAddr(offset_t remote_item_off) {
-    return remote_item_off + sizeof(table_id) + sizeof(value_size) +
-           sizeof(key) + sizeof(remote_offset);
+    return remote_item_off + sizeof(lock_t) + sizeof(table_id) +
+           sizeof(value_size) + sizeof(key) + sizeof(remote_offset);
   }
 
   ALWAYS_INLINE
