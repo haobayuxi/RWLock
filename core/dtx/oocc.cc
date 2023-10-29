@@ -180,7 +180,8 @@ bool DTX::CheckDirectRO() {
     // auto* it = res.item->item_ptr.get();
     res.item->is_fetched = true;
     // auto* lock = (lock_t*)res.buf;
-    int lock = *(lock_t*)res.buf;
+    int lock = 0;
+    memcpy(&lock, res.buf, sizeof(lock_t));
     // if (lock != 0) {
     //   RDMA_LOG(INFO) << "lock";
     //   return false;
