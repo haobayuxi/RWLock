@@ -179,7 +179,7 @@ bool DTX::CheckDirectRO() {
   for (auto& res : pending_direct_ro) {
     // auto* it = res.item->item_ptr.get();
     res.item->is_fetched = true;
-    // auto* fetched_item = (DataItem*)res.buf;
+    auto* fetched_item = (DataItem*)res.buf;
     // if (unlikely(fetched_item->lock != 0)) return false;
   }
   //   pending_direct_ro.clear();
