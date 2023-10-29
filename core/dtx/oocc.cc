@@ -13,7 +13,7 @@ bool DTX::OOCC(coro_yield_t& yield) {
   //     CasWriteLockAndRead(yield);
   //   }
 
-  //   coro_sched->Yield(yield, coro_id);
+  coro_sched->Yield(yield, coro_id);
 
   //   if (!read_only) {
   //     auto _wlock_start_time = get_clock_sys_time_us();
@@ -56,8 +56,8 @@ bool DTX::OccReadOnly(coro_yield_t& yield) {
                                                 .item = &item,
                                                 .buf = data_buf,
                                                 .remote_node = remote_node_id});
-      if (unlikely(!coro_sched->RDMAReadSync(coro_id, qp, data_buf, offset,
-                                             DataItemSize))) {
+      if (unlikely(!coro_sched->RDMARead(coro_id, qp, data_buf, offset,
+                                         DataItemSize))) {
         return false;
       }
     } else {
@@ -74,8 +74,8 @@ bool DTX::OccReadOnly(coro_yield_t& yield) {
                                          .remote_node = remote_node_id,
                                          .meta = meta,
                                          .op = OP::Read});
-      if (!coro_sched->RDMAReadSync(coro_id, qp, local_hash_node, node_off,
-                                    sizeof(HashNode))) {
+      if (!coro_sched->RDMARead(coro_id, qp, local_hash_node, node_off,
+                                sizeof(HashNode))) {
         return false;
       }
     }
@@ -146,14 +146,14 @@ bool DTX::CasWriteLockAndRead(coro_yield_t& yield) {
 }
 
 bool DTX::OOCCCheck(coro_yield_t& yield) {
-  auto end_time = get_clock_sys_time_us();
+  //   auto end_time = get_clock_sys_time_us();
   //   if ((end_time - start_time) > 100) {
   //     RDMA_LOG(INFO) << "tid" << t_id << "coro id" << coro_id
   //                    << "cost time =" << end_time - start_time;
   //   }
   //   auto end = get_clock_sys_time_us();
   if (!CheckDirectRO()) return false;
-  end_time = get_clock_sys_time_us();
+  //   end_time = get_clock_sys_time_us();
   //   if ((end_time - start_time) > 100) {
   //     RDMA_LOG(INFO) << "tid" << t_id << "coro id" << coro_id
   //                    << "cost time =" << end_time - start_time;
