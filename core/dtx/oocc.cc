@@ -164,7 +164,7 @@ ALWAYS_INLINE
 bool DTX::CheckDirectRO() {
   // check if the tuple has been wlocked
   int len = pending_direct_ro.size();
-
+  RDMA_LOG(INFO) << "len " << len;
   for (int i = 0; i < len; i++) {
     // auto* it = res.item->item_ptr.get();
     pending_direct_ro[i].item->is_fetched = true;
