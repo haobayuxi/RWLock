@@ -26,12 +26,12 @@ bool DTX::OOCC(coro_yield_t& yield) {
   //     RDMA_LOG(INFO) << "cost time =" << end_time - start_time;
   //   }
   // Receive data
-  auto end_time = get_clock_sys_time_us();
-  if ((end_time - start_time) > 5) {
-    RDMA_LOG(INFO) << "cost time =" << end_time - start_time << "  "
-                   << expire[t_id];
-    expire[t_id] += 1;
-  }
+  //   auto end_time = get_clock_sys_time_us();
+  //   if ((end_time - start_time) > 5) {
+  //     RDMA_LOG(INFO) << "cost time =" << end_time - start_time << "  "
+  //                    << expire[t_id];
+  //     expire[t_id] += 1;
+  //   }
   auto res = OOCCCheck(yield);
   //   if (res && !read_only) {
   //     RDMA_LOG(INFO) << "log";
