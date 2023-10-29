@@ -146,25 +146,9 @@ bool DTX::CasWriteLockAndRead(coro_yield_t& yield) {
 }
 
 bool DTX::OOCCCheck(coro_yield_t& yield) {
-  //   auto end_time = get_clock_sys_time_us();
-  //   if ((end_time - start_time) > 100) {
-  //     RDMA_LOG(INFO) << "tid" << t_id << "coro id" << coro_id
-  //                    << "cost time =" << end_time - start_time;
-  //   }
-  //   auto end = get_clock_sys_time_us();
-  //   if (!CheckDirectRO()) return false;
-  //   end_time = get_clock_sys_time_us();
-  //   if ((end_time - start_time) > 100) {
-  //     RDMA_LOG(INFO) << "tid" << t_id << "coro id" << coro_id
-  //                    << "cost time =" << end_time - start_time;
-  //   }
-  //   if (!CheckCAS()) return false;
+  if (!CheckDirectRO()) return false;
   if (!CheckHash()) return false;
 
-  //   auto end1 = get_clock_sys_time_us();
-
-  //   RDMA_LOG(INFO) << "cost time =" << end - start_time;
-  //   RDMA_LOG(INFO) << "cost time =" << end1 - start_time;
   // During results checking, we may re-read data due to invisibility and hash
   // collisions
   //   while (unlikely(!pending_next_hash.empty() || !pending_cas.empty())) {
