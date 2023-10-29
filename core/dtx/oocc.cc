@@ -1,6 +1,6 @@
 #include "dtx.h"
 
-int[] expire = new int[0];
+int expire[] = new int[0];
 
 bool DTX::OOCC(coro_yield_t& yield) {
   //   bool read_only = read_write_set.empty();
