@@ -185,10 +185,10 @@ bool DTX::CheckDirectRO() {
     auto* lock = (lock_t*)res.buf;
     if (*lock != 0) {
       RDMA_LOG(INFO) << "lock";
-      //   return false;
+      return false;
     }
   }
-  pending_direct_ro.clear();
+  //   pending_direct_ro.clear();
   return true;
 }
 
