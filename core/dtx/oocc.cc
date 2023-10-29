@@ -179,8 +179,9 @@ bool DTX::CheckDirectRO() {
   for (auto& res : pending_direct_ro) {
     // auto* it = res.item->item_ptr.get();
     res.item->is_fetched = true;
-    auto* lock = (lock_t*)res.buf;
-    if (*lock != 0) {
+    // auto* lock = (lock_t*)res.buf;
+    int lock = *(lock_t*)res.buf;
+    if (lock != 0) {
       RDMA_LOG(INFO) << "lock";
       return false;
     }
