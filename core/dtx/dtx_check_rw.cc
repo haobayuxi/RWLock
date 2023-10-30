@@ -14,7 +14,8 @@ bool DTX::CheckReadRORW(std::vector<DirectRead>& pending_direct_ro,
   // The reason to use separate CheckHashRO and CheckHashRW: We need to compare
   // txid with the fetched id in read-write txn check read-write results
   if (!CheckCasRW(pending_cas_rw)) return false;
-  if (!CheckHashRW(pending_hash_rw, pending_next_hash_rw)) return false;
+  if (!CheckHashRW(pending_hash_rw, pending_next_cas_rw, pending_next_hash_rw))
+    return false;
   // During results checking, we may re-read data due to invisibility and hash
   // collisions
   while (!pending_next_hash_ro.empty() || !pending_next_hash_rw.empty() ||
