@@ -12,11 +12,18 @@ bool DTX::ReadWrite(coro_yield_t& yield) {
 
   std::list<HashRead> pending_next_hash_ro;
   std::list<HashRead> pending_next_hash_rw;
+  std::list<CasRead>& pending_next_cas_rw;
   //   std::list<InsertOffRead> pending_next_off_rw;
   // may contain read only set
   if (!IssueReadRO(pending_direct_ro, pending_hash_ro)) return false;
   if (!IssueReadLock(pending_cas_rw, pending_hash_rw)) return false;
-  return true;
+  // Yield to other coroutines when waiting for network replies
+  coro_sched->Yield(yield, coro_id);
+  auto res = CheckReadRORW(pending_direct_ro, pending_hash_ro, pending_hash_rw,
+                           pending_insert_off_rw, pending_cas_rw,
+                           pending_next_cas_rw, pending_next_hash_ro,
+                           pending_next_hash_rw, pending_next_off_rw, yield);
+  return res;
 }
 
 bool DTX::IssueReadLock(std::vector<CasRead>& pending_cas_rw,
