@@ -66,10 +66,9 @@ bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
                 uint64_t num_keys_global, uint64_t write_ratio) {
   dtx->TxBegin(tx_id);
   bool read_only = true;
-  dtx->write_ratio += 1;
-  if (dtx->write_ratio == write_ratio) {
+  auto write = FastRand(seed) % 1000;
+  if (write < write_ratio) {
     read_only = false;
-    write_ratio = 0;
   }
   for (int i = 0; i < data_set_size; i++) {
     micro_key_t micro_key;
@@ -86,11 +85,11 @@ bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
 
     DataItemPtr micro_obj = std::make_shared<DataItem>(
         (table_id_t)MicroTableType::kMicroTable, micro_key.item_key);
-    // if (read_only) {
-    dtx->AddToReadOnlySet(micro_obj);
-    // } else {
-    //   dtx->AddToReadWriteSet(micro_obj);
-    // }
+    if (read_only) {
+      dtx->AddToReadOnlySet(micro_obj);
+    } else {
+      dtx->AddToReadWriteSet(micro_obj);
+    }
   }
 
   if (!dtx->TxExe(yield)) {
