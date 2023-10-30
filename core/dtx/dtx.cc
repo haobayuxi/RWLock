@@ -206,7 +206,7 @@ bool DTX::commit_data() {
       return false;
     }
     if (!coro_sched->RDMACAS(coro_id, qp, cas_buf,
-                             it->GetRemoteLockAddr(offset), 0, tx_id)) {
+                             it->GetRemoteLockAddr(offset), tx_id, 0)) {
       return false;
     }
   }
