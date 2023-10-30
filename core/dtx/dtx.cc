@@ -67,7 +67,6 @@ bool DTX::TxExe(coro_yield_t& yield, bool fail_abort) {
       }
     } else {
       if (ReadWrite(yield)) {
-        RDMA_LOG(INFO) << "read write success";
         return true;
       } else {
         RDMA_LOG(INFO) << "read write fail";
@@ -139,7 +138,6 @@ bool DTX::TxCommit(coro_yield_t& yield) {
     */
     // RDMA_LOG(INFO) << "occ commit";
     if (!Validate(yield)) {
-      RDMA_LOG(INFO) << "occ validate fail";
       goto ABORT;
     }
     // Next step. If read-write txns, we need to commit the updates to remote
@@ -151,6 +149,8 @@ bool DTX::TxCommit(coro_yield_t& yield) {
       // write data and unlock
       commit_data();
       coro_sched->Yield(yield, coro_id);
+      end_time = get_clock_sys_time_us();
+      RDMA_LOG(INFO) << "commit time = " << end_time - start_time;
     }
 
   } else if (global_meta_man->txn_system == DTX_SYS::DrTMH) {
