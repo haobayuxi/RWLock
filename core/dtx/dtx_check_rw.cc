@@ -88,7 +88,7 @@ bool DTX::CheckHashRW(std::vector<HashRead>& pending_hash_rw,
       // Not found, we need to re-read the next bucket
       auto node_off = (uint64_t)local_hash_node->next - res.meta.data_ptr +
                       res.meta.base_off;
-      pending_next_hash_ro.emplace_back(HashRead{.qp = res.qp,
+      pending_next_hash_rw.emplace_back(HashRead{.qp = res.qp,
                                                  .item = res.item,
                                                  .buf = res.buf,
                                                  .remote_node = res.remote_node,
