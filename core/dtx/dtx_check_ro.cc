@@ -19,23 +19,6 @@ bool DTX::CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
   return true;
 }
 
-ALWAYS_INLINE
-bool DTX::CheckDirectRO(std::vector<DirectRead>& pending_direct_ro) {
-  // check if the tuple has been wlocked
-  int len = pending_direct_ro.size();
-  for (int i = 0; i < len; i++) {
-    // auto* it = res.item->item_ptr.get();
-    // pending_direct_ro[i].item->is_fetched = true;
-    auto* lock = (lock_t*)pending_direct_ro[i].buf;
-    if (*lock != 0) {
-      RDMA_LOG(INFO) << "lock";
-      return false;
-    }
-  }
-  //   pending_direct_ro.clear();
-  return true;
-}
-
 bool DTX::CheckHashRO(std::vector<HashRead>& pending_hash_ro,
                       std::list<HashRead>& pending_next_hash_ro) {
   // Check results from hash read
