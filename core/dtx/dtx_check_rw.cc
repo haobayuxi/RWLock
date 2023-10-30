@@ -37,6 +37,7 @@ bool DTX::CheckCasRW(std::vector<CasRead>& pending_cas_rw) {
       return false;
     }
   }
+  RDMA_LOG(INFO) << "cas read check";
   pending_cas_rw.clear();
   return true;
 }
@@ -58,12 +59,12 @@ bool DTX::CheckHashRW(std::vector<HashRead>& pending_hash_rw,
                            it->remote_offset);
         res.item->is_fetched = true;
         find = true;
-        // RDMA_LOG(INFO) << "find key" << it->key;
+        RDMA_LOG(INFO) << "find key" << it->key;
         break;
       }
     }
     if (likely(find)) {
-      if (unlikely(it->lock == W_LOCKED)) {
+      if (unlikely(it->lock != 0)) {
         return false;
       } else {
         // After getting address, use CAS + READ
@@ -75,6 +76,7 @@ bool DTX::CheckHashRW(std::vector<HashRead>& pending_hash_rw,
                     .cas_buf = cas_buf,
                     .data_buf = data_buf,
                     .primary_node_id = res.remote_node});
+        RDMA_LOG(INFO) << "cas read";
         if (!coro_sched->RDMACAS(coro_id, res.qp, cas_buf,
                                  it->GetRemoteLockAddr(it->remote_offset), 0,
                                  tx_id)) {

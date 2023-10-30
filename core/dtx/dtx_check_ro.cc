@@ -40,33 +40,9 @@ bool DTX::CheckHashRO(std::vector<HashRead>& pending_hash_ro,
       }
     }
     if (likely(find)) {
-      if (unlikely(it->lock == W_LOCKED)) {
+      if (unlikely(it->lock != 0)) {
         return false;
       }
-      //   else {
-      //     // if write, cas read to lock and get the data
-      //     if (res.op == OP::Write) {
-      //       // After getting address, use CAS + READ
-      //       RDMA_LOG(INFO) << "hash read wirt";
-      //       char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
-      //       char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
-      //       pending_cas.emplace_back(CasRead{.qp = res.qp,
-      //                                        .item = res.item,
-      //                                        .cas_buf = cas_buf,
-      //                                        .data_buf = data_buf,
-      //                                        .primary_node_id =
-      //                                        res.remote_node});
-      //       if (!coro_sched->RDMACAS(coro_id, res.qp, cas_buf,
-      //                                it->GetRemoteLockAddr(it->remote_offset),
-      //                                0, tx_id)) {
-      //         return false;
-      //       }
-      //       if (!coro_sched->RDMARead(coro_id, res.qp, data_buf,
-      //                                 it->remote_offset, DataItemSize)) {
-      //         return false;
-      //       }
-      //     }
-      //   }
     } else {
       if (local_hash_node->next == nullptr) return false;
       // Not found, we need to re-read the next bucket
