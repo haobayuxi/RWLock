@@ -98,13 +98,14 @@ ABORT:
 bool DTX::TxCommit(coro_yield_t& yield) {
   bool commit_stat;
   coro_sched->Yield(yield, coro_id);
+
+  auto end_time = get_clock_sys_time_us();
   /*!
     RWLock's commit protocol
     */
   // RDMA_LOG(INFO) << "tx commit" << global_meta_man->txn_system;
   if (global_meta_man->txn_system == DTX_SYS::RWLock) {
     // check lease
-    auto end_time = get_clock_sys_time_us();
 
     if ((end_time - start_time) > lease) {
       // RDMA_LOG(INFO) << "rwlock commit" << end_time - start_time << "lease "
