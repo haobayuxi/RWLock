@@ -18,7 +18,6 @@ DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t _tid,
   lease = _lease;
   thread_rdma_buffer_alloc = rdma_buffer_allocator;
   tx_status = TXStatus::TX_INIT;
-  read_only = true;
 
   thread_remote_log_offset_alloc = remote_log_offset_allocator;
   addr_cache = addr_buf;
@@ -60,7 +59,7 @@ bool DTX::TxExe(coro_yield_t& yield, bool fail_abort) {
   if (global_meta_man->txn_system == DTX_SYS::RWLock ||
       global_meta_man->txn_system == DTX_SYS::OCC) {
     // Run our system
-    if (OOCC(yield)) {
+    if (ReadOnly(yield)) {
       return true;
     } else {
       goto ABORT;
@@ -178,11 +177,11 @@ bool DTX::commit_data(coro_yield_t& yield) {
     // After getting address, use doorbell CAS + READ
     char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
     char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
-    pending_cas.emplace_back(CasRead{.qp = qp,
-                                     .item = &read_write_set[i],
-                                     .cas_buf = cas_buf,
-                                     .data_buf = data_buf,
-                                     .primary_node_id = remote_node_id});
+    // pending_cas.emplace_back(CasRead{.qp = qp,
+    //                                  .item = &read_write_set[i],
+    //                                  .cas_buf = cas_buf,
+    //                                  .data_buf = data_buf,
+    //                                  .primary_node_id = remote_node_id});
     if (!coro_sched->RDMACAS(coro_id, qp, cas_buf,
                              it->GetRemoteLockAddr(offset), 0, tx_id)) {
       return false;
