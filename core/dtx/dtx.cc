@@ -181,7 +181,7 @@ bool DTX::commit_data() {
     char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
     char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
     *(lock_t*)cas_buf = 0;
-    memcpy(data_buf, (char*)it, sizeof(DataItem));
+    memcpy(data_buf, (char*)it.get(), sizeof(DataItem));
     // pending_cas.emplace_back(CasRead{.qp = qp,
     //                                  .item = &read_write_set[i],
     //                                  .cas_buf = cas_buf,
