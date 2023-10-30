@@ -94,6 +94,7 @@ class DTX {
                      coro_yield_t& yield);
 
   bool CheckHashRW(std::vector<HashRead>& pending_hash_rw,
+                   std::vector<CasRead>& pending_next_cas_rw,
                    std::list<HashRead>& pending_next_hash_rw);
 
   bool CheckNextHashRW(std::list<HashRead>& pending_next_hash_rw);

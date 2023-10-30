@@ -40,7 +40,7 @@ bool DTX::CheckCasRW(std::vector<CasRead>& pending_cas_rw) {
 }
 
 bool DTX::CheckHashRW(std::vector<HashRead>& pending_hash_rw,
-                      std::list<CasRead>& pending_next_cas_rw,
+                      std::vector<CasRead>& pending_next_cas_rw,
                       std::list<HashRead>& pending_next_hash_rw) {
   // Check results from hash read
   //   return true;
