@@ -50,12 +50,12 @@ bool DTX::IssueReadRO(std::vector<DirectRead>& pending_direct_ro,
       uint64_t idx = MurmurHash64A(it->key, 0xdeadbeef) % meta.bucket_num;
       offset_t node_off = idx * meta.node_size + meta.base_off;
       char* local_hash_node = thread_rdma_buffer_alloc->Alloc(sizeof(HashNode));
-      pending_hash.emplace_back(HashRead{.qp = qp,
-                                         .item = &item,
-                                         .buf = local_hash_node,
-                                         .remote_node = remote_node_id,
-                                         .meta = meta,
-                                         .op = OP::Read});
+      pending_hash_ro.emplace_back(HashRead{.qp = qp,
+                                            .item = &item,
+                                            .buf = local_hash_node,
+                                            .remote_node = remote_node_id,
+                                            .meta = meta,
+                                            .op = OP::Read});
       if (!coro_sched->RDMARead(coro_id, qp, local_hash_node, node_off,
                                 sizeof(HashNode))) {
         return false;
