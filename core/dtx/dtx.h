@@ -64,7 +64,7 @@ class DTX {
   // size_t GetAddrCacheSize() { return addr_cache->TotalAddrSize(); }
 
  private:
-  bool commit_data(coro_yield_t& yield);
+  bool commit_data();
   bool release_write_lock(coro_yield_t& yield);
   // oocc
   bool Validate(coro_yield_t& yield);

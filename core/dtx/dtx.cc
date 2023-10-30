@@ -117,7 +117,7 @@ bool DTX::TxCommit(coro_yield_t& yield) {
         end_time = get_clock_sys_time_us();
       }
       // write data and unlock
-
+      commit_data();
       coro_sched->Yield(yield, coro_id);
     }
   } else if (global_meta_man->txn_system == DTX_SYS::OCC) {
@@ -131,9 +131,12 @@ bool DTX::TxCommit(coro_yield_t& yield) {
     // Next step. If read-write txns, we need to commit the updates to remote
     // replicas
     if (!read_write_set.empty()) {
-      // check log ack
-
+      while (!coro_sched->CheckLogAck(coro_id)) {
+        ;  // wait
+      }
       // write data and unlock
+      commit_data();
+      coro_sched->Yield(yield, coro_id);
     }
 
   } else if (global_meta_man->txn_system == DTX_SYS::DrTMH) {
@@ -166,7 +169,7 @@ ABORT:
   return false;
 }
 
-bool DTX::commit_data(coro_yield_t& yield) {
+bool DTX::commit_data() {
   for (size_t i = 0; i < read_write_set.size(); i++) {
     auto it = read_write_set[i].item_ptr;
     auto remote_node_id = global_meta_man->GetPrimaryNodeID(it->table_id);
@@ -177,16 +180,18 @@ bool DTX::commit_data(coro_yield_t& yield) {
     // After getting address, use doorbell CAS + READ
     char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
     char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
+    *(lock_t*)cas_buf = 0;
+    memcpy(data_buf, (char*)it, sizeof(DataItem));
     // pending_cas.emplace_back(CasRead{.qp = qp,
     //                                  .item = &read_write_set[i],
     //                                  .cas_buf = cas_buf,
     //                                  .data_buf = data_buf,
     //                                  .primary_node_id = remote_node_id});
-    if (!coro_sched->RDMACAS(coro_id, qp, cas_buf,
-                             it->GetRemoteLockAddr(offset), 0, tx_id)) {
+    if (!coro_sched->RDMAWrite(coro_id, qp, data_buf, offset, DataItemSize)) {
       return false;
     }
-    if (!coro_sched->RDMAWrite(coro_id, qp, data_buf, offset, DataItemSize)) {
+    if (!coro_sched->RDMACAS(coro_id, qp, cas_buf,
+                             it->GetRemoteLockAddr(offset), 0, tx_id)) {
       return false;
     }
   }
