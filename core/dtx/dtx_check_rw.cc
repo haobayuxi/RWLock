@@ -37,6 +37,7 @@ bool DTX::CheckCasRW(std::vector<CasRead>& pending_cas_rw) {
       return false;
     }
   }
+  pending_cas_rw.clear();
   return true;
 }
 
