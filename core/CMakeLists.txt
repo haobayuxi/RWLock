@@ -12,6 +12,7 @@ set(DTX_SRC
         dtx/oocc.cc
         dtx/dtx_check.cc
         dtx/read_only.cc
+        dtx/read_write.cc
         # dtx/drtm.cc
         # dtx/dlmr.cc
         )

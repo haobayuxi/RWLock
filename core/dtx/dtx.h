@@ -96,7 +96,7 @@ class DTX {
   //                 std::vector<HashRead>& pending_hash_ro,
   //                 std::list<HashRead>& pending_next_hash_ro,
   //                 coro_yield_t& yield);
-  bool CheckCAS();
+  // bool CheckCAS();
   bool CheckValidate(std::vector<ValidateRead>& pending_validate);
 
   void Abort();
