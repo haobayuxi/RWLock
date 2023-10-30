@@ -12,7 +12,7 @@ bool DTX::ReadWrite(coro_yield_t& yield) {
 
   std::list<HashRead> pending_next_hash_ro;
   std::list<HashRead> pending_next_hash_rw;
-  std::list<CasRead> pending_next_cas_rw;
+  std::vector<CasRead> pending_next_cas_rw;
   //   std::list<InsertOffRead> pending_next_off_rw;
   // may contain read only set
   if (!IssueReadRO(pending_direct_ro, pending_hash_ro)) return false;
