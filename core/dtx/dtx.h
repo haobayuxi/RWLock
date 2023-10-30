@@ -68,13 +68,19 @@ class DTX {
   bool release_write_lock(coro_yield_t& yield);
   // oocc
   bool Validate(coro_yield_t& yield);
-  bool OOCC(coro_yield_t& yield);
-  bool OccReadOnly(coro_yield_t& yield);
+  bool ReadOnly(coro_yield_t& yield);
+  bool ReadWrite(coro_yield_t& yield);
   bool CasWriteLockAndRead(coro_yield_t& yield);
+  bool IssueReadRO(std::vector<DirectRead>& pending_direct_ro,
+                   std::vector<HashRead>& pending_hash_ro);
   // check
-
-  bool OOCCCheck(coro_yield_t& yield);
-  bool CheckDirectRO();
+  bool CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
+                   std::vector<HashRead>& pending_hash_ro,
+                   std::list<HashRead>& pending_next_hash_ro,
+                   coro_yield_t& yield);
+  bool CheckHashRO(std::vector<HashRead>& pending_hash_ro,
+                   std::list<HashRead>& pending_next_hash_ro);
+  bool CheckDirectRO(std::vector<DirectRead>& pending_direct_ro);
   // drtm
   // bool Drtm(coro_yield_t& yield);
 
@@ -91,8 +97,6 @@ class DTX {
   //                 std::list<HashRead>& pending_next_hash_ro,
   //                 coro_yield_t& yield);
   bool CheckCAS();
-  bool CheckHash();
-  bool CheckNextHash();
   bool CheckValidate(std::vector<ValidateRead>& pending_validate);
 
   void Abort();
@@ -152,13 +156,6 @@ class DTX {
   std::vector<size_t> locked_rw_set;  // For release lock during abort
 
   AddrCache* addr_cache;
-  std::vector<DirectRead> pending_direct_ro;
-  std::vector<HashRead> pending_hash;
-  // std::vector<HashRead> pending_hash_rw;
-  std::list<HashRead> pending_next_hash;
-  // std::list<HashRead> pending_next_hash_rw;
-  // std::vector<CasRead> pending_cas_ro;
-  std::vector<CasRead> pending_cas;
 
   struct pair_hash {
     inline std::size_t operator()(
@@ -181,13 +178,6 @@ ALWAYS_INLINE
 void DTX::TxBegin(tx_id_t txid) {
   Clean();  // Clean the last transaction states
   tx_id = txid;
-  pending_direct_ro.clear();
-  pending_hash.clear();
-  // pending_hash_rw.clear();
-  pending_next_hash.clear();
-  // pending_next_hash_rw.clear();
-  pending_cas.clear();
-  // pending_cas_rw.clear();
   start_time = 0;
   wlock_start_time = 0;
 }

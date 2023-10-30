@@ -8,50 +8,6 @@
 /******************** The business logic (Transaction) start
  * ********************/
 
-bool TxTestCachedAddr(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
-                      tx_id_t tx_id, DTX* dtx, bool is_skewed,
-                      uint64_t data_set_size, uint64_t num_keys_global,
-                      uint64_t write_ratio) {
-  dtx->TxBegin(tx_id);
-  bool is_write[data_set_size];
-  DataItemDuplicate micro_objs[data_set_size];
-
-  for (uint64_t i = 0; i < data_set_size; i++) {
-    micro_key_t micro_key;
-    micro_key.micro_id =
-        688;  // First read is non-cacheable, set ATTEMPED_NUM to 5
-
-    assert(micro_key.item_key >= 0 && micro_key.item_key < num_keys_global);
-
-    micro_objs[i].data_item_ptr = std::make_shared<DataItem>(
-        (table_id_t)MicroTableType::kMicroTable, micro_key.item_key);
-    micro_objs[i].is_dup = false;
-
-    dtx->AddToReadWriteSet(micro_objs[i].data_item_ptr);
-    is_write[i] = true;
-  }
-
-  if (!dtx->TxExe(yield)) {
-    // TLOG(DBG, thread_gid) << "tx " << tx_id << " aborts after exe";
-    return false;
-  }
-
-  for (uint64_t i = 0; i < data_set_size; i++) {
-    micro_val_t* micro_val = (micro_val_t*)micro_objs[i].data_item_ptr->value;
-    if (micro_val->magic[0] != micro_magic) {
-      RDMA_LOG(FATAL) << "[FATAL] Read unmatch, tid-cid-txid: " << dtx->t_id
-                      << "-" << dtx->coro_id << "-" << tx_id;
-    }
-    if (is_write[i]) {
-      micro_val->magic[1] = micro_magic * 2;
-    }
-  }
-
-  bool commit_status = dtx->TxCommit(yield);
-  // TLOG(DBG, thread_gid) << "tx " << tx_id << " commit? " << commit_status;
-  return commit_status;
-}
-
 bool TxLockContention(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
                       tx_id_t tx_id, DTX* dtx, bool is_skewed,
                       uint64_t data_set_size, uint64_t num_keys_global,

@@ -18,6 +18,7 @@ DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t _tid,
   lease = _lease;
   thread_rdma_buffer_alloc = rdma_buffer_allocator;
   tx_status = TXStatus::TX_INIT;
+  read_only = true;
 
   thread_remote_log_offset_alloc = remote_log_offset_allocator;
   addr_cache = addr_buf;

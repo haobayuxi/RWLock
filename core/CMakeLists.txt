@@ -11,6 +11,7 @@ set(DTX_SRC
         dtx/dtx.cc
         dtx/oocc.cc
         dtx/dtx_check.cc
+        dtx/read_only.cc
         # dtx/drtm.cc
         # dtx/dlmr.cc
         )
