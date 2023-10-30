@@ -15,7 +15,7 @@ bool DTX::ReadWrite(coro_yield_t& yield) {
   //   std::list<InsertOffRead> pending_next_off_rw;
   // may contain read only set
   if (!IssueReadRO(pending_direct_ro, pending_hash_ro)) return false;
-
+  if (!IssueReadLock(pending_cas_rw, pending_hash_rw)) return false;
   return true;
 }
 

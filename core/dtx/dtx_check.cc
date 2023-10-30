@@ -144,3 +144,32 @@ bool DTX::CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro) {
   }
   return true;
 }
+
+bool DTX::CheckReadRORW(std::vector<DirectRead>& pending_direct_ro,
+                        std::vector<HashRead>& pending_hash_ro,
+                        std::vector<HashRead>& pending_hash_rw,
+                        std::vector<CasRead>& pending_cas_rw,
+                        std::list<HashRead>& pending_next_hash_ro,
+                        std::list<HashRead>& pending_next_hash_rw,
+                        coro_yield_t& yield) {
+  // check read-only results
+  if (!CheckDirectRO(pending_direct_ro, pending_next_hash_ro)) return false;
+  if (!CheckHashRO(pending_hash_ro, pending_next_hash_ro)) return false;
+  // The reason to use separate CheckHashRO and CheckHashRW: We need to compare
+  // txid with the fetched id in read-write txn check read-write results
+  if (!CheckCasRW(pending_cas_rw, pending_next_hash_rw, pending_next_off_rw))
+    return false;
+  if (!CheckHashRW(pending_hash_rw, pending_next_hash_rw)) return false;
+  // During results checking, we may re-read data due to invisibility and hash
+  // collisions
+  while (!pending_next_hash_ro.empty() || !pending_next_hash_rw.empty()) {
+    coro_sched->Yield(yield, coro_id);
+
+    // Recheck read-only replies
+    if (!CheckNextHashRO(pending_next_hash_ro)) return false;
+
+    // Recheck read-write replies
+    if (!CheckNextHashRW(pending_next_hash_rw)) return false;
+  }
+  return true;
+}

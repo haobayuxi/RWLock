@@ -84,6 +84,14 @@ class DTX {
   bool CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro);
   bool CheckDirectRO(std::vector<DirectRead>& pending_direct_ro);
 
+  bool CheckReadRORW(std::vector<DirectRead>& pending_direct_ro,
+                     std::vector<HashRead>& pending_hash_ro,
+                     std::vector<HashRead>& pending_hash_rw,
+                     std::vector<CasRead>& pending_cas_rw,
+                     std::list<HashRead>& pending_next_hash_ro,
+                     std::list<HashRead>& pending_next_hash_rw,
+                     coro_yield_t& yield);
+
   //////////// check
   // bool CheckCASRO(std::vector<CasRead>& pending_cas_ro,
   //                 std::vector<HashRead>& pending_hash_ro,
