@@ -70,9 +70,10 @@ class DTX {
   bool Validate(coro_yield_t& yield);
   bool ReadOnly(coro_yield_t& yield);
   bool ReadWrite(coro_yield_t& yield);
-  bool CasWriteLockAndRead(coro_yield_t& yield);
   bool IssueReadRO(std::vector<DirectRead>& pending_direct_ro,
                    std::vector<HashRead>& pending_hash_ro);
+  bool IssueReadLock(std::vector<CasRead>& pending_cas_rw,
+                     std::vector<HashRead>& pending_hash_rw);
   // check
   bool CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
                    std::vector<HashRead>& pending_hash_ro,
@@ -82,15 +83,6 @@ class DTX {
                    std::list<HashRead>& pending_next_hash_ro);
   bool CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro);
   bool CheckDirectRO(std::vector<DirectRead>& pending_direct_ro);
-  // drtm
-  // bool Drtm(coro_yield_t& yield);
-
-  // bool DrtmCheckCas(coro_yield_t& yield);
-  // // dlmr
-  // bool Dlmr(coro_yield_t& yield);
-  // bool DlmrCheck(coro_yield_t& yield);
-
-  // bool cas_lease_expired(uint64_t lease);
 
   //////////// check
   // bool CheckCASRO(std::vector<CasRead>& pending_cas_ro,

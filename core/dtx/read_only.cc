@@ -14,8 +14,6 @@ bool DTX::ReadOnly(coro_yield_t& yield) {
 
   // Receive data
   std::list<HashRead> pending_next_hash_ro;
-  // RDMA_LOG(DBG) << "coro: " << coro_id << " tx_id: " << tx_id << " check read
-  // ro";
   auto res = CheckReadRO(pending_direct_ro, pending_hash_ro,
                          pending_next_hash_ro, yield);
   return res;

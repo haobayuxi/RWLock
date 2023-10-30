@@ -15,6 +15,12 @@ bool DTX::ReadWrite(coro_yield_t& yield) {
   //   std::list<InsertOffRead> pending_next_off_rw;
   // may contain read only set
   if (!IssueReadRO(pending_direct_ro, pending_hash_ro)) return false;
+
+  return true;
+}
+
+bool DTX::IssueReadLock(std::vector<CasRead>& pending_cas_rw,
+                        std::vector<HashRead>& pending_hash_rw) {
   // For read-write set, we need to read and lock them
   for (size_t i = 0; i < read_write_set.size(); i++) {
     if (read_write_set[i].is_fetched) continue;
@@ -61,11 +67,11 @@ bool DTX::ReadWrite(coro_yield_t& yield) {
       //                       .node_off = node_off});
       //   } else {
       pending_hash_rw.emplace_back(HashRead{.qp = qp,
-                                         .item = &read_write_set[i],
-                                         .buf = local_hash_node,
-                                         .remote_node = remote_node_id,
-                                         .meta = meta,
-                                         .op = OP::Write});
+                                            .item = &read_write_set[i],
+                                            .buf = local_hash_node,
+                                            .remote_node = remote_node_id,
+                                            .meta = meta,
+                                            .op = OP::Write});
       //   }
       if (!coro_sched->RDMARead(coro_id, qp, local_hash_node, node_off,
                                 sizeof(HashNode))) {
