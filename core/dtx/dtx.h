@@ -80,6 +80,7 @@ class DTX {
                    coro_yield_t& yield);
   bool CheckHashRO(std::vector<HashRead>& pending_hash_ro,
                    std::list<HashRead>& pending_next_hash_ro);
+  bool CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro);
   bool CheckDirectRO(std::vector<DirectRead>& pending_direct_ro);
   // drtm
   // bool Drtm(coro_yield_t& yield);

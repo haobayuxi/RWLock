@@ -11,12 +11,10 @@ bool DTX::CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
 
   // During results checking, we may re-read data due to invisibility and hash
   // collisions
-  // if (!lease_expired) {
-  while (!pending_invisible_ro.empty() || !pending_next_hash_ro.empty()) {
+  while (!pending_next_hash_ro.empty()) {
     coro_sched->Yield(yield, coro_id);
     if (!CheckNextHashRO(pending_next_hash_ro)) return false;
   }
-  // }
 
   return true;
 }
@@ -42,7 +40,7 @@ bool DTX::CheckHashRO(std::vector<HashRead>& pending_hash_ro,
                       std::list<HashRead>& pending_next_hash_ro) {
   // Check results from hash read
   //   return true;
-  for (auto& res : pending_hash) {
+  for (auto& res : pending_hash_ro) {
     auto* local_hash_node = (HashNode*)res.buf;
     auto* it = res.item->item_ptr.get();
     bool find = false;
@@ -91,12 +89,12 @@ bool DTX::CheckHashRO(std::vector<HashRead>& pending_hash_ro,
       // Not found, we need to re-read the next bucket
       auto node_off = (uint64_t)local_hash_node->next - res.meta.data_ptr +
                       res.meta.base_off;
-      pending_next_hash.emplace_back(HashRead{.qp = res.qp,
-                                              .item = res.item,
-                                              .buf = res.buf,
-                                              .remote_node = res.remote_node,
-                                              .meta = res.meta,
-                                              .op = res.op});
+      pending_next_hash_ro.emplace_back(HashRead{.qp = res.qp,
+                                                 .item = res.item,
+                                                 .buf = res.buf,
+                                                 .remote_node = res.remote_node,
+                                                 .meta = res.meta,
+                                                 .op = res.op});
       if (!coro_sched->RDMARead(coro_id, res.qp, res.buf, node_off,
                                 sizeof(HashNode)))
         return false;
@@ -106,9 +104,9 @@ bool DTX::CheckHashRO(std::vector<HashRead>& pending_hash_ro,
   return true;
 }
 
-bool DTX::CheckNextHash() {
-  for (auto iter = pending_next_hash.begin(); iter != pending_next_hash.end();
-       iter++) {
+bool DTX::CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro) {
+  for (auto iter = pending_next_hash_ro.begin();
+       iter != pending_next_hash_ro.end(); iter++) {
     auto res = *iter;
     auto* local_hash_node = (HashNode*)res.buf;
     auto* it = res.item->item_ptr.get();
@@ -128,17 +126,17 @@ bool DTX::CheckNextHash() {
       if (unlikely(it->lock == W_LOCKED)) {
         return false;
       }
-      iter = pending_next_hash.erase(iter);
+      iter = pending_next_hash_ro.erase(iter);
     } else {
       if (local_hash_node->next == nullptr) return false;
       // Not found, we need to re-read the next bucket
       auto node_off = (uint64_t)local_hash_node->next - res.meta.data_ptr +
                       res.meta.base_off;
-      pending_next_hash.emplace_back(HashRead{.qp = res.qp,
-                                              .item = res.item,
-                                              .buf = res.buf,
-                                              .remote_node = res.remote_node,
-                                              .meta = res.meta});
+      pending_next_hash_ro.emplace_back(HashRead{.qp = res.qp,
+                                                 .item = res.item,
+                                                 .buf = res.buf,
+                                                 .remote_node = res.remote_node,
+                                                 .meta = res.meta});
       if (!coro_sched->RDMARead(coro_id, res.qp, res.buf, node_off,
                                 sizeof(HashNode)))
         return false;
