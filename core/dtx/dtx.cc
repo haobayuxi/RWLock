@@ -59,11 +59,20 @@ bool DTX::TxExe(coro_yield_t& yield, bool fail_abort) {
   if (global_meta_man->txn_system == DTX_SYS::RWLock ||
       global_meta_man->txn_system == DTX_SYS::OCC) {
     // Run our system
-    if (ReadOnly(yield)) {
-      return true;
+    if (read_write_set.empty()) {
+      if (ReadOnly(yield)) {
+        return true;
+      } else {
+        goto ABORT;
+      }
     } else {
-      goto ABORT;
+      if (ReadWrite(yield)) {
+        return true;
+      } else {
+        goto ABORT;
+      }
     }
+
   } else if (global_meta_man->txn_system == DTX_SYS::DrTMH) {
     // if (Drtm(yield)) {
     //   return true;
@@ -87,7 +96,7 @@ ABORT:
 
 bool DTX::TxCommit(coro_yield_t& yield) {
   bool commit_stat;
-
+  coro_sched->Yield(yield, coro_id);
   /*!
     RWLock's commit protocol
     */

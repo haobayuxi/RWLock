@@ -1,7 +1,6 @@
 #include "dtx.h"
 
 bool DTX::ReadOnly(coro_yield_t& yield) {
-  //   bool read_only = read_write_set.empty();
   if (start_time == 0) {
     start_time = get_clock_sys_time_us();
   }
