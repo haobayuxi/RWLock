@@ -103,4 +103,6 @@ bool DTX::CheckHashRW(std::vector<HashRead>& pending_hash_rw,
   return true;
 }
 
-bool DTX::CheckNextHashRW(std::list<HashRead>& pending_next_hash_rw) {}
+bool DTX::CheckNextHashRW(std::list<HashRead>& pending_next_hash_rw) {
+  return true;
+}
