@@ -14,16 +14,7 @@ bool DTX::OOCC(coro_yield_t& yield) {
   //   }
 
   coro_sched->Yield(yield, coro_id);
-  int len = pending_direct_ro.size();
-  for (int i = 0; i < len; i++) {
-    // auto* it = res.item->item_ptr.get();
-    // pending_direct_ro[i].item->is_fetched = true;
-    auto* lock = (lock_t*)pending_direct_ro[i].buf;
-    if (*lock != 0) {
-      RDMA_LOG(INFO) << "lock";
-      return false;
-    }
-  }
+
   //   if (!read_only) {
   //     auto _wlock_start_time = get_clock_sys_time_us();
   //     if (wlock_start_time < _wlock_start_time) {
@@ -155,7 +146,7 @@ bool DTX::CasWriteLockAndRead(coro_yield_t& yield) {
 }
 
 bool DTX::OOCCCheck(coro_yield_t& yield) {
-  //   if (!CheckDirectRO()) return false;
+  if (!CheckDirectRO()) return false;
   if (!CheckHash()) return false;
 
   // During results checking, we may re-read data due to invisibility and hash

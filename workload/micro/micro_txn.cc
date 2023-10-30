@@ -107,24 +107,24 @@ bool TxLockContention(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
 
 bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
                 tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size,
-                uint64_t num_keys_global, uint64_t rw_ratio) {
+                uint64_t num_keys_global, uint64_t write_ratio) {
   dtx->TxBegin(tx_id);
   bool read_only = true;
-  dtx->rw_ratio += 1;
-  if (dtx->rw_ratio == rw_ratio) {
+  dtx->write_ratio += 1;
+  if (dtx->write_ratio == write_ratio) {
     read_only = false;
-    rw_ratio = 0;
+    write_ratio = 0;
   }
   for (int i = 0; i < data_set_size; i++) {
     micro_key_t micro_key;
     if (is_skewed) {
       // Skewed distribution
-      // micro_key.micro_id = (itemkey_t)(zipf_gen->next());
-      micro_key.micro_id = 100;
+      micro_key.micro_id = (itemkey_t)(zipf_gen->next());
+      // micro_key.micro_id = 100;
     } else {
       // Uniformed distribution
-      // micro_key.micro_id = (itemkey_t)FastRand(seed) % (num_keys_global - 1);
-      micro_key.micro_id = dtx->t_id * 100 + dtx->coro_id;
+      micro_key.micro_id = (itemkey_t)FastRand(seed) % (num_keys_global - 1);
+      // micro_key.micro_id = dtx->t_id * 100 + dtx->coro_id;
     }
     assert(micro_key.item_key >= 0 && micro_key.item_key < num_keys_global);
 

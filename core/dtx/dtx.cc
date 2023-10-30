@@ -21,7 +21,7 @@ DTX::DTX(MetaManager* meta_man, QPManager* qp_man, t_id_t _tid,
 
   thread_remote_log_offset_alloc = remote_log_offset_allocator;
   addr_cache = addr_buf;
-  rw_ratio = 0;
+  write_ratio = 0;
 
   hit_local_cache_times = 0;
   miss_local_cache_times = 0;

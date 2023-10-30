@@ -30,7 +30,7 @@ bool TxLockContention(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
 // num_keys_global, uint64_t write_ratio);
 bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
                 tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size,
-                uint64_t num_keys_global, uint64_t rw_ratio);
+                uint64_t num_keys_global, uint64_t write_ratio);
 bool TxRFlush1(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
                tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size,
                uint64_t num_keys_global, uint64_t write_ratio);

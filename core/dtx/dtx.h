@@ -128,7 +128,7 @@ class DTX {
   size_t miss_local_cache_times;
 
   MetaManager* global_meta_man;  // Global metadata manager
-  int rw_ratio;
+  int write_ratio;
 
  private:
   int lease;
