@@ -33,8 +33,8 @@ bool DTX::CheckHashRO(std::vector<HashRead>& pending_hash_ro,
         *it = item;
         addr_cache->Insert(res.remote_node, it->table_id, it->key,
                            it->remote_offset);
-        RDMA_LOG(INFO) << "hash get key=" << it->key
-                       << ",offset =" << it->remote_offset;
+        // RDMA_LOG(INFO) << "hash get key=" << it->key
+        //                << ",offset =" << it->remote_offset;
         res.item->is_fetched = true;
         find = true;
         // RDMA_LOG(INFO) << "find key" << it->key;

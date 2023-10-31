@@ -290,13 +290,14 @@ bool DTX::CheckDirectRO(std::vector<DirectRead>& pending_direct_ro) {
   for (auto& res : pending_direct_ro) {
     auto* fetched_item = (DataItem*)res.buf;
     // fetched_item
-    RDMA_LOG(INFO) << "direct check ro key " << fetched_item->key
-                   << ", version=" << fetched_item->version;
+    // RDMA_LOG(INFO) << "direct check ro key " << fetched_item->key
+    //                << ", version=" << fetched_item->version;
     if (fetched_item->lock != 0) {
       RDMA_LOG(INFO) << "lock " << fetched_item->lock;
       usleep(400000);
       return false;
     }
+    res.item = fetched_item;
   }
   //   pending_direct_ro.clear();
   return true;
