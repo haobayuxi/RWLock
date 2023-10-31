@@ -104,7 +104,7 @@ bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
   // }
 
   bool commit_status = dtx->TxCommit(yield);
-  // TLOG(DBG, thread_gid) << "tx " << tx_id << " commit? " << commit_status;
+  sleep(5);
   return commit_status;
 }
 
