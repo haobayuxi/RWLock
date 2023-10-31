@@ -230,7 +230,7 @@ bool DTX::Validate(coro_yield_t& yield) {
                                             .cas_buf = nullptr,
                                             .version_buf = version_buf,
                                             .has_lock_in_validate = false});
-    auto offset = addr_cache->Search(remote_node_id, it->table_id, it->key);
+    auto offset = addr_cache->Search(0, it->table_id, it->key);
     RDMA_LOG(INFO) << "cache offset =" << offset
                    << ", version addr =" << it->remote_offset;
     if (!coro_sched->RDMARead(coro_id, qp, version_buf,
