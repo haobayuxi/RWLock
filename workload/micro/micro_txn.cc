@@ -104,7 +104,7 @@ bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
   // }
 
   bool commit_status = dtx->TxCommit(yield);
-  sleep(5);
+  // sleep(5);
   return commit_status;
 }
 
