@@ -196,6 +196,7 @@ bool DTX::commit_data() {
     char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
     char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
     *(lock_t*)cas_buf = 0;
+    it->version = tx_id;
     memcpy(data_buf, (char*)it.get(), sizeof(DataItem));
     // pending_cas.emplace_back(CasRead{.qp = qp,
     //                                  .item = &read_write_set[i],
@@ -235,7 +236,6 @@ bool DTX::Validate(coro_yield_t& yield) {
                                             .has_lock_in_validate = false});
     if (!coro_sched->RDMARead(coro_id, qp, version_buf,
                               it->GetRemoteVersionAddr(), sizeof(version_t))) {
-      RDMA_LOG(INFO) << "read version fail";
       return false;
     }
   }
