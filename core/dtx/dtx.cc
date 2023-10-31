@@ -131,7 +131,7 @@ bool DTX::TxCommit(coro_yield_t& yield) {
       commit_data();
       coro_sched->Yield(yield, coro_id);
       end_time = get_clock_sys_time_us();
-      RDMA_LOG(INFO) << "commit time = " << end_time - start_time;
+      // RDMA_LOG(INFO) << "commit time = " << end_time - start_time;
     }
   } else if (global_meta_man->txn_system == DTX_SYS::OCC) {
     /*
@@ -151,7 +151,7 @@ bool DTX::TxCommit(coro_yield_t& yield) {
       commit_data();
       coro_sched->Yield(yield, coro_id);
       end_time = get_clock_sys_time_us();
-      RDMA_LOG(INFO) << "commit time = " << end_time - start_time;
+      // RDMA_LOG(INFO) << "commit time = " << end_time - start_time;
     }
 
   } else if (global_meta_man->txn_system == DTX_SYS::DrTMH) {
