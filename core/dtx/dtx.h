@@ -286,15 +286,15 @@ void DTX::Clean() {
 ALWAYS_INLINE
 bool DTX::CheckDirectRO(std::vector<DirectRead>& pending_direct_ro) {
   // check if the tuple has been wlocked
-  int len = pending_direct_ro.size();
-  for (int i = 0; i < len; i++) {
+  // int len = pending_direct_ro.size();
+  for (auto& res : pending_direct_ro) {
     auto* it = res.item->item_ptr.get();
     pending_direct_ro[i].item->is_fetched = true;
     auto* fetched_item = (DataItem*)res.buf;
     RDMA_LOG(INFO) << "direct check ro key " << fetched_item->key
                    << ", version=" << fetched_item->version;
     if (fetched_item->lock != 0) {
-      RDMA_LOG(INFO) << "lock " << *lock;
+      RDMA_LOG(INFO) << "lock " << fetched_item->lock;
       usleep(400000);
       return false;
     }
