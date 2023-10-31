@@ -74,8 +74,8 @@ bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
     micro_key_t micro_key;
     if (is_skewed) {
       // Skewed distribution
-      micro_key.micro_id = (itemkey_t)(zipf_gen->next());
-      // micro_key.micro_id = 100 + i;
+      // micro_key.micro_id = (itemkey_t)(zipf_gen->next());
+      micro_key.micro_id = 100 + i;
     } else {
       // Uniformed distribution
       micro_key.micro_id = (itemkey_t)FastRand(seed) % (num_keys_global - 1);
