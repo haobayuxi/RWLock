@@ -293,7 +293,7 @@ bool DTX::CheckDirectRO(std::vector<DirectRead>& pending_direct_ro) {
     auto* lock = (lock_t*)pending_direct_ro[i].buf;
     if (*lock != 0) {
       RDMA_LOG(INFO) << "lock " << *lock;
-      usleep(200000);
+      usleep(400000);
       return false;
     }
   }
