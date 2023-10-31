@@ -226,7 +226,7 @@ bool DTX::Validate(coro_yield_t& yield) {
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(set_it.read_which_node);
     char* version_buf = thread_rdma_buffer_alloc->Alloc(sizeof(version_t));
     pending_validate.push_back(ValidateRead{.qp = qp,
-                                            .item = &set_it,
+                                            .item = it,
                                             .cas_buf = nullptr,
                                             .version_buf = version_buf,
                                             .has_lock_in_validate = false});
@@ -249,7 +249,7 @@ bool DTX::Validate(coro_yield_t& yield) {
 
 bool DTX::CheckValidate(std::vector<ValidateRead>& pending_validate) {
   for (auto& re : pending_validate) {
-    auto it = re.item->item_ptr;
+    auto it = re.item->item_ptr.get();
     // Compare version
     if (it->version != *((version_t*)re.version_buf)) {
       RDMA_LOG(INFO) << it->version << "  " << *((version_t*)re.version_buf);
