@@ -288,8 +288,8 @@ bool DTX::CheckDirectRO(std::vector<DirectRead>& pending_direct_ro) {
   // check if the tuple has been wlocked
   // int len = pending_direct_ro.size();
   for (auto& res : pending_direct_ro) {
-    res.is_fetched = true;
     auto* fetched_item = (DataItem*)res.buf;
+    // fetched_item
     RDMA_LOG(INFO) << "direct check ro key " << fetched_item->key
                    << ", version=" << fetched_item->version;
     if (fetched_item->lock != 0) {
