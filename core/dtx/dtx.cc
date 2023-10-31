@@ -192,11 +192,11 @@ bool DTX::commit_data() {
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
     auto offset = it->remote_offset;
     locked_rw_set.emplace_back(i);
-    // After getting address, use doorbell CAS + READ
-    char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
+    // char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
     char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
-    *(lock_t*)cas_buf = 0;
+    // *(lock_t*)cas_buf = 0;
     it->version = tx_id;
+    it->lock = 0;
     memcpy(data_buf, (char*)it.get(), sizeof(DataItem));
     // pending_cas.emplace_back(CasRead{.qp = qp,
     //                                  .item = &read_write_set[i],
@@ -206,10 +206,10 @@ bool DTX::commit_data() {
     if (!coro_sched->RDMAWrite(coro_id, qp, data_buf, offset, DataItemSize)) {
       return false;
     }
-    if (!coro_sched->RDMACAS(coro_id, qp, cas_buf,
-                             it->GetRemoteLockAddr(offset), tx_id, 0)) {
-      return false;
-    }
+    // if (!coro_sched->RDMACAS(coro_id, qp, cas_buf,
+    //                          it->GetRemoteLockAddr(offset), tx_id, 0)) {
+    //   return false;
+    // }
   }
   return true;
 }
