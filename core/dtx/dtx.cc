@@ -191,7 +191,7 @@ bool DTX::commit_data() {
     read_write_set[i].read_which_node = remote_node_id;
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
     auto offset = it->remote_offset;
-    RDMA_LOG(INFO) << "write key=" << it->key << ",offset =" << offset;
+    // RDMA_LOG(INFO) << "write key=" << it->key << ",offset =" << offset;
     // locked_rw_set.emplace_back(i);
     // char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
     char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
@@ -221,8 +221,6 @@ bool DTX::Validate(coro_yield_t& yield) {
   // For read-only items, we only need to read their versions
   for (auto& set_it : read_only_set) {
     auto it = set_it.item_ptr;
-    // RDMA_LOG(INFO) << "validate key = " << it->key << "node "
-    //                << it->remote_offset;
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(set_it.read_which_node);
     char* version_buf = thread_rdma_buffer_alloc->Alloc(sizeof(version_t));
     pending_validate.push_back(ValidateRead{.qp = qp,
@@ -231,8 +229,8 @@ bool DTX::Validate(coro_yield_t& yield) {
                                             .version_buf = version_buf,
                                             .has_lock_in_validate = false});
     auto offset = addr_cache->Search(0, it->table_id, it->key);
-    RDMA_LOG(INFO) << "cache offset =" << offset
-                   << ", version addr =" << it->remote_offset;
+    // RDMA_LOG(INFO) << "cache offset =" << offset
+    //                << ", version addr =" << it->remote_offset;
     if (!coro_sched->RDMARead(coro_id, qp, version_buf,
                               it->GetRemoteVersionAddr(), sizeof(version_t))) {
       return false;

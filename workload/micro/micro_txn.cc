@@ -87,11 +87,11 @@ bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
         (table_id_t)MicroTableType::kMicroTable, micro_key.item_key);
     if (read_only || i % 2 == 1) {
       dtx->AddToReadOnlySet(micro_obj);
-      RDMA_LOG(INFO) << "txid = " << dtx->tx_id
-                     << "write key=" << micro_key.micro_id;
+      // RDMA_LOG(INFO) << "txid = " << dtx->tx_id
+      //                << "write key=" << micro_key.micro_id;
     } else {
-      RDMA_LOG(INFO) << "txid = " << dtx->tx_id
-                     << "write key=" << micro_key.micro_id;
+      // RDMA_LOG(INFO) << "txid = " << dtx->tx_id
+      //                << "write key=" << micro_key.micro_id;
       dtx->AddToReadWriteSet(micro_obj);
     }
   }
