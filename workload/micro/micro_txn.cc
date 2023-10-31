@@ -95,16 +95,10 @@ bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
   }
 
   if (!dtx->TxExe(yield)) {
-    // TLOG(DBG, thread_gid) << "tx " << tx_id << " aborts after exe";
     return false;
   }
-  // auto end_time = dtx->get_clock_sys_time_us();
-  // if ((end_time - dtx->start_time) > 100) {
-  //   RDMA_LOG(INFO) << "cost time =" << end_time - dtx->start_time;
-  // }
 
   bool commit_status = dtx->TxCommit(yield);
-  // sleep(5);
   return commit_status;
 }
 

@@ -242,7 +242,6 @@ bool DTX::RDMAWriteRoundTrip(RCQP* qp, char* wt_data, uint64_t remote_offset,
     return false;
   }
   // wait finish
-  sleep(1);
   // ibv_wc wc{};
   // rc = qp->poll_till_completion(wc, no_timeout);
   // if (rc != SUCC) {
@@ -294,7 +293,7 @@ bool DTX::CheckDirectRO(std::vector<DirectRead>& pending_direct_ro) {
     auto* lock = (lock_t*)pending_direct_ro[i].buf;
     if (*lock != 0) {
       RDMA_LOG(INFO) << "lock " << *lock;
-      sleep(2);
+      usleep(200);
       return false;
     }
   }
