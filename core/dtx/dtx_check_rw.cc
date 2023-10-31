@@ -66,7 +66,6 @@ bool DTX::CheckHashRW(std::vector<HashRead>& pending_hash_rw,
     }
     if (likely(find)) {
       if (unlikely(it->lock != 0)) {
-        RDMA_LOG(INFO) << "lock key" << it->key << " lock id " << it->lock;
         return false;
       } else {
         // After getting address, use CAS + READ

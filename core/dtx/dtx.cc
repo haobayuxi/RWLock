@@ -239,9 +239,7 @@ bool DTX::Validate(coro_yield_t& yield) {
   // Yield to other coroutines when waiting for network replies
   coro_sched->Yield(yield, coro_id);
   auto res = CheckValidate(pending_validate);
-  if (!res) {
-    RDMA_LOG(INFO) << "check version fail";
-  }
+
   return res;
 }
 
@@ -250,9 +248,9 @@ bool DTX::CheckValidate(std::vector<ValidateRead>& pending_validate) {
     auto it = re.item->item_ptr.get();
     // Compare version
     if (it->version != *((version_t*)re.version_buf)) {
-      RDMA_LOG(INFO) << "validate key=" << it->key
-                     << " ,offset= " << it->remote_offset;
-      RDMA_LOG(INFO) << it->version << "  " << *((version_t*)re.version_buf);
+      // RDMA_LOG(INFO) << "validate key=" << it->key
+      //                << " ,offset= " << it->remote_offset;
+      // RDMA_LOG(INFO) << it->version << "  " << *((version_t*)re.version_buf);
       return false;
     }
   }
