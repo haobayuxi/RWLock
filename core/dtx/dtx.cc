@@ -69,7 +69,7 @@ bool DTX::TxExe(coro_yield_t& yield, bool fail_abort) {
       if (ReadWrite(yield)) {
         return true;
       } else {
-        RDMA_LOG(INFO) << "read write fail";
+        // RDMA_LOG(INFO) << "read write fail";
         goto ABORT;
       }
     }
