@@ -191,18 +191,14 @@ bool DTX::commit_data() {
     read_write_set[i].read_which_node = remote_node_id;
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
     auto offset = it->remote_offset;
-    locked_rw_set.emplace_back(i);
+    RDMA_LOG(INFO) << "write key=" << it->key << ",offset =" << offset;
+    // locked_rw_set.emplace_back(i);
     // char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
     char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
     // *(lock_t*)cas_buf = 0;
     it->version = tx_id;
     it->lock = 0;
     memcpy(data_buf, (char*)it.get(), sizeof(DataItem));
-    // pending_cas.emplace_back(CasRead{.qp = qp,
-    //                                  .item = &read_write_set[i],
-    //                                  .cas_buf = cas_buf,
-    //                                  .data_buf = data_buf,
-    //                                  .primary_node_id = remote_node_id});
     if (!coro_sched->RDMAWrite(coro_id, qp, data_buf, offset, DataItemSize)) {
       return false;
     }
@@ -234,6 +230,9 @@ bool DTX::Validate(coro_yield_t& yield) {
                                             .cas_buf = nullptr,
                                             .version_buf = version_buf,
                                             .has_lock_in_validate = false});
+    auto offset = addr_cache->Search(remote_node_id, it->table_id, it->key);
+    RDMA_LOG(INFO) << "cache offset =" << offset
+                   << ", version addr =" << it->remote_offset;
     if (!coro_sched->RDMARead(coro_id, qp, version_buf,
                               it->GetRemoteVersionAddr(), sizeof(version_t))) {
       return false;
