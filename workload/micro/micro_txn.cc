@@ -88,6 +88,8 @@ bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
     if (read_only || i % 2 == 1) {
       dtx->AddToReadOnlySet(micro_obj);
     } else {
+      RDMA_LOG(INFO) << "txid = " << dtx->tx_id
+                     << "write key=" << micro_key.micro_id;
       dtx->AddToReadWriteSet(micro_obj);
     }
   }
