@@ -40,7 +40,7 @@ bool DTX::IssueLock() {
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
     auto offset = it->remote_offset;
     char* lock_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
-    *(lock_t*)lock_buf = tx_id;
+    *(lock_t*)lock_buf = 0;
     if (!coro_sched->RDMAWrite(coro_id, qp, lock_buf, offset, sizeof(lock_t))) {
       return false;
     }
