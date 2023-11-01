@@ -42,7 +42,7 @@ bool DTX::CheckHashRO(std::vector<HashRead>& pending_hash_ro,
       }
     }
     if (likely(find)) {
-      if (unlikely(it->lock != 0)) {
+      if (unlikely(it->lock > 1)) {
         return false;
       }
     } else {

@@ -27,6 +27,7 @@ bool DTX::ReadWrite(coro_yield_t& yield) {
                            pending_next_hash_ro, pending_next_hash_rw, yield);
   if (res) {
     ParallelUndoLog();
+    IssueLock();
   }
   return res;
 }
