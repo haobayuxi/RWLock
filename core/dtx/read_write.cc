@@ -25,8 +25,26 @@ bool DTX::ReadWrite(coro_yield_t& yield) {
   auto res = CheckReadRORW(pending_direct_ro, pending_hash_ro, pending_hash_rw,
                            pending_cas_rw, pending_next_cas_rw,
                            pending_next_hash_ro, pending_next_hash_rw, yield);
-  if (res) ParallelUndoLog();
+  if (res) {
+    ParallelUndoLog();
+  }
   return res;
+}
+
+bool DTX::IssueLock() {
+  auto size = read_write_set.size();
+  for (size_t i = 0; i < size; i++) {
+    auto it = read_write_set[i].item_ptr;
+    auto remote_node_id = read_write_set[i].read_which_node;
+    RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
+    auto offset = it->remote_offset;
+    char* lock_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
+    *(lock_t*)lock_buf = tx_id;
+    if (!coro_sched->RDMAWrite(coro_id, qp, lock_buf, offset, sizeof(lock_t))) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool DTX::IssueReadLock(std::vector<CasRead>& pending_cas_rw,

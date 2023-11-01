@@ -74,6 +74,7 @@ class DTX {
                    std::vector<HashRead>& pending_hash_ro);
   bool IssueReadLock(std::vector<CasRead>& pending_cas_rw,
                      std::vector<HashRead>& pending_hash_rw);
+  bool IssueLock();
   // check
   bool CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
                    std::vector<HashRead>& pending_hash_ro,
