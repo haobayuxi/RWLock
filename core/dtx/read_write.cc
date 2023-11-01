@@ -73,7 +73,7 @@ bool DTX::IssueReadLock(std::vector<CasRead>& pending_cas_rw,
                                           .primary_node_id = remote_node_id,
                                           .op = OP::Write});
       if (!coro_sched->RDMACAS(coro_id, qp, cas_buf,
-                               it->GetRemoteLockAddr(offset), 0, tx_id)) {
+                               it->GetRemoteLockAddr(offset), 0, 1)) {
         return false;
       }
       if (!coro_sched->RDMARead(coro_id, qp, data_buf, offset, DataItemSize)) {

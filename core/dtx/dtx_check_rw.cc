@@ -78,7 +78,7 @@ bool DTX::CheckHashRW(std::vector<HashRead>& pending_hash_rw,
                     .primary_node_id = res.remote_node});
         if (!coro_sched->RDMACAS(coro_id, res.qp, cas_buf,
                                  it->GetRemoteLockAddr(it->remote_offset), 0,
-                                 tx_id)) {
+                                 1)) {
           return false;
         }
         if (!coro_sched->RDMARead(coro_id, res.qp, data_buf, it->remote_offset,
