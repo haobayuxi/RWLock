@@ -25,7 +25,7 @@ bool DTX::ReadWrite(coro_yield_t& yield) {
   auto res = CheckReadRORW(pending_direct_ro, pending_hash_ro, pending_hash_rw,
                            pending_cas_rw, pending_next_cas_rw,
                            pending_next_hash_ro, pending_next_hash_rw, yield);
-  if (res) ParallelUndoLog();
+  //   if (res) ParallelUndoLog();
   return res;
 }
 
