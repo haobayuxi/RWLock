@@ -35,7 +35,6 @@ bool DTX::CheckCasRW(std::vector<CasRead>& pending_cas_rw) {
   for (auto& re : pending_cas_rw) {
     if (*((lock_t*)re.cas_buf) != 0) {
       // RDMA_LOG(INFO) << "cas read check fail" << *(lock_t*)re.cas_buf;
-      sleep(1);
       return false;
     }
   }
