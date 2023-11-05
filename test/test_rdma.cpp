@@ -66,6 +66,7 @@ size_t nr_nodes = 1;
 int nr_threads = 1;
 size_t block_size = 64;
 size_t depth = 1;
+int dtx_txn_sys = 0;
 int qp_num;
 std::string dump_file_path;
 std::string dump_prefix;
@@ -76,9 +77,8 @@ volatile int stop_signal = 0;
 pthread_barrier_t barrier;
 Initiator *node[32];
 
-void *test_thread_func(void *arg, void *txn_sys) {
+void *test_thread_func(void *arg) {
   int thread_id = (int)(uintptr_t)arg;
-  int dtx_txn_sys = (int)(uintptr_t)arg;
   auto ctx = node[thread_id % nr_nodes];
   BindCore(thread_id);
   size_t kSegmentSize = MEM_POOL_SIZE / nr_threads;
@@ -247,7 +247,7 @@ void run_client(const std::vector<std::string> &server_list, uint16_t port,
                  (end_tv.tv_usec - start_tv.tv_usec) / 1000.0;
   pthread_barrier_init(&barrier, NULL, nr_threads + 1);
   for (long i = 0; i < nr_threads; ++i) {
-    pthread_create(&tid[i], NULL, test_thread_func, (void *)i, (void *txn_sys));
+    pthread_create(&tid[i], NULL, test_thread_func, (void *)i);
   }
   pthread_barrier_wait(&barrier);
   gettimeofday(&start_tv, NULL);
@@ -276,7 +276,7 @@ int main(int argc, char **argv) {
   JsonConfig config =
       JsonConfig::load_file(env_path ? env_path : ROOT_DIR "test_rdma.json");
   qp_num = (int)config.get("qp_num").get_int64();
-  int txn_sys = (int)config.get("txn_sys").get_int64();
+  dtx_txn_sys = (int)config.get("txn_sys").get_int64();
   if (getenv("QP_NUM")) {
     qp_num = atoi(getenv("QP_NUM"));
   }
