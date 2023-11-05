@@ -41,7 +41,7 @@
 
 #define ALWAYS_INLINE inline __attribute__((always_inline))
 #define MAP_HUGE_2MB (21 << MAP_HUGE_SHIFT)
-#define ROOT_DIR ""
+#define ROOT_DIR "."
 
 #define RED "\033[1;31m"
 #define DEFAULT "\033[0m"
