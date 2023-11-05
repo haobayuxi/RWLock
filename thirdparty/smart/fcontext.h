@@ -1,8 +1,8 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (C) 2022-2023 Feng Ren, Tsinghua University
- *
+ * Copyright (C) 2022-2023 Feng Ren, Tsinghua University 
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -22,19 +22,28 @@
  * THE SOFTWARE.
  */
 
-#include "thread.h"
+#ifndef SDS_FCONTEXT_H
+#define SDS_FCONTEXT_H
 
-namespace sds {
-thread_local ThreadCheckInCheckOut tl_tcico{};
+#include <stddef.h>
 
-ThreadRegistry gThreadRegistry{};
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int gBindToCore[kMaxThreads] = {0};
-int gBindToSocket[kMaxThreads] = {0};
+typedef void *fcontext_t;
 
-void thread_registry_deregister_thread(const int tid) {
-  gThreadRegistry.deregister_thread(tid);
+typedef struct {
+    fcontext_t fctx;
+    void *data;
+} transfer_t;
+
+fcontext_t make_fcontext(void *sp, size_t size, void(*fn)(transfer_t));
+transfer_t jump_fcontext(fcontext_t const to, void *vp);
+transfer_t ontop_fcontext(fcontext_t const to, void *vp, transfer_t(*fn)(transfer_t));
+
+#ifdef __cplusplus
 }
+#endif
 
-StatInfo tl_stat[kMaxThreads];
-}  // namespace sds
+#endif //SDS_FCONTEXT_H

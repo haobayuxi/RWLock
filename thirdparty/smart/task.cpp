@@ -1,8 +1,8 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (C) 2022-2023 Feng Ren, Tsinghua University 
- * 
+ * Copyright (C) 2022-2023 Feng Ren, Tsinghua University
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -22,10 +22,11 @@
  * THE SOFTWARE.
  */
 
-#include "smart/task.h"
-#include "smart/common.h"
+#include "task.h"
+
+#include "common.h"
 
 namespace sds {
-    thread_local bool tl_task_pool_enabled = false;
-    transfer_t TaskPool::g_empty_transfer;
-}
+thread_local bool tl_task_pool_enabled = false;
+transfer_t TaskPool::g_empty_transfer;
+}  // namespace sds
