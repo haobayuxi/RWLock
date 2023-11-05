@@ -38,6 +38,7 @@
 #include "smart/thread.h"
 
 using namespace sds;
+using namespace rdmaio;
 
 static const size_t MEM_POOL_SIZE = (1ull << 30);
 
