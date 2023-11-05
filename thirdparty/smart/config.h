@@ -61,8 +61,7 @@ struct SmartConfig {
   SmartConfig() {
     throttler = true;
     const char *path = getenv("SMART_CONFIG_PATH");
-    JsonConfig config = JsonConfig::load_file(
-        path ? path : ROOT_DIR "/config/smart_config.json");
+    JsonConfig config = JsonConfig::load_file("config/smart_config.json");
     char buf[11];
     infiniband_name = config.get("infiniband").get("name").get_str();
     infiniband_port = (uint8_t)config.get("infiniband").get("port").get_int64();
