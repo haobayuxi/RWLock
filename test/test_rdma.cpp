@@ -110,8 +110,8 @@ void *test_thread_func(void *arg, void *txn_sys) {
         }
         // read data
         GlobalAddress data_remote_addr(attempts % connections, offset + 8);
-        int rc = ctx->read(buf + align_size * tokens, data_remote_addr,
-                           block_size, Initiator::Option::PostRequest);
+        rc = ctx->read(buf + align_size * tokens, data_remote_addr, block_size,
+                       Initiator::Option::PostRequest);
         assert(!rc);
         --tokens;
         while (tokens == 0) {
@@ -135,8 +135,8 @@ void *test_thread_func(void *arg, void *txn_sys) {
         }
         // read data
         GlobalAddress data_remote_addr(attempts % connections, offset + 8);
-        int rc = ctx->read(buf + align_size * tokens, data_remote_addr,
-                           block_size, Initiator::Option::PostRequest);
+        rc = ctx->read(buf + align_size * tokens, data_remote_addr, block_size,
+                       Initiator::Option::PostRequest);
         assert(!rc);
         --tokens;
         while (tokens == 0) {
@@ -273,8 +273,8 @@ void run_client(const std::vector<std::string> &server_list, uint16_t port,
 
 int main(int argc, char **argv) {
   const char *env_path = getenv("TEST_RDMA_CONF");
-  JsonConfig config = JsonConfig::load_file(
-      env_path ? env_path : ROOT_DIR "/config/test_rdma.json");
+  JsonConfig config =
+      JsonConfig::load_file(env_path ? env_path : ROOT_DIR "test_rdma.json");
   qp_num = (int)config.get("qp_num").get_int64();
   int txn_sys = (int)config.get("txn_sys").get_int64();
   if (getenv("QP_NUM")) {
