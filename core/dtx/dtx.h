@@ -300,6 +300,5 @@ bool DTX::CheckDirectRO(std::vector<DirectRead>& pending_direct_ro) {
     auto* it = res.item->item_ptr.get();
     *it = *fetched_item;
   }
-  //   pending_direct_ro.clear();
   return true;
 }

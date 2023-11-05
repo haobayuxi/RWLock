@@ -438,8 +438,8 @@ void PollCompletion(coro_yield_t& yield) {
 void test_iops(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man) {
   // test rdma read and atomic
   RCQP* qp = qp_man->data_qps[0];
-  // auto offset = ((thread_gid * 20) + coro_id) * sizeof(int);
-  auto offset = 96;
+  auto offset = ((thread_gid * 20) + coro_id) * sizeof(int);
+  // auto offset = 96;
 
   char* data_buf = rdma_buffer_allocator->Alloc(sizeof(int));
   while (running) {
@@ -699,10 +699,10 @@ void run_thread(thread_params* params) {
       //   coro_sched->coro_array[coro_i].func =
       //       coro_call_t(bind(RunTPCC, _1, coro_i));
       // } else if (bench_name == "micro") {
-      coro_sched->coro_array[coro_i].func =
-          coro_call_t(bind(RunMICRO, _1, coro_i, qp_man, params->lease));
       // coro_sched->coro_array[coro_i].func =
-      //     coro_call_t(bind(test_iops, _1, coro_i, qp_man));
+      //     coro_call_t(bind(RunMICRO, _1, coro_i, qp_man, params->lease));
+      coro_sched->coro_array[coro_i].func =
+          coro_call_t(bind(test_iops, _1, coro_i, qp_man));
       // }
     }
   }
