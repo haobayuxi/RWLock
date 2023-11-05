@@ -32,6 +32,7 @@
 #include <iostream>
 #include <random>
 
+#include "rlib/logging.hpp"
 #include "smart/initiator.h"
 #include "smart/target.h"
 #include "smart/thread.h"
@@ -276,11 +277,11 @@ int main(int argc, char **argv) {
   qp_num = (int)config.get("qp_num").get_int64();
   dtx_txn_sys = (int)config.get("txn_sys").get_int64();
   if (dtx_txn_sys == DTX_SYS::OOCC) {
-    SDS_INFO("running oocc");
+    RDMA_LOG(INFO) << "running oocc";
   } else if (dtx_txn_sys == DTX_SYS::DSLR) {
-    SDS_INFO("running dslr");
+    RDMA_LOG(INFO) << "running dslr";
   } else if (dtx_txn_sys == DTX_SYS::DrTMH) {
-    SDS_INFO("running drtm");
+    RDMA_LOG(INFO) << "running drtm";
   }
   if (getenv("QP_NUM")) {
     qp_num = atoi(getenv("QP_NUM"));
@@ -301,7 +302,7 @@ int main(int argc, char **argv) {
   }
   BindCore(0);
   if (argc == 1) {
-    SDS_INFO("running server");
+    RDMA_LOG(INFO) << "running server";
     run_server(port);
   } else {
     block_size = (int)config.get("block_size").get_int64();
