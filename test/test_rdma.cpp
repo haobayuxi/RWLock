@@ -204,11 +204,14 @@ double connect_time = 0.0;
 void report(uint64_t elapsed_time) {
   auto bandwidth = total_attempts * block_size / elapsed_time / 1024.0 / 1024.0;
   auto throughput = total_attempts / elapsed_time / 1000000.0;
-  SDS_INFO(
-      "%s: #threads=%d, #depth=%ld, #block_size=%ld, BW=%.3lf MB/s, IOPS=%.3lf "
-      "M/s, conn establish time=%.3lf ms",
-      dump_prefix.c_str(), nr_threads, depth, block_size, bandwidth, throughput,
-      connect_time);
+  RDMA_LOG(INFO) << dump_prefix.c_str() << ": #threads=" << nr_threads
+                 << "#depth=" << depth << ", #block_size=" << block_size
+                 << ", BW=" << bandwidth << " MB/s, IOPS=" << throughput
+                 << "
+                        M /
+                        s,
+      conn establish time = "<<connect_time <<" ms "
+      ;
   if (dump_file_path.empty()) {
     return;
   }
