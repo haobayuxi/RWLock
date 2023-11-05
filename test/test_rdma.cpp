@@ -204,7 +204,7 @@ double connect_time = 0.0;
 void report(uint64_t elapsed_time) {
   auto bandwidth = total_attempts * block_size / elapsed_time / 1024.0 / 1024.0;
   auto throughput = total_attempts / elapsed_time / 1000000.0;
-  RDMA_LOG(INFO) << dump_prefix.c_str() << ": #threads=" << nr_threads
+  RDMA_LOG(INFO) << dump_prefix << ": #threads=" << nr_threads
                  << "#depth=" << depth << ", #block_size=" << block_size
                  << ", BW=" << bandwidth << " MB/s, IOPS=" << throughput
                  << "M/s,conn establish time = " << connect_time << " ms ";
