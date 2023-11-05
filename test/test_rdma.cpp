@@ -311,7 +311,7 @@ int main(int argc, char **argv) {
       server_list.push_back(servers.get(i).get_str());
     }
     assert(!server_list.empty());
-    run_client(server_list, port, txn_sys);
+    run_client(server_list, port);
   }
   return 0;
 }
