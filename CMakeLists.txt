@@ -18,11 +18,12 @@ include_directories(
     thirdparty
     workload
     compute_pool
+    test
 )
 
 add_subdirectory(thirdparty/rlib)
 add_subdirectory(thirdparty/smart)
-
+add_subdirectory(test)
 add_subdirectory(core)
 
 add_subdirectory(workload)
