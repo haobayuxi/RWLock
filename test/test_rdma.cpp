@@ -273,7 +273,7 @@ void run_client(const std::vector<std::string> &server_list, uint16_t port) {
 int main(int argc, char **argv) {
   const char *env_path = getenv("TEST_RDMA_CONF");
   JsonConfig config = JsonConfig::load_file(
-      env_path ? env_path : ROOT_DIR "/config/test_rdma.json");
+      env_path ? env_path : ROOT_DIR "config/test_rdma.json");
   qp_num = (int)config.get("qp_num").get_int64();
   dtx_txn_sys = (int)config.get("txn_sys").get_int64();
   if (getenv("QP_NUM")) {
