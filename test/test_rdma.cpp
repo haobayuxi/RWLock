@@ -220,8 +220,7 @@ void report(uint64_t elapsed_time) {
   fclose(fout);
 }
 
-void run_client(const std::vector<std::string> &server_list, uint16_t port,
-                int txn_sys) {
+void run_client(const std::vector<std::string> &server_list, uint16_t port) {
   struct timeval start_tv, end_tv;
   pthread_t tid[kMaxThreads];
   double elapsed_time;
