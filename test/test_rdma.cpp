@@ -43,7 +43,7 @@ static const size_t MEM_POOL_SIZE = (1ull << 30);
 enum DTX_SYS : int {
   OOCC = 0,
   DrTMH = 1,
-  DLMR = 2,
+  DSLR = 2,
   OCC = 3,
 };
 
@@ -94,7 +94,7 @@ void *test_thread_func(void *arg) {
   if (type == "read") {
     while (!stop_signal) {
       attempts++;
-      if (dtx_txn_sys == DTX_SYS::DLMR) {
+      if (dtx_txn_sys == DTX_SYS::DSLR) {
         //  a faa and a read
         uint64_t offset = thread_id * kSegmentSize + block_size * (dist(rnd));
         GlobalAddress remote_addr(attempts % connections, offset);
@@ -275,6 +275,13 @@ int main(int argc, char **argv) {
   JsonConfig config = JsonConfig::load_file("config/test_rdma.json");
   qp_num = (int)config.get("qp_num").get_int64();
   dtx_txn_sys = (int)config.get("txn_sys").get_int64();
+  if (dtx_txn_sys == DTX_SYS::OOCC) {
+    SDS_INFO("running oocc");
+  } else if (dtx_txn_sys == DTX_SYS::DSLR) {
+    SDS_INFO("running dslr");
+  } else if (dtx_txn_sys == DTX_SYS::DrTMH) {
+    SDS_INFO("running drtm");
+  }
   if (getenv("QP_NUM")) {
     qp_num = atoi(getenv("QP_NUM"));
   }
@@ -294,6 +301,7 @@ int main(int argc, char **argv) {
   }
   BindCore(0);
   if (argc == 1) {
+    SDS_INFO("running server");
     run_server(port);
   } else {
     block_size = (int)config.get("block_size").get_int64();
