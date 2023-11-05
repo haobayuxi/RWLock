@@ -207,11 +207,7 @@ void report(uint64_t elapsed_time) {
   RDMA_LOG(INFO) << dump_prefix.c_str() << ": #threads=" << nr_threads
                  << "#depth=" << depth << ", #block_size=" << block_size
                  << ", BW=" << bandwidth << " MB/s, IOPS=" << throughput
-                 << "
-                        M /
-                        s,
-      conn establish time = "<<connect_time <<" ms "
-      ;
+                 << "M/s,conn establish time = " << connect_time << " ms ";
   if (dump_file_path.empty()) {
     return;
   }
