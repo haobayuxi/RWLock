@@ -1,17 +1,14 @@
 
 cmake_minimum_required(VERSION 3.3)
 
-project(RWLock)
+project(RWLock CXX ASM)
 
-set(CMAKE_CXX_STANDARD 11)
+# set(CMAKE_CXX_STANDARD 11)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result -fPIC")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result -fPIC")
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
-else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -DDEBUG -g")
-endif()
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "-O3 -g")
 
 include_directories(
     core
@@ -22,7 +19,7 @@ include_directories(
 )
 
 add_subdirectory(thirdparty/rlib)
-# add_subdirectory(thirdparty/fcontext)
+add_subdirectory(thirdparty/fcontext)
 add_subdirectory(thirdparty/smart)
 add_subdirectory(test)
 add_subdirectory(core)
