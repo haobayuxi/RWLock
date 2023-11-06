@@ -21,12 +21,21 @@ set(SCHEDULER_SRC
         scheduler/corotine_scheduler.cc
         )
 
+set(SMART_SRC
+        smart/initiator.cpp 
+        smart/resource_manger.cpp 
+        smart/thread.cpp 
+        )
+
 add_library(rwlock STATIC
         ${CONNECTION_SRC}
+        ${SMART_SRC}
         ${SCHEDULER_SRC}
         ${DTX_SRC}
         )
 
+
+
 set_target_properties(rwlock PROPERTIES LINKER_LANGUAGE CXX)
 
-target_link_libraries(rwlock rlib pthread boost_coroutine boost_context boost_system)
+target_link_libraries(rwlock rlib pthread boost_coroutine boost_context boost_system numa pthread ibverbs mlx5)
