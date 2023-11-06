@@ -29,7 +29,6 @@ set(SMART_SRC
 
 add_library(rwlock STATIC
         ${CONNECTION_SRC}
-        ${SMART_SRC}
         ${SCHEDULER_SRC}
         ${DTX_SRC}
         )
