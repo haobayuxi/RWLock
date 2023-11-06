@@ -23,7 +23,7 @@ set(SCHEDULER_SRC
 
 set(SMART_SRC
         smart/initiator.cpp 
-        smart/resource_manger.cpp 
+        smart/resource_manager.cpp 
         smart/thread.cpp 
         )
 
