@@ -96,6 +96,7 @@ ABORT:
 }
 
 bool DTX::TxCommit(coro_yield_t& yield) {
+  return true;
   bool commit_stat;
   coro_sched->Yield(yield, coro_id);
 
