@@ -81,7 +81,7 @@ Initiator *node[32];
 
 void *test_thread_func(void *arg) {
   int thread_id = (int)(uintptr_t)arg;
-  auto ctx = node[thread_id % nr_nodes];
+  auto ctx = node[0];
   BindCore(thread_id);
   size_t kSegmentSize = MEM_POOL_SIZE / nr_threads;
   kSegmentSize &= ~4095ull;
