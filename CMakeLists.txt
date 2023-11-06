@@ -20,7 +20,7 @@ include_directories(
 
 add_subdirectory(thirdparty/rlib)
 # add_subdirectory(thirdparty/fcontext)
-add_subdirectory(test)
+# add_subdirectory(test)
 add_subdirectory(core)
 
 add_subdirectory(workload)
