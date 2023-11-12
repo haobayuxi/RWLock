@@ -470,7 +470,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
   clock_gettime(CLOCK_REALTIME, &msr_start);
   while (running) {
     uint64_t iter = ++tx_id_generator;  // Global atomic transaction id
-    // stat_attempted_tx_total++;
+    stat_attempted_tx_total++;
     clock_gettime(CLOCK_REALTIME, &tx_start_time);
     tx_committed = TxReadOnly(zipf_gen, &seed, yield, iter, dtx, is_skewed,
                               data_set_size, num_keys_global, write_ratio);
