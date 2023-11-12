@@ -294,7 +294,7 @@ bool DTX::CheckDirectRO(std::vector<DirectRead>& pending_direct_ro) {
     // RDMA_LOG(INFO) << "direct check ro key " << fetched_item->key
     //                << ", version=" << fetched_item->version;
     if (fetched_item->lock > 1) {
-      RDMA_LOG(INFO) << "read locked";
+      // RDMA_LOG(INFO) << "read locked";
       return false;
     }
     auto* it = res.item->item_ptr.get();
