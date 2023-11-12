@@ -85,7 +85,7 @@ bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
 
     DataItemPtr micro_obj = std::make_shared<DataItem>(
         (table_id_t)MicroTableType::kMicroTable, micro_key.item_key);
-    if (read_only || i % 2 == 1) {
+    if (read_only) {
       dtx->AddToReadOnlySet(micro_obj);
       // RDMA_LOG(INFO) << "txid = " << dtx->tx_id
       //                << "write key=" << micro_key.micro_id;

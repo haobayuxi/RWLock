@@ -471,7 +471,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
   while (running) {
     uint64_t iter = ++tx_id_generator;  // Global atomic transaction id
     // stat_attempted_tx_total++;
-    // clock_gettime(CLOCK_REALTIME, &tx_start_time);
+    clock_gettime(CLOCK_REALTIME, &tx_start_time);
     tx_committed = TxReadOnly(zipf_gen, &seed, yield, iter, dtx, is_skewed,
                               data_set_size, num_keys_global, write_ratio);
 
@@ -479,11 +479,11 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id, QPManager* qp_man,
      * *****************************************/
     // Stat after one transaction finishes
     if (tx_committed) {
-      // clock_gettime(CLOCK_REALTIME, &tx_end_time);
-      // double tx_usec =
-      //     (tx_end_time.tv_sec - tx_start_time.tv_sec) * 1000000 +
-      //     (double)(tx_end_time.tv_nsec - tx_start_time.tv_nsec) / 1000;
-      // timer[stat_committed_tx_total++] = tx_usec;
+      clock_gettime(CLOCK_REALTIME, &tx_end_time);
+      double tx_usec =
+          (tx_end_time.tv_sec - tx_start_time.tv_sec) * 1000000 +
+          (double)(tx_end_time.tv_nsec - tx_start_time.tv_nsec) / 1000;
+      timer[stat_committed_tx_total++] = tx_usec;
       micro_commit[thread_local_id] += 1;
     }
     // if (stat_attempted_tx_total >= ATTEMPTED_NUM) {
@@ -699,10 +699,10 @@ void run_thread(thread_params* params) {
       //   coro_sched->coro_array[coro_i].func =
       //       coro_call_t(bind(RunTPCC, _1, coro_i));
       // } else if (bench_name == "micro") {
-      // coro_sched->coro_array[coro_i].func =
-      //     coro_call_t(bind(RunMICRO, _1, coro_i, qp_man, params->lease));
       coro_sched->coro_array[coro_i].func =
-          coro_call_t(bind(test_iops, _1, coro_i, qp_man));
+          coro_call_t(bind(RunMICRO, _1, coro_i, qp_man, params->lease));
+      // coro_sched->coro_array[coro_i].func =
+      //     coro_call_t(bind(test_iops, _1, coro_i, qp_man));
       // }
     }
   }
